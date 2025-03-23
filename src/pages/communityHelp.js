@@ -157,7 +157,8 @@ const inputStyle = `
   focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 
   transition-all duration-300
   placeholder-gray-500
-`;
+  text-gray-900
+`; 
 
 // Add after imports, before CommunityHelp function
 const ImageModal = ({ imageUrl, onClose }) => {
