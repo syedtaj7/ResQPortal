@@ -133,21 +133,9 @@ const gradientButtonStyle = `
   focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-gray-900
 `;
 
-// Update the alert card styles
-const alertCardStyle = `
-  bg-[#F8F8F8]/50 backdrop-blur-sm
-  border border-gray-700/50
-  rounded-xl p-6
-  transform transition-all duration-300
-  hover:border-yellow-500/30
-  
-`;
+// Alert card styles are defined in the AlertCard component
 
-// Modify the main content area styling
-const mainContentStyle = `
-  flex-grow p-8 
-  
-`;
+// Removed unused mainContentStyle variable
 
 // Update form input styles
 const inputStyle = `
@@ -197,6 +185,34 @@ const ImageModal = ({ imageUrl, onClose }) => {
     </div>
   );
 };
+
+// Add these animation styles at the top of your file
+const fadeInUp = `animate-[fadeIn_0.5s_ease-out,slideUp_0.5s_ease-out]`;
+const slideIn = `animate-[slideIn_0.3s_ease-out]`;
+
+// Update the login container and styles
+const loginContainerStyle = `
+  min-h-[calc(100vh-4rem)] 
+  flex items-center justify-center 
+  px-4 sm:px-6 md:px-8 
+  py-8 sm:py-12
+  bg-gradient-to-br from-gray-50 via-gray-50 to-yellow-50
+  relative
+  overflow-hidden
+`;
+
+const formCardStyle = `
+  w-full 
+  max-w-[420px] 
+  mx-auto
+  bg-white/80
+  backdrop-blur-xl
+  rounded-2xl
+  shadow-[0_8px_32px_rgba(0,0,0,0.08)]
+  overflow-hidden
+  border border-white
+  ${fadeInUp}
+`;
 
 function CommunityHelp() {
   // Add effect to load TensorFlow
@@ -675,191 +691,203 @@ function CommunityHelp() {
     );
   }
 
+  // Update the main container structure
   return (
-    <div className="min-h-screen flex flex-col bg-white text-white">
-      {/* Header */}
+    <div className="min-h-screen flex flex-col bg-white">
       <Header />
-      <main className={mainContentStyle}>
+      <main className="flex-grow md:pl-64 p-4 md:p-6"> {/* Added responsive padding */}
         {!user ? (
-          <div className="min-h-screen flex items-center justify-center px-4 bg-white bg-auth-pattern">
-            <div className="w-full max-w-md animate-slideUp ml-28">
-              <div className="relative group">
-                {/* Decorative elements */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-600 to-yellow-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+          // Login/Register container with responsive classes
+          <div className={loginContainerStyle}>
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute -top-4 -right-4 w-64 h-64 bg-yellow-200 rounded-full opacity-20 blur-3xl animate-pulse"></div>
+              <div className="absolute -bottom-8 -left-8 w-96 h-96 bg-yellow-300 rounded-full opacity-10 blur-3xl animate-pulse delay-700"></div>
+            </div>
 
-                <div className="relative px-8 py-10 bg-[#F8F8F8] ring-1 ring-gray-800/50 rounded-2xl backdrop-blur-xl">
-                  {/* Header */}
-                  <div className="text-center space-y-6 mb-8">
-                    <div className="relative inline-block animate-float">
-                      <div className="absolute inset-0 bg-blue-500 rounded-full blur-xl opacity-20"></div>
-                      <svg
-                        className="w-16 h-16 text-yellow-400 relative"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"
-                        />
-                      </svg>
-                    </div>
-                    <h2 className="text-3xl font-bold">
-                      <span className="bg-yellow-300 bg-clip-text text-transparent">
-                        {isLoginMode ? "Welcome Back" : "Join ResQTech"}
-                      </span>
-                    </h2>
-                    <p className="text-gray-400 text-sm">
-                      {isLoginMode
-                        ? "Sign in to connect with your community"
-                        : "Create an account to start helping others"}
-                    </p>
-                  </div>
-
-                  {/* Social Login */}
-                  <button
-                    onClick={handleGoogleSignIn}
-                    className="group relative w-full bg-[#F8F8F8] text-gray-900 rounded-xl p-3.5 font-medium flex items-center justify-center gap-3 hover:bg-gray-50 transition-all duration-300"
-                  >
-                    <span className="absolute inset-0 w-3 bg-gradient-to-r from-yellow-500 to-yellow-500 rounded-xl transition-all duration-500 ease-out group-hover:w-full opacity-0 group-hover:opacity-20"></span>
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <div className={formCardStyle}>
+              <div className="px-4 sm:px-8 py-6 sm:py-8">
+                {/* Logo/Header Section with animation */}
+                <div className="text-center space-y-3 mb-8">
+                  <div className="inline-block p-3 bg-yellow-100 rounded-full animate-bounce">
+                    <svg
+                      className="w-8 h-8 sm:w-10 sm:h-10 text-yellow-500 transform rotate-12"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path
-                        fill="currentColor"
-                        d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+                        className="animate-pulse"
                       />
                     </svg>
-                    Continue with Google
-                  </button>
-
-                  <div className="relative my-8">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-800"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-4 bg-[#F8F8F8] text-gray-500">
-                        or continue with email
-                      </span>
-                    </div>
                   </div>
-
-                  {/* Error Message */}
-                  {authError && (
-                    <div className="mb-6 animate-shake">
-                      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3">
-                        <svg
-                          className="w-5 h-5 text-red-500 flex-shrink-0"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        <p className="text-red-400 text-sm">{authError}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Login Form */}
-                  <form onSubmit={handleAuth} className="space-y-6 ">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300 block ">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className={inputStyle}
-                        placeholder="Enter your email"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300 block">
-                        Password
-                      </label>
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className={inputStyle}
-                        placeholder="Enter your password"
-                        required
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className={`${gradientButtonStyle} p-3`}
-                    >
-                      <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 group-hover:opacity-100 group-hover:transition-opacity"></span>
-                      {isLoading ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                          <span>
-                            {isLoginMode
-                              ? "Signing in..."
-                              : "Creating account..."}
-                          </span>
-                        </div>
-                      ) : (
-                        <span>
-                          {isLoginMode ? "Sign in" : "Create account"}
-                        </span>
-                      )}
-                    </button>
-                  </form>
-
-                  {/* Toggle Login/Register */}
-                  <p className="mt-6 text-center text-sm text-gray-400">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+                    {isLoginMode ? "Welcome Back" : "Create Account"}
+                  </h2>
+                  <p className="text-sm text-gray-600">
                     {isLoginMode
-                      ? "Don't have an account?"
-                      : "Already have an account?"}{" "}
-                    <button
-                      onClick={() => {
-                        setIsLoginMode(!isLoginMode);
-                        setAuthError("");
-                      }}
-                      className="text-yellow-400 hover:text-blue-300 font-medium transition-colors"
-                    >
-                      {isLoginMode ? "Register now" : "Sign in"}
-                    </button>
+                      ? "Sign in to access your account"
+                      : "Join us to help your community"}
                   </p>
                 </div>
+
+                {/* Google Sign In Button with hover effect */}
+                <button
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                  className="group w-full flex items-center justify-center gap-3 px-4 py-2.5 sm:py-3
+                    border border-gray-300 rounded-xl text-gray-700 bg-white
+                    hover:bg-gray-50 hover:border-yellow-300 hover:shadow-md
+                    focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500
+                    transition-all duration-300 ease-out text-sm sm:text-base font-medium"
+                >
+                  <svg 
+                    className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
+                  </svg>
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">
+                    Continue with Google
+                  </span>
+                </button>
+
+                {/* Animated divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500 animate-pulse">
+                      or continue with email
+                    </span>
+                  </div>
+                </div>
+
+                {/* Error Message with shake animation */}
+                {authError && (
+                  <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 animate-[shake_0.5s_ease-in-out]">
+                    <p className="text-sm text-red-600">{authError}</p>
+                  </div>
+                )}
+
+                {/* Login Form with animated inputs */}
+                <form onSubmit={handleAuth} className="space-y-4">
+                  <div className={slideIn}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg
+                        focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500
+                        transition-all duration-300 ease-out text-sm sm:text-base
+                        hover:border-yellow-300"
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
+
+                  <div className={slideIn} style={{ animationDelay: "150ms" }}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg
+                        focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500
+                        transition-all duration-300 ease-out text-sm sm:text-base
+                        hover:border-yellow-300"
+                      placeholder="Enter your password"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full py-2.5 sm:py-3 px-4 bg-yellow-500 text-white rounded-lg
+                      hover:bg-yellow-600 hover:shadow-lg transform hover:-translate-y-0.5
+                      focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500
+                      transition-all duration-300 ease-out text-sm sm:text-base font-medium 
+                      disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>{isLoginMode ? "Signing in..." : "Creating account..."}</span>
+                      </div>
+                    ) : (
+                      <span>{isLoginMode ? "Sign in" : "Create account"}</span>
+                    )}
+                  </button>
+                </form>
+
+                {/* Toggle Login/Register with animation */}
+                <p className="mt-6 text-center text-sm text-gray-600">
+                  {isLoginMode ? "Don't have an account?" : "Already have an account?"}{" "}
+                  <button
+                    onClick={() => {
+                      setIsLoginMode(!isLoginMode);
+                      setAuthError("");
+                    }}
+                    className="font-medium text-yellow-600 hover:text-yellow-700
+                      transition-colors duration-300 hover:underline transform hover:scale-105"
+                  >
+                    {isLoginMode ? "Sign up" : "Sign in"}
+                  </button>
+                </p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto md:ml-40">
-            {/* Alerts Feed */}
-            <div className="col-span-2">
-              <AlertTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-              <FilterBar filters={filters} setFilters={setFilters} />
+          // Main content area with responsive grid
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 max-w-7xl mx-auto">
+            {/* Alerts Feed - Takes full width on mobile, 2/3 on desktop */}
+            <div className="lg:col-span-2 order-2 lg:order-1">
+              <div className="sticky top-4">
+                <AlertTabs 
+                  activeTab={activeTab} 
+                  setActiveTab={setActiveTab}
+                  className="flex overflow-x-auto md:overflow-visible" 
+                />
+                <FilterBar 
+                  filters={filters} 
+                  setFilters={setFilters}
+                  className="mt-4 flex flex-col md:flex-row gap-2 md:gap-4" 
+                />
 
-              {/* In the JSX where alerts are rendered */}
-              <div className="space-y-6">
-                {isTabLoading ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                  </div>
-                ) : filteredAlerts.length > 0 ? (
-                  filteredAlerts.map((alert) => (
-                    <div className={alertCardStyle}>
+                {/* Alerts list with responsive spacing */}
+                <div className="mt-4 space-y-4 md:space-y-6">
+                  {isTabLoading ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                    </div>
+                  ) : filteredAlerts.length > 0 ? (
+                    filteredAlerts.map((alert) => (
                       <AlertCard
                         key={alert.id}
                         alert={alert}
@@ -869,262 +897,259 @@ function CommunityHelp() {
                         onImageClick={() => handleImageClick(alert.imageUrl)}
                         isUpvoting={upvotingId === alert.id}
                         isSaved={user?.savedAlerts?.includes(alert.id)}
+                        className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
                       />
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-400">
+                      {activeTab === "my-posts"
+                        ? "You haven't posted any alerts yet"
+                        : activeTab === "saved"
+                        ? "No saved alerts"
+                        : "No alerts found. Be the first to report an incident!"}
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-gray-400">
-                    {activeTab === "my-posts"
-                      ? "You haven't posted any alerts yet"
-                      : activeTab === "saved"
-                      ? "No saved alerts"
-                      : "No alerts found. Be the first to report an incident!"}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Report Form */}
-            <div
-              className="form-container"
-              style={{ backgroundColor: "#F8F8F8", color: "black" }}
-            >
-              <h2 className="text-2xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-black to-black">
-                Report Incident
-              </h2>
-              <form onSubmit={handleSubmitAlert} className="space-y-4">
-                {/* Location and State Selection */}
-                <div className="grid grid-cols-2 gap-4">
+            {/* Report Form - Takes full width on mobile, 1/3 on desktop */}
+            <div className="lg:col-span-1 order-1 lg:order-2">
+              <div className="bg-[#F8F8F8] rounded-xl p-4 md:p-6 sticky top-4">
+                <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-gray-900">
+                  Report Incident
+                </h2>
+                <form onSubmit={handleSubmitAlert} className="space-y-4">
+                  {/* Location inputs with responsive grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="form-group">
+                      <label className="form-label">State *</label>
+                      <div className="select-wrapper">
+                        <select
+                          value={selectedState}
+                          onChange={(e) => setSelectedState(e.target.value)}
+                          className="custom-select"
+                          style={{ backgroundColor: "#F8F8F8", color: "gray" }}
+                          required
+                        >
+                          <option value="">Select state</option>
+                          {INDIAN_STATES.map((state) => (
+                            <option key={state} value={state}>
+                              {state}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">City/District *</label>
+                      <input
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className={inputStyle}
+                        placeholder="Enter city or district"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Other form fields remain the same but with responsive padding/margins */}
+                  {/* Incident Category */}
                   <div className="form-group">
-                    <label className="form-label">State *</label>
+                    <label className="form-label">Incident Category *</label>
                     <div className="select-wrapper">
                       <select
-                        value={selectedState}
-                        onChange={(e) => setSelectedState(e.target.value)}
+                        value={selectedCategory}
+                        onChange={(e) => {
+                          setSelectedCategory(e.target.value);
+                          setSelectedIncident("");
+                        }}
                         className="custom-select"
                         style={{ backgroundColor: "#F8F8F8", color: "gray" }}
                         required
                       >
-                        <option value="">Select state</option>
-                        {INDIAN_STATES.map((state) => (
-                          <option key={state} value={state}>
-                            {state}
+                        <option value="">Select category</option>
+                        {Object.keys(DISASTER_CATEGORIES).map((category) => (
+                          <option key={category} value={category}>
+                            {category}
                           </option>
                         ))}
                       </select>
                     </div>
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">City/District *</label>
-                    <input
-                      type="text"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className={inputStyle}
-                      placeholder="Enter city or district"
+                  {/* Specific Incident Dropdown */}
+                  {selectedCategory && (
+                    <div className="form-group">
+                      <label className="form-label">Specific Incident *</label>
+                      <div className="select-wrapper">
+                        <select
+                          value={selectedIncident}
+                          onChange={(e) => setSelectedIncident(e.target.value)}
+                          className="custom-select"
+                          style={{ backgroundColor: "#F8F8F8" }}
+                          required
+                        >
+                          <option value="">Select incident type</option>
+                          {DISASTER_CATEGORIES[selectedCategory].map(
+                            (incident) => (
+                              <option key={incident.value} value={incident.value}>
+                                {incident.label}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Description Second */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Description *
+                    </label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="input-field"
+                      rows="3"
+                      placeholder="Describe the incident and current conditions"
+                      style={{ backgroundColor: "#F8F8F8" }}
                       required
                     />
                   </div>
-                </div>
 
-                {/* Incident Category */}
-                <div className="form-group">
-                  <label className="form-label">Incident Category *</label>
-                  <div className="select-wrapper">
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => {
-                        setSelectedCategory(e.target.value);
-                        setSelectedIncident("");
-                      }}
-                      className="custom-select"
-                      style={{ backgroundColor: "#F8F8F8", color: "gray" }}
-                      required
-                    >
-                      <option value="">Select category</option>
-                      {Object.keys(DISASTER_CATEGORIES).map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Specific Incident Dropdown */}
-                {selectedCategory && (
-                  <div className="form-group">
-                    <label className="form-label">Specific Incident *</label>
-                    <div className="select-wrapper">
-                      <select
-                        value={selectedIncident}
-                        onChange={(e) => setSelectedIncident(e.target.value)}
-                        className="custom-select"
-                        style={{ backgroundColor: "#F8F8F8" }}
-                        required
+                  {/* Image Upload Last */}
+                  {location && description && (
+                    <div>
+                      <label
+                        className={`
+    w-full flex flex-col items-center px-4 py-6
+    bg-[#F8F8F8]/50 backdrop-blur-sm
+    border-2 border-dashed border-gray-600
+    rounded-xl
+    cursor-pointer
+    transition-all duration-300
+    hover:border-blue-500/50 hover:bg-gray-800/70
+    ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}
+  `}
                       >
-                        <option value="">Select incident type</option>
-                        {DISASTER_CATEGORIES[selectedCategory].map(
-                          (incident) => (
-                            <option key={incident.value} value={incident.value}>
-                              {incident.label}
-                            </option>
-                          )
+                        {isProcessing ? (
+                          <div className="flex flex-col items-center">
+                            <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                            <span className="mt-2 text-sm">
+                              Processing image...
+                            </span>
+                          </div>
+                        ) : !imageFile ? (
+                          <>
+                            <svg
+                              className="w-8 h-8"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
+                            </svg>
+                            <span className="mt-2 text-sm">
+                              Select an image that shows current conditions
+                            </span>
+                          </>
+                        ) : (
+                          <div className="text-center">
+                            <svg
+                              className="w-8 h-8 mx-auto"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            <span className="mt-2 text-sm">
+                              Image selected - Click to change
+                            </span>
+                          </div>
                         )}
-                      </select>
-                    </div>
-                  </div>
-                )}
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          disabled={!location || !description}
+                        />
+                      </label>
 
-                {/* Description Second */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Description *
-                  </label>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="input-field"
-                    rows="3"
-                    placeholder="Describe the incident and current conditions"
-                    style={{ backgroundColor: "#F8F8F8" }}
-                    required
-                  />
-                </div>
-
-                {/* Image Upload Last */}
-                {location && description && (
-                  <div>
-                    <label
-                      className={`
-  w-full flex flex-col items-center px-4 py-6
-  bg-[#F8F8F8]/50 backdrop-blur-sm
-  border-2 border-dashed border-gray-600
-  rounded-xl
-  cursor-pointer
-  transition-all duration-300
-  hover:border-blue-500/50 hover:bg-gray-800/70
-  ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}
-`}
-                    >
-                      {isProcessing ? (
-                        <div className="flex flex-col items-center">
-                          <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                          <span className="mt-2 text-sm">
-                            Processing image...
-                          </span>
-                        </div>
-                      ) : !imageFile ? (
-                        <>
-                          <svg
-                            className="w-8 h-8"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                      {imagePreview && (
+                        <div className="mt-2 relative">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-48 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImageFile(null);
+                              setImagePreview(null);
+                            }}
+                            className="absolute top-2 right-2 bg-red-500 p-1 rounded-full hover:bg-red-600 transition-colors"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                          <span className="mt-2 text-sm">
-                            Select an image that shows current conditions
-                          </span>
-                        </>
-                      ) : (
-                        <div className="text-center">
-                          <svg
-                            className="w-8 h-8 mx-auto"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          <span className="mt-2 text-sm">
-                            Image selected - Click to change
-                          </span>
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
                         </div>
                       )}
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        disabled={!location || !description}
-                      />
-                    </label>
+                    </div>
+                  )}
 
-                    {imagePreview && (
-                      <div className="mt-2 relative">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-full h-48 object-cover rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setImageFile(null);
-                            setImagePreview(null);
-                          }}
-                          className="absolute top-2 right-2 bg-red-500 p-1 rounded-full hover:bg-red-600 transition-colors"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
+                  <button
+                    type="submit"
+                    disabled={
+                      isUploading || !imageFile || !location || !description
+                    }
+                    className={`${gradientButtonStyle} w-full py-2 md:py-3 text-sm md:text-base`}
+                  >
+                    {isUploading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        <span>Processing...</span>
                       </div>
+                    ) : (
+                      "Submit Alert"
                     )}
-                  </div>
-                )}
+                  </button>
+                </form>
 
                 <button
-                  type="submit"
-                  disabled={
-                    isUploading || !imageFile || !location || !description
-                  }
-                  className={`${gradientButtonStyle} w-full py-3 ${
-                    isUploading || !imageFile || !location || !description
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                  }`}
+                  onClick={() => signOut(auth)}
+                  className="mt-4 w-full bg-red-600 px-4 py-2 md:py-3 rounded text-white hover:bg-red-700 transition-colors text-sm md:text-base"
                 >
-                  {isUploading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                      <span>Processing...</span>
-                    </div>
-                  ) : (
-                    "Submit Alert"
-                  )}
+                  Logout
                 </button>
-              </form>
-
-              <button
-                onClick={() => signOut(auth)}
-                className="mt-4 w-full bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition-colors"
-              >
-                Logout
-              </button>
+              </div>
             </div>
           </div>
         )}
@@ -1132,10 +1157,12 @@ function CommunityHelp() {
 
       <Footer />
 
+      {/* Image Modal with responsive sizing */}
       {selectedImage && (
         <ImageModal
           imageUrl={selectedImage}
           onClose={() => setSelectedImage(null)}
+          className="fixed inset-0 z-50 p-4 md:p-8"
         />
       )}
     </div>
