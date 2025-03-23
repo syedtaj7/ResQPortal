@@ -8,6 +8,7 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
+  fetchSignInMethodsForEmail,
 } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import {
@@ -273,6 +274,7 @@ function CommunityHelp() {
     }
   };
 
+  // Update the handleAuth function with better error handling
   const handleAuth = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -280,21 +282,62 @@ function CommunityHelp() {
 
     try {
       if (isLoginMode) {
+        // Sign in existing user
         await signInWithEmailAndPassword(auth, email, password);
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        // Check if email already exists before creating account
+        try {
+          const methods = await fetchSignInMethodsForEmail(auth, email);
+          if (methods.length > 0) {
+            setAuthError("An account with this email already exists. Please sign in instead.");
+            return;
+          }
+        } catch (error) {
+          console.error("Error checking email:", error);
+        }
+
+        // Create new user
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Add user to Firestore
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+          email: email,
+          createdAt: serverTimestamp(),
+          lastLogin: serverTimestamp()
+        });
       }
     } catch (error) {
       console.error("Auth error:", error);
-      setAuthError(
-        error.code === "auth/wrong-password"
-          ? "Invalid email or password"
-          : error.code === "auth/user-not-found"
-          ? "No account found with this email"
-          : error.code === "auth/email-already-in-use"
-          ? "Email already registered"
-          : "Authentication failed. Please try again."
-      );
+      let errorMessage = "Authentication failed. Please try again.";
+
+      switch (error.code) {
+        case 'auth/invalid-credential':
+          errorMessage = "Invalid email or password. Please check your credentials.";
+          break;
+        case 'auth/email-already-in-use':
+          errorMessage = "This email is already registered. Please sign in instead.";
+          break;
+        case 'auth/invalid-email':
+          errorMessage = "Please enter a valid email address.";
+          break;
+        case 'auth/weak-password':
+          errorMessage = "Password should be at least 6 characters long.";
+          break;
+        case 'auth/user-not-found':
+          errorMessage = "No account found with this email. Please register first.";
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = "Too many failed attempts. Please try again later.";
+          break;
+        case 'auth/network-request-failed':
+          errorMessage = "Network error. Please check your internet connection.";
+          break;
+        default:
+          errorMessage = "Authentication failed. Please try again.";
+          break;
+      }
+
+      setAuthError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -367,6 +410,8 @@ function CommunityHelp() {
 
           default:
             console.warn(`Unhandled tab type: ${activeTab}`);
+            setTabsData((prev) => ({ ...prev }));
+            setIsTabLoading(false);
             break;
         }
       } catch (error) {
