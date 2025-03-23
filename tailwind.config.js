@@ -24,8 +24,8 @@ module.exports = {
           '100%': { opacity: '1' },
         },
         pulse: {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '.5' },
+          '0%, 100%': { opacity: 0.2 },
+          '50%': { opacity: 0.15 }
         },
         slideIn: {
           '0%': { transform: 'translateX(-10px)', opacity: '0' },
@@ -37,7 +37,7 @@ module.exports = {
         float: 'float 3s ease-in-out infinite',
         slideUp: 'slideUp 0.5s ease-out',
         fadeIn: 'fadeIn 0.5s ease-out',
-        pulse: 'pulse 2s ease-in-out infinite',
+        pulse: 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'pulse-slow': 'pulse 3s ease-in-out infinite',
         'bounce-slow': 'bounce 3s infinite',
       },
