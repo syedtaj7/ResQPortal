@@ -8,6 +8,7 @@
   z-index: 1;
   border-radius: 0.5rem;
   position: relative;
+  touch-action: pan-x pan-y;
 }
 
 .leaflet-control-container .leaflet-control {
@@ -85,7 +86,7 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 3px;
+  border-radius: 20px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -169,7 +170,7 @@
 }
 
 .leaflet-popup-content {
-  margin: 0 !important;
+  margin: 8px;
   width: 300px !important;
   width: 100% !important;
   overflow-y: auto;
@@ -177,6 +178,12 @@
   padding: 1rem !important;  /* Add padding */
   max-height: none !important;
   height: auto;
+}
+
+@media (max-width: 640px) {
+  .leaflet-popup-content {
+    max-width: 280px;
+  }
 }
 
 /* Ensure popup stays in view */
@@ -355,7 +362,7 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 3px;
+  border-radius: 20px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {

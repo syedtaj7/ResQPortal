@@ -71,7 +71,6 @@ function Relocation() {
   const [nearestSafeZone, setNearestSafeZone] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const defaultCenter = [20.5937, 78.9629];
   const [locationSearch, setLocationSearch] = useState("");
   const [safeZoneSearch, setSafeZoneSearch] = useState("");
   const [travelDetails, setTravelDetails] = useState(null);
@@ -629,23 +628,24 @@ function Relocation() {
     );
   };
 
+  // Update the main layout structure
   return (
-    <div className="min-h-screen flex flex-col bg-white text-white">
-      <Header /> {/* Add Header component */}
-      <main className="flex-grow p-5 pt-16 mb-16 md:ml-48">
-        <div className="grid grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
-          {" "}
-          {/* Fixed height instead of min-height */}
-          {/* Map container */}
-          <div className="col-span-2 bg-[#F8F8F8] p-6 rounded-xl shadow-xl flex flex-col h-full shadow-lg mt-1 border border-gray-200">
-            <div className="mb-4 flex gap-4">
+    <div className="min-h-screen flex flex-col bg-white">
+      <Header />
+      <main className="flex-grow p-2 sm:p-5 pt-16 mb-16 md:ml-48">
+        {/* Change to flex column on mobile, side by side on desktop */}
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 h-auto lg:h-[calc(100vh-8rem)]">
+          {/* Map container - full width on mobile */}
+          <div className="lg:col-span-2 bg-[#F8F8F8] p-3 sm:p-6 rounded-xl shadow-xl flex flex-col h-[70vh] lg:h-full border border-gray-200">
+            {/* Search controls - stack on mobile */}
+            <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:gap-4">
               <button
                 onClick={getUserLocation}
-                className="bg-yellow-300 px-4 py-2 rounded hover:bg-gray-400 transition-colors"
+                className="bg-yellow-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors text-black whitespace-nowrap"
               >
                 Use My Location
               </button>
-              <div className="flex-1 relative search-container">
+              <div className="flex-1 relative">
                 <input
                   type="text"
                   value={locationSearch}
@@ -653,42 +653,52 @@ function Relocation() {
                     setLocationSearch(e.target.value);
                     debouncedSearch(e.target.value);
                   }}
-                  placeholder="Enter location and press Enter..."
-                  className="w-full p-2 rounded-lg bg-[#F8F8F8] text-black focus:ring-2 focus:ring-yellow-300 focus:outline-none"
+                  placeholder="Search location..."
+                  className="w-full p-2 rounded-lg bg-[#F8F8F8] text-black border border-gray-300 focus:ring-2 focus:ring-yellow-300 focus:outline-none"
                 />
                 <button
                   onClick={() => handleLocationSearch(locationSearch)}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800 p-2"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 relative rounded-xl overflow-hidden">
+            {/* Map container with increased size */}
+            <div className="flex-1 relative rounded-xl overflow-hidden min-h-[500px]">
               <MapContainer
-                center={userLocation || defaultCenter}
-                zoom={userLocation ? 8 : 5}
+                center={userLocation || [20.5937, 78.9629]} // Center of India
+                zoom={userLocation ? 8 : 4} // Decreased zoom level to show more area
                 className="h-full w-full"
                 scrollWheelZoom={true}
+                zoomControl={false} // Move zoom control to right side
+                touchZoom={true}
+                dragging={true}
+                tap={true}
+                minZoom={3}
+                maxBounds={[
+                  [8.4, 68.7], // Southwest coordinates of India
+                  [37.6, 97.25] // Northeast coordinates of India
+                ]}
               >
+                {/* Add zoom control to right side */}
+                <div className="leaflet-control-container">
+                  <div className="leaflet-top leaflet-right">
+                    <div className="leaflet-control-zoom leaflet-bar leaflet-control">
+                      <button className="leaflet-control-zoom-in" type="button" title="Zoom in">+</button>
+                      <button className="leaflet-control-zoom-out" type="button" title="Zoom out">-</button>
+                    </div>
+                  </div>
+                </div>
+
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
-
+                {/* ... rest of map content ... */}
                 {/* User Location Marker */}
                 {userLocation && (
                   <Circle
@@ -846,8 +856,10 @@ function Relocation() {
               </MapContainer>
             </div>
           </div>
-          {/* Right sidebar */}
-          <div className="col-span-1 bg-[#F8F8F8] rounded-lg flex flex-col h-full overflow-hidden shadow-lg mt-1 border border-gray-200">
+
+          {/* Sidebar - Full width on mobile, side panel on desktop */}
+          <div className="lg:col-span-1 bg-[#F8F8F8] rounded-lg flex flex-col h-[60vh] lg:h-full overflow-hidden shadow-lg border border-gray-200">
+            {/* ... existing sidebar content ... */}
             {/* Fixed header */}
             <div className="p-4 border-b border-gray-700 bg-[#F8F8F8] sticky top-0 z-10">
               <div className="relative">
