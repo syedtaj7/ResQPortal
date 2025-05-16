@@ -24,7 +24,6 @@ import {
   arrayRemove,
   onSnapshot,
   setDoc,
-  getDocs,
   where,
   limit,
   getDoc,
@@ -477,17 +476,26 @@ function CommunityHelp() {
 
       const result = await signInWithPopup(auth, googleProvider);
 
-      // Add user to Firestore if needed
+      // Check if user exists and get their data
       const userRef = doc(db, "users", result.user.uid);
-      await setDoc(
-        userRef,
-        {
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        // Update last login time
+        await updateDoc(userRef, {
+          lastLogin: serverTimestamp(),
+        });
+        // Set user profile with existing data
+        setUserProfile(userDoc.data());
+      } else {
+        // Create new user document
+        await setDoc(userRef, {
           name: result.user.displayName,
           email: result.user.email,
           lastLogin: serverTimestamp(),
-        },
-        { merge: true }
-      );
+          isVolunteer: false, // Initialize volunteer status
+        });
+      }
     } catch (error) {
       console.error("Google auth error:", error);
       setAuthError(
@@ -581,9 +589,7 @@ function CommunityHelp() {
     }
   };
 
-  // Update the useEffects for data fetching
-
-  // 1. First, combine the two useEffects for tab data
+  // Update the useEffect for tab data
   useEffect(() => {
     if (!user) return;
 
@@ -603,7 +609,6 @@ function CommunityHelp() {
                   id: doc.id,
                   ...doc.data(),
                 }));
-                console.log("Recent alerts:", recentAlerts); // Add this debug log
                 setTabsData((prev) => ({ ...prev, recent: recentAlerts }));
                 setIsTabLoading(false);
               },
@@ -615,17 +620,26 @@ function CommunityHelp() {
             break;
 
           case "my-posts":
-            const myPostsQuery = query(
-              alertsRef,
-              where("userId", "==", user.uid),
-              orderBy("timestamp", "desc")
+            // Use real-time listener for my-posts tab
+            unsubscribe = onSnapshot(
+              query(
+                alertsRef,
+                where("userId", "==", user.uid),
+                orderBy("timestamp", "desc")
+              ),
+              (snapshot) => {
+                const myPosts = snapshot.docs.map((doc) => ({
+                  id: doc.id,
+                  ...doc.data(),
+                }));
+                setTabsData((prev) => ({ ...prev, "my-posts": myPosts }));
+                setIsTabLoading(false);
+              },
+              (error) => {
+                console.error("Error fetching my posts:", error);
+                setIsTabLoading(false);
+              }
             );
-            const myPostsSnap = await getDocs(myPostsQuery);
-            const myPosts = myPostsSnap.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-            setTabsData((prev) => ({ ...prev, "my-posts": myPosts }));
             break;
 
           case "saved":
@@ -666,15 +680,6 @@ function CommunityHelp() {
       unsubscribe();
     };
   }, [user, activeTab]);
-
-  // 2. Remove the duplicate useEffect for alerts
-  // Remove this useEffect:
-  // useEffect(() => {
-  //   if (!user) return;
-  //   const alertsRef = collection(db, 'alerts');
-  //   const q = query(alertsRef, orderBy('timestamp', 'desc'));
-  //   ...
-  // }, [user]);
 
   // Simplify handleImageChange function
   const handleImageChange = async (e) => {
@@ -730,6 +735,11 @@ function CommunityHelp() {
     try {
       setIsUploading(true);
 
+      // Get user's volunteer status
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userData = userDoc.data();
+      const isVolunteer = userData?.isVolunteer || false;
+
       const alertData = {
         imageUrl: imageFile,
         description,
@@ -742,13 +752,10 @@ function CommunityHelp() {
         timestamp: serverTimestamp(),
         upvotes: 0,
         upvotedBy: [],
-        postedByVolunteer: !!userProfile?.isVolunteer,
+        postedByVolunteer: isVolunteer,
       };
 
-      console.log("Creating alert with data:", alertData); // Add this debug log
-
-      const docRef = await addDoc(collection(db, "alerts"), alertData);
-      console.log("Alert created with ID:", docRef.id); // Add this debug log
+      await addDoc(collection(db, "alerts"), alertData);
 
       // Reset form
       setImageFile(null);
