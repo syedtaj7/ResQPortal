@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Header from "../components/Header";
 import { initializeApp } from "firebase/app";
 import {
@@ -214,6 +214,217 @@ const formCardStyle = `
   ${fadeInUp}
 `;
 
+// (Copy volunteerData and VolunteerRegistrationForm from Donation.js, or define a simple form here)
+const volunteerData = [
+  {
+    id: 1,
+    name: "General Volunteer Registration",
+    skillsNeeded: [
+      "Medical",
+      "Construction",
+      "Logistics",
+      "Food Distribution",
+      "Community Outreach",
+    ],
+  },
+];
+
+const VolunteerRegistrationForm = ({ user, onRegister }) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    skills: [],
+    availability: "",
+    experience: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const availabilityOptions = [
+    "Weekdays",
+    "Weekends",
+    "Evenings",
+    "Full-time (1+ weeks)",
+    "On-call (Emergency)",
+  ];
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+  const handleSkillChange = (skill) => {
+    setFormData((prev) => {
+      const updatedSkills = prev.skills.includes(skill)
+        ? prev.skills.filter((s) => s !== skill)
+        : [...prev.skills, skill];
+      return { ...prev, skills: updatedSkills };
+    });
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    // Save volunteer status in Firestore
+    await setDoc(
+      doc(db, "users", user.uid),
+      { isVolunteer: true },
+      { merge: true }
+    );
+    setIsSubmitting(false);
+    setIsSubmitted(true);
+    if (onRegister) onRegister();
+  };
+  if (isSubmitted) {
+    return (
+      <div className="p-6 text-center">
+        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+          <svg
+            className="h-6 w-6 text-green-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          Registration Successful!
+        </h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Thank you for registering as a volunteer. You can now report incidents
+          as a volunteer.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 bg-white rounded-lg p-6 shadow-md"
+    >
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          Full Name
+        </label>
+        <input
+          type="text"
+          name="name"
+          required
+          value={formData.name}
+          onChange={handleChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          Email Address
+        </label>
+        <input
+          type="email"
+          name="email"
+          required
+          value={formData.email}
+          onChange={handleChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          Phone Number
+        </label>
+        <input
+          type="tel"
+          name="phone"
+          required
+          value={formData.phone}
+          onChange={handleChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Skills (Select all that apply)
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          {volunteerData[0].skillsNeeded.map((skill) => (
+            <div key={skill} className="flex items-center">
+              <input
+                id={`skill-${skill}`}
+                type="checkbox"
+                checked={formData.skills.includes(skill)}
+                onChange={() => handleSkillChange(skill)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label
+                htmlFor={`skill-${skill}`}
+                className="ml-2 block text-sm text-gray-700"
+              >
+                {skill}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          Availability
+        </label>
+        <select
+          name="availability"
+          required
+          value={formData.availability}
+          onChange={handleChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+        >
+          <option value="">Select your availability</option>
+          {availabilityOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          Relevant Experience
+        </label>
+        <textarea
+          name="experience"
+          rows="2"
+          value={formData.experience}
+          onChange={handleChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+        ></textarea>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          Additional Information (Optional)
+        </label>
+        <textarea
+          name="message"
+          rows="2"
+          value={formData.message}
+          onChange={handleChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+        ></textarea>
+      </div>
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 ${
+          isSubmitting ? "opacity-75 cursor-not-allowed" : ""
+        }`}
+      >
+        {isSubmitting ? "Processing..." : "Register as Volunteer"}
+      </button>
+    </form>
+  );
+};
+
 function CommunityHelp() {
   // Add effect to load TensorFlow
   useEffect(() => {
@@ -251,6 +462,7 @@ function CommunityHelp() {
     saved: [],
   });
   const [isTabLoading, setIsTabLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
 
   // Update handleGoogleSignIn function
   const handleGoogleSignIn = async () => {
@@ -530,6 +742,7 @@ function CommunityHelp() {
         timestamp: serverTimestamp(),
         upvotes: 0,
         upvotedBy: [],
+        postedByVolunteer: !!userProfile?.isVolunteer,
       };
 
       console.log("Creating alert with data:", alertData); // Add this debug log
@@ -692,6 +905,18 @@ function CommunityHelp() {
         return b.timestamp?.seconds || 0 - (a.timestamp?.seconds || 0);
       });
   }, [tabsData, activeTab, filters]);
+
+  const fetchUserProfile = useCallback(async () => {
+    if (!user) return;
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    setUserProfile(userDoc.data());
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user, fetchUserProfile]);
 
   if (loading) {
     return (
@@ -903,6 +1128,23 @@ function CommunityHelp() {
                   {isTabLoading ? (
                     <div className="flex justify-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                    </div>
+                  ) : activeTab === "volunteers" ? (
+                    <div className="mt-6">
+                      <h2 className="text-xl font-bold mb-4 text-gray-900">
+                        Volunteer Registration
+                      </h2>
+                      {!userProfile?.isVolunteer ? (
+                        <VolunteerRegistrationForm
+                          user={user}
+                          onRegister={() => fetchUserProfile()}
+                        />
+                      ) : (
+                        <div className="bg-green-50 p-6 rounded-lg text-green-800 font-semibold shadow">
+                          You are registered as a volunteer! You can now report
+                          incidents as a volunteer.
+                        </div>
+                      )}
                     </div>
                   ) : filteredAlerts.length > 0 ? (
                     filteredAlerts.map((alert) => (
