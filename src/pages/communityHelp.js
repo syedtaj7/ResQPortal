@@ -147,7 +147,7 @@ const inputStyle = `
   transition-all duration-300
   placeholder-gray-500
   text-gray-900
-`; 
+`;
 
 // Add after imports, before CommunityHelp function
 const ImageModal = ({ imageUrl, onClose }) => {
@@ -305,7 +305,9 @@ function CommunityHelp() {
         try {
           const methods = await fetchSignInMethodsForEmail(auth, email);
           if (methods.length > 0) {
-            setAuthError("An account with this email already exists. Please sign in instead.");
+            setAuthError(
+              "An account with this email already exists. Please sign in instead."
+            );
             return;
           }
         } catch (error) {
@@ -313,13 +315,17 @@ function CommunityHelp() {
         }
 
         // Create new user
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
         // Add user to Firestore
         await setDoc(doc(db, "users", userCredential.user.uid), {
           email: email,
           createdAt: serverTimestamp(),
-          lastLogin: serverTimestamp()
+          lastLogin: serverTimestamp(),
         });
       }
     } catch (error) {
@@ -327,26 +333,30 @@ function CommunityHelp() {
       let errorMessage = "Authentication failed. Please try again.";
 
       switch (error.code) {
-        case 'auth/invalid-credential':
-          errorMessage = "Invalid email or password. Please check your credentials.";
+        case "auth/invalid-credential":
+          errorMessage =
+            "Invalid email or password. Please check your credentials.";
           break;
-        case 'auth/email-already-in-use':
-          errorMessage = "This email is already registered. Please sign in instead.";
+        case "auth/email-already-in-use":
+          errorMessage =
+            "This email is already registered. Please sign in instead.";
           break;
-        case 'auth/invalid-email':
+        case "auth/invalid-email":
           errorMessage = "Please enter a valid email address.";
           break;
-        case 'auth/weak-password':
+        case "auth/weak-password":
           errorMessage = "Password should be at least 6 characters long.";
           break;
-        case 'auth/user-not-found':
-          errorMessage = "No account found with this email. Please register first.";
+        case "auth/user-not-found":
+          errorMessage =
+            "No account found with this email. Please register first.";
           break;
-        case 'auth/too-many-requests':
+        case "auth/too-many-requests":
           errorMessage = "Too many failed attempts. Please try again later.";
           break;
-        case 'auth/network-request-failed':
-          errorMessage = "Network error. Please check your internet connection.";
+        case "auth/network-request-failed":
+          errorMessage =
+            "Network error. Please check your internet connection.";
           break;
         default:
           errorMessage = "Authentication failed. Please try again.";
@@ -695,7 +705,9 @@ function CommunityHelp() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
-      <main className="flex-grow md:pl-64 p-4 md:p-6"> {/* Added responsive padding */}
+      <main className="flex-grow md:pl-64 p-4 md:p-6">
+        {" "}
+        {/* Added responsive padding */}
         {!user ? (
           // Login/Register container with responsive classes
           <div className={loginContainerStyle}>
@@ -745,8 +757,8 @@ function CommunityHelp() {
                     focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500
                     transition-all duration-300 ease-out text-sm sm:text-base font-medium"
                 >
-                  <svg 
-                    className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" 
+                  <svg
+                    className="w-5 h-5 group-hover:scale-110 transition-transform duration-300"
                     viewBox="0 0 24 24"
                   >
                     <path
@@ -838,7 +850,11 @@ function CommunityHelp() {
                     {isLoading ? (
                       <div className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span>{isLoginMode ? "Signing in..." : "Creating account..."}</span>
+                        <span>
+                          {isLoginMode
+                            ? "Signing in..."
+                            : "Creating account..."}
+                        </span>
                       </div>
                     ) : (
                       <span>{isLoginMode ? "Sign in" : "Create account"}</span>
@@ -848,7 +864,9 @@ function CommunityHelp() {
 
                 {/* Toggle Login/Register with animation */}
                 <p className="mt-6 text-center text-sm text-gray-600">
-                  {isLoginMode ? "Don't have an account?" : "Already have an account?"}{" "}
+                  {isLoginMode
+                    ? "Don't have an account?"
+                    : "Already have an account?"}{" "}
                   <button
                     onClick={() => {
                       setIsLoginMode(!isLoginMode);
@@ -869,15 +887,15 @@ function CommunityHelp() {
             {/* Alerts Feed - Takes full width on mobile, 2/3 on desktop */}
             <div className="lg:col-span-2 order-2 lg:order-1">
               <div className="sticky top-4">
-                <AlertTabs 
-                  activeTab={activeTab} 
+                <AlertTabs
+                  activeTab={activeTab}
                   setActiveTab={setActiveTab}
-                  className="flex overflow-x-auto md:overflow-visible" 
+                  className="flex overflow-x-auto md:overflow-visible"
                 />
-                <FilterBar 
-                  filters={filters} 
+                <FilterBar
+                  filters={filters}
                   setFilters={setFilters}
-                  className="mt-4 flex flex-col md:flex-row gap-2 md:gap-4" 
+                  className="mt-4 flex flex-col md:flex-row gap-2 md:gap-4"
                 />
 
                 {/* Alerts list with responsive spacing */}
@@ -954,7 +972,7 @@ function CommunityHelp() {
                       />
                     </div>
                   </div>
-                  
+
                   {/* Other form fields remain the same but with responsive padding/margins */}
                   {/* Incident Category */}
                   <div className="form-group">
@@ -995,7 +1013,10 @@ function CommunityHelp() {
                           <option value="">Select incident type</option>
                           {DISASTER_CATEGORIES[selectedCategory].map(
                             (incident) => (
-                              <option key={incident.value} value={incident.value}>
+                              <option
+                                key={incident.value}
+                                value={incident.value}
+                              >
                                 {incident.label}
                               </option>
                             )
