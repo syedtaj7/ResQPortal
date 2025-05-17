@@ -12,6 +12,7 @@ import { safeLocations as safeLocationsData } from "../data/safeLocations";
 import Header from "../components/Header"; // Import Header component
 import Footer from "../components/Footer"; // Import Footer component
 import TranslatableText from "../components/TranslatableText"; // Import TranslatableText component
+import { useTheme } from "../contexts/ThemeContext"; // Import ThemeContext
 
 // Add debounce utility
 const debounce = (func, wait) => {
@@ -75,6 +76,7 @@ function Relocation() {
   const [locationSearch, setLocationSearch] = useState("");
   const [safeZoneSearch, setSafeZoneSearch] = useState("");
   const [travelDetails, setTravelDetails] = useState(null);
+  const { darkMode } = useTheme();
 
   // Move calculateTravelDetails to the top of component
   const calculateTravelDetails = useCallback((from, to) => {
@@ -436,16 +438,26 @@ function Relocation() {
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-        <div className="bg-gray-800 rounded-xl w-full max-w-2xl relative">
+        <div
+          className={`${
+            darkMode ? "bg-dark-bg-secondary" : "bg-gray-800"
+          } rounded-xl w-full max-w-2xl relative`}
+        >
           {/* Modal Header */}
-          <div className="p-4 border-b border-gray-700">
+          <div
+            className={`p-4 border-b ${
+              darkMode ? "border-gray-700" : "border-gray-600"
+            }`}
+          >
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-white">
+              <h2 className="text-xl font-bold text-white dark:text-dark-text-primary">
                 {location.name.toUpperCase()}
               </h2>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-white transition-colors"
+                className={`text-gray-400 ${
+                  darkMode ? "hover:text-dark-text-primary" : "hover:text-white"
+                } transition-colors`}
               >
                 <svg
                   className="w-6 h-6"
@@ -467,7 +479,11 @@ function Relocation() {
           {/* Modal Content - Scrollable */}
           <div className="overflow-y-auto p-4 max-h-[70vh] custom-scrollbar">
             {/* Safety Score */}
-            <div className="bg-gray-700 p-4 rounded-lg mb-4">
+            <div
+              className={`${
+                darkMode ? "bg-dark-bg-tertiary" : "bg-gray-700"
+              } p-4 rounded-lg mb-4`}
+            >
               <div className="flex items-center space-x-2">
                 <div
                   className={`w-3 h-3 rounded-full ${
@@ -478,23 +494,27 @@ function Relocation() {
                       : "bg-red-500"
                   }`}
                 ></div>
-                <span className="text-lg font-medium text-white">
+                <span className="text-lg font-medium text-white dark:text-dark-text-primary">
                   <TranslatableText>Safety Score:</TranslatableText>{" "}
                   {location.score}%
                 </span>
               </div>
-              <p className="text-gray-300 mt-2">
+              <p className="text-gray-300 dark:text-dark-text-secondary mt-2">
                 <TranslatableText>{location.description}</TranslatableText>
               </p>
             </div>
 
             {/* Location Details */}
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-gray-700 p-3 rounded-lg">
-                <p className="text-gray-400">
+              <div
+                className={`${
+                  darkMode ? "bg-dark-bg-tertiary" : "bg-gray-700"
+                } p-3 rounded-lg`}
+              >
+                <p className="text-gray-400 dark:text-dark-text-muted">
                   <TranslatableText>State</TranslatableText>
                 </p>
-                <p className="text-white font-medium">
+                <p className="text-white dark:text-dark-text-primary font-medium">
                   <TranslatableText>{location.state}</TranslatableText>
                 </p>
               </div>
@@ -669,18 +689,32 @@ function Relocation() {
 
   // Update the main layout structure
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div
+      className={`min-h-screen flex flex-col ${
+        darkMode ? "bg-dark-bg-primary" : "bg-white"
+      }`}
+    >
       <Header />
       <main className="flex-grow p-2 sm:p-5 pt-16 mb-16 md:ml-48">
         {/* Change to flex column on mobile, side by side on desktop */}
         <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 h-auto lg:h-[calc(100vh-8rem)]">
           {/* Map container - full width on mobile */}
-          <div className="lg:col-span-2 bg-[#F8F8F8] p-3 sm:p-6 rounded-xl shadow-xl flex flex-col h-[70vh] lg:h-full border border-gray-200">
+          <div
+            className={`lg:col-span-2 ${
+              darkMode ? "bg-dark-bg-secondary" : "bg-[#F8F8F8]"
+            } p-3 sm:p-6 rounded-xl shadow-xl flex flex-col h-[70vh] lg:h-full border ${
+              darkMode ? "border-gray-700" : "border-gray-200"
+            }`}
+          >
             {/* Search controls - stack on mobile */}
             <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:gap-4">
               <button
                 onClick={getUserLocation}
-                className="bg-yellow-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors text-black whitespace-nowrap"
+                className={`${
+                  darkMode
+                    ? "bg-yellow-600 text-white hover:bg-yellow-700"
+                    : "bg-yellow-300 text-black hover:bg-gray-400"
+                } px-4 py-2 rounded-lg transition-colors whitespace-nowrap`}
               >
                 <TranslatableText>Use My Location</TranslatableText>
               </button>
@@ -693,11 +727,19 @@ function Relocation() {
                     debouncedSearch(e.target.value);
                   }}
                   placeholder="Search location..."
-                  className="w-full p-2 rounded-lg bg-[#F8F8F8] text-black border border-gray-300 focus:ring-2 focus:ring-yellow-300 focus:outline-none"
+                  className={`w-full p-2 rounded-lg ${
+                    darkMode
+                      ? "bg-dark-bg-tertiary text-dark-text-primary border-gray-600 focus:ring-yellow-600"
+                      : "bg-[#F8F8F8] text-black border-gray-300 focus:ring-yellow-300"
+                  } border focus:ring-2 focus:outline-none`}
                 />
                 <button
                   onClick={() => handleLocationSearch(locationSearch)}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800 p-2"
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${
+                    darkMode
+                      ? "text-gray-400 hover:text-gray-200"
+                      : "text-gray-600 hover:text-gray-800"
+                  } p-2`}
                 >
                   <svg
                     className="w-5 h-5"
@@ -955,20 +997,38 @@ function Relocation() {
           </div>
 
           {/* Sidebar - Full width on mobile, side panel on desktop */}
-          <div className="lg:col-span-1 bg-[#F8F8F8] rounded-lg flex flex-col h-[60vh] lg:h-full overflow-hidden shadow-lg border border-gray-200">
+          <div
+            className={`lg:col-span-1 ${
+              darkMode ? "bg-dark-bg-secondary" : "bg-[#F8F8F8]"
+            } rounded-lg flex flex-col h-[60vh] lg:h-full overflow-hidden shadow-lg border ${
+              darkMode ? "border-gray-700" : "border-gray-200"
+            }`}
+          >
             {/* ... existing sidebar content ... */}
             {/* Fixed header */}
-            <div className="p-4 border-b border-gray-700 bg-[#F8F8F8] sticky top-0 z-10">
+            <div
+              className={`p-4 border-b ${
+                darkMode
+                  ? "border-gray-700 bg-dark-bg-secondary"
+                  : "border-gray-300 bg-[#F8F8F8]"
+              } sticky top-0 z-10`}
+            >
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Search safe locations..."
-                  className="w-full p-2 pl-10 pr-3 rounded-lg bg-[#F8F8F8] text-black placeholder-gray-400 focus:ring-2 focus:ring-yellow-300 focus:outline-none"
+                  className={`w-full p-2 pl-10 pr-3 rounded-lg ${
+                    darkMode
+                      ? "bg-dark-bg-tertiary text-dark-text-primary border-gray-600 placeholder-gray-500 focus:ring-yellow-600"
+                      : "bg-[#F8F8F8] text-black placeholder-gray-400 focus:ring-yellow-300"
+                  } focus:ring-2 focus:outline-none`}
                   value={safeZoneSearch}
                   onChange={(e) => setSafeZoneSearch(e.target.value)}
                 />
                 <svg
-                  className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  className={`w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 ${
+                    darkMode ? "text-gray-500" : "text-gray-400"
+                  }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -984,7 +1044,11 @@ function Relocation() {
             </div>
 
             {/* Single scrollable container */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#F8F8F8]">
+            <div
+              className={`flex-1 overflow-y-auto custom-scrollbar ${
+                darkMode ? "bg-dark-bg-secondary" : "bg-[#F8F8F8]"
+              }`}
+            >
               {nearestSafeZone && (
                 <div className="p-4 bg-gray-750 border-b border-gray-700">
                   <div className="flex justify-between items-center mb-3">
@@ -1202,10 +1266,20 @@ function Relocation() {
                 </div>
               )}
 
-              <div className="p-4 bg-[#F8F8F8]">
+              <div
+                className={`p-4 ${
+                  darkMode ? "bg-dark-bg-secondary" : "bg-[#F8F8F8]"
+                }`}
+              >
                 <h2
-                  className="text-lg font-semibold text-black mb-3 sticky top-0 py-2"
-                  style={{ backgroundColor: "#F8F8F8" }}
+                  className={`text-lg font-semibold ${
+                    darkMode ? "text-dark-text-primary" : "text-black"
+                  } mb-3 sticky top-0 py-2`}
+                  style={{
+                    backgroundColor: darkMode
+                      ? "var(--dark-bg-secondary)"
+                      : "#F8F8F8",
+                  }}
                 >
                   <TranslatableText>Available Safe Zones</TranslatableText>
                 </h2>

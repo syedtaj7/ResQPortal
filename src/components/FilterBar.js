@@ -1,21 +1,33 @@
 import React from "react";
 import TranslatableText from "../components/TranslatableText";
+import { useTheme } from "../contexts/ThemeContext";
 
 export const FilterBar = ({ filters, setFilters }) => {
+  const { darkMode } = useTheme();
+
   return (
-    <div className="bg-[#F8F8F8]/90 backdrop-blur-sm p-4 rounded-lg mb-6 space-y-4 shadow-lg mt-1 border border-gray-200 - box shadow">
+    <div
+      className={`${
+        darkMode
+          ? "bg-dark-bg-secondary/90 border-gray-700"
+          : "bg-white/90 border-gray-300"
+      } backdrop-blur-sm p-4 rounded-lg mb-6 space-y-4 shadow-lg mt-1 border`}
+    >
       <div className="flex items-center space-x-4">
         <div className="relative flex-1">
           <input
             type="text"
             placeholder="Search alerts..." // HTML attributes can't use React components
-            className="w-full bg-[#F8F8F8] border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-black
-              focus:ring-2 focus:ring-yellow-500 focus:outline-none transition-all"
+            className={`w-full ${
+              darkMode
+                ? "bg-dark-bg-tertiary border-gray-700 text-dark-text-primary placeholder-gray-500"
+                : "bg-gray-100 border-gray-300 text-gray-900 placeholder-gray-500"
+            } border rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition-all`}
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           />
           <svg
-            className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -30,7 +42,11 @@ export const FilterBar = ({ filters, setFilters }) => {
         </div>
 
         <select
-          className="bg-[#F8F8F8] border border-gray-600 rounded-lg px-4 py-2 text-black appearance-none cursor-pointer"
+          className={`${
+            darkMode
+              ? "bg-dark-bg-tertiary border-gray-700 text-dark-text-primary"
+              : "bg-gray-100 border-gray-300 text-gray-900"
+          } border rounded-lg px-4 py-2 appearance-none cursor-pointer`}
           value={filters.sortBy}
           onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
         >
@@ -53,8 +69,10 @@ export const FilterBar = ({ filters, setFilters }) => {
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors
               ${
                 filters.severity === severity.toLowerCase()
-                  ? "bg-yellow-300 text-white"
-                  : "bg-[#F8F8F8] text-black hover:bg-yellow-300"
+                  ? "bg-yellow-500 text-white"
+                  : darkMode
+                  ? "bg-dark-bg-tertiary text-dark-text-primary border border-gray-700 hover:bg-yellow-600/70"
+                  : "bg-gray-100 text-gray-800 border border-gray-300 hover:bg-yellow-400/70"
               }`}
             onClick={() =>
               setFilters({ ...filters, severity: severity.toLowerCase() })

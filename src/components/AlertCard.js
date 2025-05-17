@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import TranslatableText from "../components/TranslatableText";
+import { useTheme } from "../contexts/ThemeContext";
 
 export const AlertCard = ({
   alert,
@@ -31,8 +32,16 @@ export const AlertCard = ({
     return badges[category] || "bg-gray-500/20 text-gray-400";
   };
 
+  const { darkMode } = useTheme();
+
   return (
-    <div className="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-700/50">
+    <div
+      className={`${
+        darkMode
+          ? "bg-dark-bg-secondary border-gray-700/50"
+          : "bg-white border-gray-300/50"
+      } backdrop-blur-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border`}
+    >
       <div className="relative">
         <img
           src={alert.imageUrl}
@@ -54,16 +63,28 @@ export const AlertCard = ({
       <div className="p-4">
         <div className="flex justify-between items-start mb-3">
           <div>
-            <h3 className="text-lg font-semibold text-white mb-1">
+            <h3
+              className={`text-lg font-semibold ${
+                darkMode ? "text-dark-text-primary" : "text-gray-900"
+              } mb-1`}
+            >
               <TranslatableText>{alert.location}</TranslatableText>
             </h3>
-            <p className="text-sm text-gray-400">
+            <p
+              className={`text-sm ${
+                darkMode ? "text-dark-text-muted" : "text-gray-500"
+              }`}
+            >
               {formatTimestamp(alert.timestamp)}
             </p>
           </div>
           <button
             onClick={onUpvote}
-            className="flex items-center space-x-2 px-3 py-1 rounded-full bg-gray-700/50 hover:bg-gray-600/50 transition-colors"
+            className={`flex items-center space-x-2 px-3 py-1 rounded-full ${
+              darkMode
+                ? "bg-dark-bg-tertiary hover:bg-gray-600/50"
+                : "bg-gray-100 hover:bg-gray-200"
+            } transition-colors`}
           >
             <svg
               className="w-4 h-4"
@@ -82,13 +103,21 @@ export const AlertCard = ({
           </button>
         </div>
 
-        <p className={`text-gray-300 ${!isExpanded && "line-clamp-3"}`}>
+        <p
+          className={`${
+            darkMode ? "text-dark-text-secondary" : "text-gray-700"
+          } ${!isExpanded && "line-clamp-3"}`}
+        >
           <TranslatableText>{alert.description}</TranslatableText>
         </p>
         {alert.description.length > 150 && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-blue-400 hover:text-blue-300 text-sm mt-2"
+            className={`${
+              darkMode
+                ? "text-blue-400 hover:text-blue-300"
+                : "text-blue-600 hover:text-blue-700"
+            } text-sm mt-2`}
           >
             <TranslatableText>
               {isExpanded ? "Show less" : "Read more"}
@@ -96,8 +125,16 @@ export const AlertCard = ({
           </button>
         )}
 
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
-          <div className="text-sm text-gray-400 flex items-center space-x-2">
+        <div
+          className={`flex items-center justify-between mt-4 pt-4 ${
+            darkMode ? "border-gray-700" : "border-gray-300"
+          } border-t`}
+        >
+          <div
+            className={`text-sm ${
+              darkMode ? "text-dark-text-muted" : "text-gray-500"
+            } flex items-center space-x-2`}
+          >
             <svg
               className="w-4 h-4"
               fill="none"
@@ -116,7 +153,7 @@ export const AlertCard = ({
               className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
                 alert.postedByVolunteer
                   ? "bg-green-600 text-white"
-                  : "bg-gray-500 text-white"
+                  : "bg-gray-600 text-white"
               }`}
             >
               <TranslatableText>
@@ -129,7 +166,9 @@ export const AlertCard = ({
           <div className="flex space-x-2">
             <button
               onClick={onShare}
-              className="p-2 hover:bg-gray-700 rounded-full transition-colors"
+              className={`p-2 ${
+                darkMode ? "hover:bg-dark-bg-tertiary" : "hover:bg-gray-100"
+              } rounded-full transition-colors`}
               title="Share alert" // Note: HTML attributes can't use React components
             >
               <svg
@@ -151,7 +190,9 @@ export const AlertCard = ({
               className={`p-2 rounded-full transition-colors ${
                 isSaved
                   ? "text-blue-400 hover:text-blue-300 bg-blue-500/10"
-                  : "text-gray-400 hover:text-white hover:bg-gray-700"
+                  : darkMode
+                  ? "text-dark-text-muted hover:text-white hover:bg-dark-bg-tertiary"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
               }`}
               title={isSaved ? "Remove from saved" : "Save alert"} // HTML attributes can't use React components
             >

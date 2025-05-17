@@ -374,7 +374,15 @@
   position: sticky;
   top: 0;
   z-index: 10;
+}
+
+/* Apply background color based on theme */
+:root:not(.dark) .sticky {
   background-color: rgb(248, 248, 248);
+}
+
+.dark .sticky {
+  background-color: rgb(31, 41, 55);
 }
 
 /* Container height adjustments */
@@ -897,40 +905,71 @@ select option:hover {
   width: 100%;
   padding: 0.75rem;
   border-radius: 0.5rem;
-  background-color: rgb(55, 65, 81);
-  color: white;
-  border: 1px solid rgb(75, 85, 99);
   transition: all 0.2s;
   appearance: none;
   cursor: pointer;
-  appearance: none;
   width: 100%;
   padding: 0.5rem 1rem;
-  background-color: rgb(55, 65, 81);
-  border: 1px solid rgb(75, 85, 99);
   border-radius: 0.5rem;
-  color: white;
   transition: all 0.2s;
+}
+
+/* Dark mode styles */
+.dark .custom-select {
+  background-color: rgb(31, 41, 55);
+  color: white;
+  border: 1px solid rgb(75, 85, 99);
+}
+
+/* Light mode styles */
+:root:not(.dark) .custom-select {
+  background-color: white;
+  color: rgb(55, 65, 81);
+  border: 1px solid rgb(209, 213, 219);
 }
 
 .custom-select:focus {
   outline: none;
   border-color: transparent;
-  box-shadow: 0 0 0 2px rgb(59, 130, 246);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
 
-.custom-select:hover {
-  background-color: rgb(75, 85, 99);
-}
-
-.custom-select option {
+/* Dark mode hover */
+.dark .custom-select:hover {
   background-color: rgb(55, 65, 81);
+  border-color: rgb(96, 165, 250);
+}
+
+/* Light mode hover */
+:root:not(.dark) .custom-select:hover {
+  background-color: rgb(243, 244, 246);
+  border-color: rgb(96, 165, 250);
+}
+
+/* Dark mode options */
+.dark .custom-select option {
+  background-color: rgb(31, 41, 55);
   color: white;
   padding: 0.5rem 0;
 }
 
-.custom-select option:hover {
-  background-color: rgb(75, 85, 99);
+.dark .custom-select option:hover,
+.dark .custom-select option:focus,
+.dark .custom-select option:checked {
+  background-color: rgb(55, 65, 81);
+}
+
+/* Light mode options */
+:root:not(.dark) .custom-select option {
+  background-color: white;
+  color: rgb(55, 65, 81);
+  padding: 0.5rem 0;
+}
+
+:root:not(.dark) .custom-select option:hover,
+:root:not(.dark) .custom-select option:focus,
+:root:not(.dark) .custom-select option:checked {
+  background-color: rgb(243, 244, 246);
 }
 
 .form-group {
@@ -943,7 +982,16 @@ select option:hover {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #d1d5db;
+}
+
+/* Dark mode form label */
+.dark .form-label {
+  color: #e5e7eb; /* Lighter text for better contrast in dark mode */
+}
+
+/* Light mode form label */
+:root:not(.dark) .form-label {
+  color: #4b5563; /* Gray-600 for good contrast in light mode */
 }
 
 /* Alert Card Animations */

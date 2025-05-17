@@ -2,17 +2,27 @@ import React from "react";
 import { Link } from "react-router-dom";
 import TranslatableText from "./TranslatableText";
 import LanguageSelector from "./LanguageSelector";
+import ThemeToggle from "./ThemeToggle";
+import { useTheme } from "../contexts/ThemeContext";
 
 function Footer() {
+  const { darkMode } = useTheme();
+
   return (
-    <footer className="bg-[#E5E4E2] text-black py-8 md:ml-48">
+    <footer
+      className={`${
+        darkMode
+          ? "bg-dark-bg-secondary text-dark-text-primary"
+          : "bg-[#E5E4E2] text-black"
+      } py-8 md:ml-48`}
+    >
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-lg font-semibold mb-4">
               <TranslatableText>About ResQTech</TranslatableText>
             </h3>
-            <p className="text-gray-800 text-sm">
+            <p className="text-gray-800 dark:text-dark-text-secondary text-sm">
               <TranslatableText>
                 Real-time disaster monitoring and management system for India
               </TranslatableText>
@@ -24,14 +34,17 @@ function Footer() {
             </h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-gray-800 hover:text-white text-sm">
+                <Link
+                  to="/"
+                  className="text-gray-800 dark:text-dark-text-secondary hover:text-white text-sm"
+                >
                   <TranslatableText>Home</TranslatableText>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/mitigation"
-                  className="text-gray-800 hover:text-white text-sm"
+                  className="text-gray-800 dark:text-dark-text-secondary hover:text-white text-sm"
                 >
                   <TranslatableText>Mitigation</TranslatableText>
                 </Link>
@@ -39,7 +52,7 @@ function Footer() {
               <li>
                 <Link
                   to="/community-help"
-                  className="text-gray-800 hover:text-white text-sm"
+                  className="text-gray-800 dark:text-dark-text-secondary hover:text-white text-sm"
                 >
                   <TranslatableText>Community Help</TranslatableText>
                 </Link>
@@ -47,7 +60,7 @@ function Footer() {
               <li>
                 <Link
                   to="/about"
-                  className="text-gray-800 hover:text-white text-sm"
+                  className="text-gray-800 dark:text-dark-text-secondary hover:text-white text-sm"
                 >
                   <TranslatableText>About</TranslatableText>
                 </Link>
@@ -58,7 +71,7 @@ function Footer() {
             <h3 className="text-lg font-semibold mb-4">
               <TranslatableText>Emergency Contacts</TranslatableText>
             </h3>
-            <ul className="space-y-2 text-sm text-gray-800">
+            <ul className="space-y-2 text-sm text-gray-800 dark:text-dark-text-secondary">
               <li>
                 <TranslatableText>National Emergency: 112</TranslatableText>
               </li>
@@ -80,7 +93,7 @@ function Footer() {
             <div className="flex space-x-4">
               <a
                 href="https://twitter.com/ResQTech"
-                className="text-gray-800 hover:text-white"
+                className="text-gray-800 dark:text-dark-text-secondary hover:text-white"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -97,7 +110,7 @@ function Footer() {
               </a>
               <a
                 href="https://github.com/ResQTech"
-                className="text-gray-800 hover:text-white"
+                className="text-gray-800 dark:text-dark-text-secondary hover:text-white"
               >
                 <span className="sr-only">
                   <TranslatableText>GitHub</TranslatableText>
@@ -118,13 +131,16 @@ function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="text-sm text-gray-400 mb-4 md:mb-0">
+          <div className="text-sm text-gray-400 dark:text-dark-text-muted mb-4 md:mb-0">
             <TranslatableText>
               © {new Date().getFullYear()} ResQTech. All rights reserved.
             </TranslatableText>
           </div>
-          <div className="language-selector">
-            <LanguageSelector />
+          <div className="flex space-x-3 items-center">
+            <div className="language-selector">
+              <LanguageSelector />
+            </div>
+            <ThemeToggle />
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import TranslatableText from "../components/TranslatableText";
+import { useTheme } from "../contexts/ThemeContext";
 
 // Dummy data for disaster areas needing donations
 const disasterData = [
@@ -550,15 +551,15 @@ const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-lg overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
+        className="bg-white dark:bg-dark-bg-secondary rounded-lg overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
       >
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
             <TranslatableText>{volunteer.name}</TranslatableText>
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400"
           >
             <svg
               className="h-6 w-6"
@@ -590,34 +591,34 @@ const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
                 <TranslatableText>
                   About the Volunteer Opportunity
                 </TranslatableText>
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-dark-text-secondary">
                 <TranslatableText>{volunteer.description}</TranslatableText>
               </p>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
                 <TranslatableText>Impact</TranslatableText>
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-dark-text-secondary">
                 <TranslatableText>{volunteer.impact}</TranslatableText>
               </p>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
                 <TranslatableText>Skills Needed</TranslatableText>
               </h3>
               <div className="flex flex-wrap gap-2">
                 {volunteer.skillsNeeded.map((skill) => (
                   <span
                     key={skill}
-                    className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                    className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded"
                   >
                     <TranslatableText>{skill}</TranslatableText>
                   </span>
@@ -626,52 +627,52 @@ const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
                 <TranslatableText>Requirements</TranslatableText>
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-dark-text-secondary">
                 <TranslatableText>{volunteer.requirements}</TranslatableText>
               </p>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-gray-50 dark:bg-dark-bg-tertiary p-4 rounded-lg">
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-gray-500 dark:text-dark-text-muted">
                   <TranslatableText>Organization</TranslatableText>
                 </span>
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
                   <TranslatableText>{volunteer.organization}</TranslatableText>
                 </span>
               </div>
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-gray-500 dark:text-dark-text-muted">
                   <TranslatableText>Location</TranslatableText>
                 </span>
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
                   <TranslatableText>{volunteer.location}</TranslatableText>
                 </span>
               </div>
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-gray-500 dark:text-dark-text-muted">
                   <TranslatableText>Time Commitment</TranslatableText>
                 </span>
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
                   <TranslatableText>
                     {volunteer.timeCommitment}
                   </TranslatableText>
                 </span>
               </div>
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-gray-500 dark:text-dark-text-muted">
                   <TranslatableText>Urgency Level</TranslatableText>
                 </span>
                 <span
                   className={`text-sm font-semibold ${
                     volunteer.urgencyLevel === "High"
-                      ? "text-red-600"
+                      ? "text-red-600 dark:text-red-400"
                       : volunteer.urgencyLevel === "Medium"
-                      ? "text-orange-600"
-                      : "text-yellow-600"
+                      ? "text-orange-600 dark:text-orange-400"
+                      : "text-yellow-600 dark:text-yellow-400"
                   }`}
                 >
                   <TranslatableText>{volunteer.urgencyLevel}</TranslatableText>
@@ -679,18 +680,18 @@ const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
               </div>
               <div className="mt-4">
                 <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-500">
+                  <span className="text-sm font-medium text-gray-500 dark:text-dark-text-muted">
                     <TranslatableText>Volunteers Registered</TranslatableText>
                   </span>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
                     {volunteer.volunteersRegistered}{" "}
                     <TranslatableText>of</TranslatableText>{" "}
                     {volunteer.volunteersNeeded}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                   <div
-                    className="bg-blue-500 h-2.5 rounded-full"
+                    className="bg-blue-500 dark:bg-blue-600 h-2.5 rounded-full"
                     style={{
                       width: `${
                         (volunteer.volunteersRegistered /
@@ -705,7 +706,7 @@ const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
           </div>
         </div>
 
-        <div className="p-4 border-t bg-gray-50">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-dark-bg-tertiary">
           <button
             onClick={() => onVolunteer(volunteer)}
             className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -740,7 +741,7 @@ const VolunteerCard = ({ volunteer, onClick }) => {
         boxShadow:
           "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
       }}
-      className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all cursor-pointer"
+      className="bg-white dark:bg-dark-bg-secondary rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all cursor-pointer"
       onClick={() => onClick(volunteer)}
     >
       <img
@@ -750,47 +751,47 @@ const VolunteerCard = ({ volunteer, onClick }) => {
       />
       <div className="p-4">
         <div className="flex justify-between items-start">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
             <TranslatableText>{volunteer.name}</TranslatableText>
           </h3>
           <span
             className={`text-xs px-2 py-1 rounded-full ${
               volunteer.urgencyLevel === "High"
-                ? "bg-red-100 text-red-800"
+                ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
                 : volunteer.urgencyLevel === "Medium"
-                ? "bg-orange-100 text-orange-800"
-                : "bg-yellow-100 text-yellow-800"
+                ? "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300"
+                : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
             }`}
           >
             <TranslatableText>{volunteer.urgencyLevel}</TranslatableText>
           </span>
         </div>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-dark-text-secondary mt-1">
           <TranslatableText>{volunteer.location}</TranslatableText>
         </p>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-dark-text-secondary mt-1">
           <TranslatableText>Organization:</TranslatableText>{" "}
           <TranslatableText>{volunteer.organization}</TranslatableText>
         </p>
-        <p className="text-sm text-gray-700 mt-2 line-clamp-2">
+        <p className="text-sm text-gray-700 dark:text-dark-text-secondary mt-2 line-clamp-2">
           <TranslatableText>{volunteer.description}</TranslatableText>
         </p>
 
         <div className="mt-3">
-          <p className="text-xs font-medium text-gray-500 mb-1">
+          <p className="text-xs font-medium text-gray-500 dark:text-dark-text-muted mb-1">
             <TranslatableText>Skills Needed:</TranslatableText>
           </p>
           <div className="flex flex-wrap gap-1">
             {volunteer.skillsNeeded.slice(0, 3).map((skill) => (
               <span
                 key={skill}
-                className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded"
+                className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium px-2 py-0.5 rounded"
               >
                 <TranslatableText>{skill}</TranslatableText>
               </span>
             ))}
             {volunteer.skillsNeeded.length > 3 && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 dark:text-dark-text-muted">
                 <TranslatableText>
                   +{volunteer.skillsNeeded.length - 3} more
                 </TranslatableText>
@@ -801,18 +802,18 @@ const VolunteerCard = ({ volunteer, onClick }) => {
 
         <div className="mt-4">
           <div className="flex justify-between mb-1">
-            <span className="text-xs font-medium text-gray-500">
+            <span className="text-xs font-medium text-gray-500 dark:text-dark-text-muted">
               <TranslatableText>Volunteers Registered</TranslatableText>
             </span>
-            <span className="text-xs font-semibold text-gray-900">
+            <span className="text-xs font-semibold text-gray-900 dark:text-dark-text-primary">
               {volunteer.volunteersRegistered}{" "}
               <TranslatableText>of</TranslatableText>{" "}
               {volunteer.volunteersNeeded}
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
             <div
-              className="bg-blue-500 h-1.5 rounded-full"
+              className="bg-blue-500 dark:bg-blue-600 h-1.5 rounded-full"
               style={{
                 width: `${
                   (volunteer.volunteersRegistered /
@@ -836,15 +837,15 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-lg overflow-hidden max-w-2xl w-full max-h-[90vh] flex flex-col"
+        className="bg-white dark:bg-dark-bg-secondary rounded-lg overflow-hidden max-w-2xl w-full max-h-[90vh] flex flex-col"
       >
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
             <TranslatableText>Volunteer Dashboard</TranslatableText>
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400"
           >
             <svg
               className="h-6 w-6"
@@ -864,42 +865,42 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
 
         <div className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-blue-50 p-4 rounded-lg text-center">
-              <p className="text-3xl font-bold text-blue-600">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-center">
+              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                 {volunteerStats.hoursLogged}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                 <TranslatableText>Hours Logged</TranslatableText>
               </p>
             </div>
-            <div className="bg-green-50 p-4 rounded-lg text-center">
-              <p className="text-3xl font-bold text-green-600">
+            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg text-center">
+              <p className="text-3xl font-bold text-green-600 dark:text-green-400">
                 {volunteerStats.activitiesCompleted}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                 <TranslatableText>Activities</TranslatableText>
               </p>
             </div>
-            <div className="bg-purple-50 p-4 rounded-lg text-center">
-              <p className="text-3xl font-bold text-purple-600">
+            <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg text-center">
+              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                 {volunteerStats.peopleHelped}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                 <TranslatableText>People Helped</TranslatableText>
               </p>
             </div>
-            <div className="bg-yellow-50 p-4 rounded-lg text-center">
-              <p className="text-3xl font-bold text-yellow-600">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg text-center">
+              <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
                 {volunteerStats.skillsUtilized.length}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                 <TranslatableText>Skills Used</TranslatableText>
               </p>
             </div>
           </div>
 
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
               <TranslatableText>Skills Utilized</TranslatableText>
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -907,13 +908,13 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
                 volunteerStats.skillsUtilized.map((skill) => (
                   <span
                     key={skill}
-                    className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                    className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded"
                   >
                     <TranslatableText>{skill}</TranslatableText>
                   </span>
                 ))
               ) : (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-dark-text-muted">
                   <TranslatableText>No skills recorded yet</TranslatableText>
                 </p>
               )}
@@ -921,16 +922,16 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
               <TranslatableText>Log Hours</TranslatableText>
             </h3>
             <form className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
                     <TranslatableText>Activity</TranslatableText>
                   </label>
-                  <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  <select className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-dark-bg-tertiary dark:text-dark-text-primary shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <option>
                       <TranslatableText>Select an activity</TranslatableText>
                     </option>
@@ -952,32 +953,32 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
                     <TranslatableText>Hours</TranslatableText>
                   </label>
                   <input
                     type="number"
                     min="0"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-dark-bg-tertiary dark:text-dark-text-primary shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
                   <TranslatableText>Date</TranslatableText>
                 </label>
                 <input
                   type="date"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-dark-bg-tertiary dark:text-dark-text-primary shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
                   <TranslatableText>Notes</TranslatableText>
                 </label>
                 <textarea
                   rows="2"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-dark-bg-tertiary dark:text-dark-text-primary shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 ></textarea>
               </div>
               <button
@@ -1300,15 +1301,15 @@ const DisasterDetailModal = ({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-lg overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
+        className="bg-white dark:bg-dark-bg-secondary rounded-lg overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
       >
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
             <TranslatableText>{disaster.name}</TranslatableText>
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400"
           >
             <svg
               className="h-6 w-6"
@@ -1344,39 +1345,39 @@ const DisasterDetailModal = ({
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
                 <TranslatableText>About the Disaster</TranslatableText>
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-dark-text-secondary">
                 <TranslatableText>{disaster.description}</TranslatableText>
               </p>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
                 <TranslatableText>Impact</TranslatableText>
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-dark-text-secondary">
                 <TranslatableText>{disaster.impact}</TranslatableText>
               </p>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
                 <TranslatableText>How Your Donation Helps</TranslatableText>
               </h3>
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-dark-text-secondary">
                 <TranslatableText>{disaster.howHelpWorks}</TranslatableText>
               </p>
             </div>
 
             {relatedVolunteers.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
                   <TranslatableText>Volunteer Opportunities</TranslatableText>
                 </h3>
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-gray-700 mb-2">
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                  <p className="text-gray-700 dark:text-dark-text-secondary mb-2">
                     <TranslatableText>
                       We need volunteers to help with this disaster relief
                       effort. There are currently {relatedVolunteers.length}{" "}
@@ -1388,7 +1389,7 @@ const DisasterDetailModal = ({
                       onSwitchToVolunteer &&
                       onSwitchToVolunteer(relatedVolunteers[0])
                     }
-                    className="inline-flex items-center text-blue-600 hover:text-blue-800"
+                    className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                   >
                     <svg
                       className="mr-1 h-5 w-5"
@@ -1411,34 +1412,34 @@ const DisasterDetailModal = ({
               </div>
             )}
 
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-gray-50 dark:bg-dark-bg-tertiary p-4 rounded-lg">
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-gray-500 dark:text-dark-text-muted">
                   <TranslatableText>Organization</TranslatableText>
                 </span>
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
                   <TranslatableText>{disaster.organization}</TranslatableText>
                 </span>
               </div>
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-gray-500 dark:text-dark-text-muted">
                   <TranslatableText>Location</TranslatableText>
                 </span>
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
                   <TranslatableText>{disaster.location}</TranslatableText>
                 </span>
               </div>
               <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-gray-500 dark:text-dark-text-muted">
                   <TranslatableText>Urgency Level</TranslatableText>
                 </span>
                 <span
                   className={`text-sm font-semibold ${
                     disaster.urgencyLevel === "High"
-                      ? "text-red-600"
+                      ? "text-red-600 dark:text-red-400"
                       : disaster.urgencyLevel === "Medium"
-                      ? "text-orange-600"
-                      : "text-yellow-600"
+                      ? "text-orange-600 dark:text-orange-400"
+                      : "text-yellow-600 dark:text-yellow-400"
                   }`}
                 >
                   <TranslatableText>{disaster.urgencyLevel}</TranslatableText>
@@ -1446,18 +1447,18 @@ const DisasterDetailModal = ({
               </div>
               <div className="mt-4">
                 <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-500">
+                  <span className="text-sm font-medium text-gray-500 dark:text-dark-text-muted">
                     <TranslatableText>Funds Raised</TranslatableText>
                   </span>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
                     {disaster.amountRaised}{" "}
                     <TranslatableText>of</TranslatableText>{" "}
                     {disaster.amountNeeded}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                   <div
-                    className="bg-yellow-500 h-2.5 rounded-full"
+                    className="bg-yellow-500 dark:bg-yellow-600 h-2.5 rounded-full"
                     style={{
                       width: `${
                         (parseInt(
@@ -1476,7 +1477,7 @@ const DisasterDetailModal = ({
           </div>
         </div>
 
-        <div className="p-4 border-t bg-gray-50">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-dark-bg-tertiary">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               onClick={() => onDonate(disaster)}
@@ -1538,7 +1539,7 @@ const DisasterCard = ({ disaster, onClick }) => {
         boxShadow:
           "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
       }}
-      className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all cursor-pointer"
+      className="bg-white dark:bg-dark-bg-secondary rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all cursor-pointer"
       onClick={() => onClick(disaster)}
     >
       <img
@@ -1548,45 +1549,45 @@ const DisasterCard = ({ disaster, onClick }) => {
       />
       <div className="p-4">
         <div className="flex justify-between items-start">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
             <TranslatableText>{disaster.name}</TranslatableText>
           </h3>
           <span
             className={`text-xs px-2 py-1 rounded-full ${
               disaster.urgencyLevel === "High"
-                ? "bg-red-100 text-red-800"
+                ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
                 : disaster.urgencyLevel === "Medium"
-                ? "bg-orange-100 text-orange-800"
-                : "bg-yellow-100 text-yellow-800"
+                ? "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300"
+                : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
             }`}
           >
             <TranslatableText>{disaster.urgencyLevel}</TranslatableText>
           </span>
         </div>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-dark-text-secondary mt-1">
           <TranslatableText>{disaster.location}</TranslatableText>
         </p>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-dark-text-secondary mt-1">
           <TranslatableText>Organization:</TranslatableText>{" "}
           <TranslatableText>{disaster.organization}</TranslatableText>
         </p>
-        <p className="text-sm text-gray-700 mt-2 line-clamp-2">
+        <p className="text-sm text-gray-700 dark:text-dark-text-secondary mt-2 line-clamp-2">
           <TranslatableText>{disaster.description}</TranslatableText>
         </p>
 
         <div className="mt-4">
           <div className="flex justify-between mb-1">
-            <span className="text-xs font-medium text-gray-500">
+            <span className="text-xs font-medium text-gray-500 dark:text-dark-text-muted">
               <TranslatableText>Funds Raised</TranslatableText>
             </span>
-            <span className="text-xs font-semibold text-gray-900">
+            <span className="text-xs font-semibold text-gray-900 dark:text-dark-text-primary">
               {disaster.amountRaised} <TranslatableText>of</TranslatableText>{" "}
               {disaster.amountNeeded}
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
             <div
-              className="bg-yellow-500 h-1.5 rounded-full"
+              className="bg-yellow-500 dark:bg-yellow-600 h-1.5 rounded-full"
               style={{
                 width: `${
                   (parseInt(disaster.amountRaised.replace(/[^0-9]/g, "")) /
@@ -1613,6 +1614,8 @@ function Donation() {
   const [userVolunteerStats, setUserVolunteerStats] = useState(
     initialVolunteerStats
   );
+  // We use useTheme() to ensure the component re-renders when theme changes
+  useTheme();
 
   const handleDisasterClick = (disaster) => {
     setSelectedDisaster(disaster);
@@ -1664,7 +1667,7 @@ function Donation() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-dark-bg-primary">
       <Header />
 
       <main className="flex-grow md:ml-48 p-6">
@@ -1674,7 +1677,7 @@ function Donation() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-3xl font-bold text-gray-900 sm:text-4xl mb-4"
+              className="text-3xl font-bold text-gray-900 dark:text-dark-text-primary sm:text-4xl mb-4"
             >
               <TranslatableText>
                 Support Disaster Relief Efforts
@@ -1684,7 +1687,7 @@ function Donation() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="max-w-2xl mx-auto text-lg text-gray-600"
+              className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-dark-text-secondary"
             >
               <TranslatableText>
                 Your contribution can make a significant difference in the lives
@@ -1702,7 +1705,7 @@ function Donation() {
                 className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
                   activeTab === "donations"
                     ? "bg-yellow-500 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
+                    : "bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary"
                 }`}
               >
                 <TranslatableText>Donate Funds</TranslatableText>
@@ -1713,7 +1716,7 @@ function Donation() {
                 className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
                   activeTab === "volunteers"
                     ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
+                    : "bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary"
                 }`}
               >
                 <TranslatableText>Volunteer Time</TranslatableText>

@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import TranslatableText from "../components/TranslatableText";
+import { useTheme } from "../contexts/ThemeContext";
 
 // Update the severityColors constant for map markers
 const severityColors = {
@@ -36,63 +37,63 @@ const severityColors = {
   },
 };
 
-// Update the disasterTypeColors constant
+// Update the disasterTypeColors constant with dark mode support
 const disasterTypeColors = {
   "Weather Warning": {
-    bg: "bg-sky-100",
-    border: "border-sky-400",
-    text: "text-sky-900",
-    title: "text-sky-950",
-    details: "text-sky-800",
+    bg: "bg-sky-100 dark:bg-sky-900/30",
+    border: "border-sky-400 dark:border-sky-700",
+    text: "text-sky-900 dark:text-sky-300",
+    title: "text-sky-950 dark:text-sky-200",
+    details: "text-sky-800 dark:text-sky-400",
   },
   Earthquake: {
-    bg: "bg-rose-100",
-    border: "border-rose-400",
-    text: "text-rose-900",
-    title: "text-rose-950",
-    details: "text-rose-800",
+    bg: "bg-rose-100 dark:bg-rose-900/30",
+    border: "border-rose-400 dark:border-rose-700",
+    text: "text-rose-900 dark:text-rose-300",
+    title: "text-rose-950 dark:text-rose-200",
+    details: "text-rose-800 dark:text-rose-400",
   },
   "Landslide Warning": {
-    bg: "bg-orange-100",
-    border: "border-orange-400",
-    text: "text-orange-900",
-    title: "text-orange-950",
-    details: "text-orange-800",
+    bg: "bg-orange-100 dark:bg-orange-900/30",
+    border: "border-orange-400 dark:border-orange-700",
+    text: "text-orange-900 dark:text-orange-300",
+    title: "text-orange-950 dark:text-orange-200",
+    details: "text-orange-800 dark:text-orange-400",
   },
   "Air Quality Warning": {
-    bg: "bg-violet-100",
-    border: "border-violet-400",
-    text: "text-violet-900",
-    title: "text-violet-950",
-    details: "text-violet-800",
+    bg: "bg-violet-100 dark:bg-violet-900/30",
+    border: "border-violet-400 dark:border-violet-700",
+    text: "text-violet-900 dark:text-violet-300",
+    title: "text-violet-950 dark:text-violet-200",
+    details: "text-violet-800 dark:text-violet-400",
   },
   "Flash Flood": {
-    bg: "bg-indigo-100",
-    border: "border-indigo-400",
-    text: "text-indigo-900",
-    title: "text-indigo-950",
-    details: "text-indigo-800",
+    bg: "bg-indigo-100 dark:bg-indigo-900/30",
+    border: "border-indigo-400 dark:border-indigo-700",
+    text: "text-indigo-900 dark:text-indigo-300",
+    title: "text-indigo-950 dark:text-indigo-200",
+    details: "text-indigo-800 dark:text-indigo-400",
   },
   Cyclone: {
-    bg: "bg-emerald-100",
-    border: "border-emerald-400",
-    text: "text-emerald-900",
-    title: "text-emerald-950",
-    details: "text-emerald-800",
+    bg: "bg-emerald-100 dark:bg-emerald-900/30",
+    border: "border-emerald-400 dark:border-emerald-700",
+    text: "text-emerald-900 dark:text-emerald-300",
+    title: "text-emerald-950 dark:text-emerald-200",
+    details: "text-emerald-800 dark:text-emerald-400",
   },
   Wildfire: {
-    bg: "bg-red-100",
-    border: "border-red-400",
-    text: "text-red-900",
-    title: "text-red-950",
-    details: "text-red-800",
+    bg: "bg-red-100 dark:bg-red-900/30",
+    border: "border-red-400 dark:border-red-700",
+    text: "text-red-900 dark:text-red-300",
+    title: "text-red-950 dark:text-red-200",
+    details: "text-red-800 dark:text-red-400",
   },
   default: {
-    bg: "bg-slate-100",
-    border: "border-slate-400",
-    text: "text-slate-900",
-    title: "text-slate-950",
-    details: "text-slate-800",
+    bg: "bg-slate-100 dark:bg-slate-800/50",
+    border: "border-slate-400 dark:border-slate-700",
+    text: "text-slate-900 dark:text-slate-300",
+    title: "text-slate-950 dark:text-slate-200",
+    details: "text-slate-800 dark:text-slate-400",
   },
 };
 
@@ -1045,20 +1046,20 @@ function Home() {
     return (
       <div
         ref={suggestionsRef}
-        className="absolute z-50 w-full bg-gray-700 rounded-md shadow-lg mt-1 border border-gray-600 max-h-48 overflow-y-auto"
+        className="absolute z-50 w-full bg-gray-700 dark:bg-dark-bg-tertiary rounded-md shadow-lg mt-1 border border-gray-600 dark:border-gray-700 max-h-48 overflow-y-auto"
       >
         <ul className="py-1">
           {matchingLocations.map((location) => (
             <li
               key={location}
-              className="px-4 py-2 hover:bg-gray-600 cursor-pointer text-gray-200 flex items-center"
+              className="px-4 py-2 hover:bg-gray-600 dark:hover:bg-dark-bg-secondary cursor-pointer text-gray-200 dark:text-dark-text-secondary flex items-center"
               onClick={() => {
                 onSelect(location);
                 setIsVisible(false);
               }}
             >
               <svg
-                className="w-4 h-4 mr-2 text-gray-400"
+                className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -1192,12 +1193,26 @@ function Home() {
     setFilteredDisasters(disasters);
   }, [disasters]);
 
+  const { darkMode } = useTheme();
+
   return (
-    <div className="min-h-screen flex flex-col bg-white text-black">
+    <div
+      className={`min-h-screen flex flex-col ${
+        darkMode
+          ? "bg-dark-bg-primary text-dark-text-primary"
+          : "bg-white text-black"
+      }`}
+    >
       <Header /> {/* Use the Header component */}
       <main className="flex-grow md:ml-48">
         <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 bg-[#F8F8F8] p-6 rounded-xl shadow-lg mt-1 border border-gray-200">
+          <div
+            className={`md:col-span-2 ${
+              darkMode
+                ? "bg-dark-bg-secondary border-gray-700"
+                : "bg-[#F8F8F8] border-gray-200"
+            } p-6 rounded-xl shadow-lg mt-1 border`}
+          >
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <svg
                 className="w-6 h-6 mr-2"
@@ -1769,8 +1784,8 @@ function Home() {
           </div>
 
           {/* Update the search bar and results styling */}
-          <div className="col-span-1 bg-gray-700 p-5 rounded-xl shadow-lg flex flex-col h-[calc(600px+2.5rem)]">
-            <h2 className="text-lg font-semibold mb-3 text-white">
+          <div className="col-span-1 bg-gray-700 dark:bg-dark-bg-tertiary p-5 rounded-xl shadow-lg flex flex-col h-[calc(600px+2.5rem)]">
+            <h2 className="text-lg font-semibold mb-3 text-white dark:text-dark-text-primary">
               <TranslatableText>Search Your Area</TranslatableText>
             </h2>
             <div className="relative mb-4">
@@ -1778,8 +1793,8 @@ function Home() {
                 <input
                   type="text"
                   placeholder="Search by city name, disaster type..." // This will be handled by browser translation
-                  className="w-full p-3 pl-10 pr-10 rounded-xl bg-gray-600 text-white placeholder-gray-300
-                    border border-gray-500 focus:border-blue-400 focus:ring-2 focus:ring-blue-400
+                  className="w-full p-3 pl-10 pr-10 rounded-xl bg-gray-600 dark:bg-dark-bg-secondary text-white dark:text-dark-text-primary placeholder-gray-300 dark:placeholder-gray-500
+                    border border-gray-500 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500
                     focus:ring-opacity-50 transition-all"
                   value={search}
                   onChange={(e) => {
@@ -1789,7 +1804,7 @@ function Home() {
                 />
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                   <svg
-                    className="w-5 h-5 text-gray-400"
+                    className="w-5 h-5 text-gray-400 dark:text-gray-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1808,7 +1823,7 @@ function Home() {
                       setSearch("");
                       filterDisasters("");
                     }}
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-200"
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-200 dark:hover:text-gray-300"
                   >
                     <svg
                       className="w-4 h-4"
@@ -1834,16 +1849,16 @@ function Home() {
 
             {/* Update the disaster reports list styling */}
             <div className="flex-1 overflow-hidden flex flex-col">
-              <h2 className="text-lg font-semibold mb-3 text-white">
+              <h2 className="text-lg font-semibold mb-3 text-white dark:text-dark-text-primary">
                 <TranslatableText>
                   Latest Indian Disaster Reports
                 </TranslatableText>
               </h2>
               <div className="overflow-y-auto flex-1 pr-2 custom-scrollbar space-y-3">
                 {loading ? (
-                  <div className="bg-gray-600 p-4 rounded-xl animate-pulse">
-                    <div className="h-4 bg-gray-500 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-500 rounded w-1/2"></div>
+                  <div className="bg-gray-600 dark:bg-dark-bg-secondary p-4 rounded-xl animate-pulse">
+                    <div className="h-4 bg-gray-500 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-500 dark:bg-gray-700 rounded w-1/2"></div>
                   </div>
                 ) : filteredDisasters.length > 0 ? (
                   filteredDisasters.map((disaster, index) => {
@@ -1904,7 +1919,7 @@ function Home() {
                     );
                   })
                 ) : (
-                  <div className="bg-gray-600 p-4 rounded-xl text-gray-300 text-center">
+                  <div className="bg-gray-600 dark:bg-dark-bg-secondary p-4 rounded-xl text-gray-300 dark:text-dark-text-secondary text-center">
                     {search.trim() ? (
                       <TranslatableText>
                         No disasters found for this location

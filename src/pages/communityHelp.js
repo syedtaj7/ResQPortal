@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Header from "../components/Header";
 import { initializeApp } from "firebase/app";
 import TranslatableText from "../components/TranslatableText";
+import { useTheme } from "../contexts/ThemeContext";
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -123,31 +124,22 @@ const INDIAN_STATES = [
 ];
 
 // Add these styles near the top of your file, after imports
-const gradientButtonStyle = `
+const getGradientButtonStyle = () => `
   relative overflow-hidden
-  bg-yellow-300
-  text-black font-medium
+  bg-yellow-600
+  text-white font-medium
   rounded-xl
   transition-all duration-300
   transform hover:scale-[1.02]
-  focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-gray-900
+  hover:bg-yellow-700 focus:ring-yellow-500/50 focus:ring-offset-dark-bg-primary
+  focus:outline-none focus:ring-2 focus:ring-offset-2
 `;
 
 // Alert card styles are defined in the AlertCard component
 
 // Removed unused mainContentStyle variable
 
-// Update form input styles
-const inputStyle = `
-  w-full px-4 py-3
-  bg-[#F8F8F8]
-  border border-gray-700
-  rounded-xl
-  focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20
-  transition-all duration-300
-  placeholder-gray-500
-  text-gray-900
-`;
+// Removed inputStyle as we're now using inline styles with darkMode conditional
 
 // Add after imports, before CommunityHelp function
 const ImageModal = ({ imageUrl, onClose }) => {
@@ -191,26 +183,26 @@ const fadeInUp = `animate-[fadeIn_0.5s_ease-out,slideUp_0.5s_ease-out]`;
 const slideIn = `animate-[slideIn_0.3s_ease-out]`;
 
 // Update the login container and styles
-const loginContainerStyle = `
+const getLoginContainerStyle = () => `
   min-h-[calc(100vh-4rem)]
   flex items-center justify-center
   px-4 sm:px-6 md:px-8
   py-8 sm:py-12
-  bg-gradient-to-br from-gray-50 via-gray-50 to-yellow-50
+  bg-gradient-to-br from-dark-bg-secondary via-dark-bg-primary to-dark-bg-tertiary
   relative
   overflow-hidden
 `;
 
-const formCardStyle = `
+const getFormCardStyle = () => `
   w-full
   max-w-[420px]
   mx-auto
-  bg-white/80
+  bg-dark-bg-secondary/90 border-gray-700
   backdrop-blur-xl
   rounded-2xl
   shadow-[0_8px_32px_rgba(0,0,0,0.08)]
   overflow-hidden
-  border border-white
+  border
   ${fadeInUp}
 `;
 
@@ -230,6 +222,7 @@ const volunteerData = [
 ];
 
 const VolunteerRegistrationForm = ({ user, onRegister }) => {
+  const { darkMode } = useTheme();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -275,10 +268,20 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
   };
   if (isSubmitted) {
     return (
-      <div className="p-6 text-center">
-        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+      <div
+        className={`p-6 text-center ${
+          darkMode ? "bg-dark-bg-secondary" : "bg-white"
+        }`}
+      >
+        <div
+          className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full ${
+            darkMode ? "bg-green-900/30" : "bg-green-100"
+          } mb-4`}
+        >
           <svg
-            className="h-6 w-6 text-green-600"
+            className={`h-6 w-6 ${
+              darkMode ? "text-green-500" : "text-green-600"
+            }`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -291,10 +294,18 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
             />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <h3
+          className={`text-lg font-medium ${
+            darkMode ? "text-dark-text-primary" : "text-gray-900"
+          } mb-2`}
+        >
           <TranslatableText>Registration Successful!</TranslatableText>
         </h3>
-        <p className="text-sm text-gray-500 mb-4">
+        <p
+          className={`text-sm ${
+            darkMode ? "text-dark-text-secondary" : "text-gray-500"
+          } mb-4`}
+        >
           <TranslatableText>
             Thank you for registering as a volunteer. You can now report
             incidents as a volunteer.
@@ -303,13 +314,20 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
       </div>
     );
   }
+
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 bg-white rounded-lg p-6 shadow-md"
+      className={`space-y-4 ${
+        darkMode ? "bg-dark-bg-secondary" : "bg-white"
+      } rounded-lg p-6 shadow-md`}
     >
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label
+          className={`block text-sm font-medium ${
+            darkMode ? "text-dark-text-primary" : "text-gray-700"
+          }`}
+        >
           <TranslatableText>Full Name</TranslatableText>
         </label>
         <input
@@ -318,11 +336,19 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
           required
           value={formData.name}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+          className={`mt-1 block w-full rounded-md ${
+            darkMode
+              ? "bg-dark-bg-tertiary border-gray-700 text-dark-text-primary placeholder-gray-500"
+              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+          } shadow-sm`}
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label
+          className={`block text-sm font-medium ${
+            darkMode ? "text-dark-text-primary" : "text-gray-700"
+          }`}
+        >
           <TranslatableText>Email Address</TranslatableText>
         </label>
         <input
@@ -331,11 +357,19 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
           required
           value={formData.email}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+          className={`mt-1 block w-full rounded-md ${
+            darkMode
+              ? "bg-dark-bg-tertiary border-gray-700 text-dark-text-primary placeholder-gray-500"
+              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+          } shadow-sm`}
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label
+          className={`block text-sm font-medium ${
+            darkMode ? "text-dark-text-primary" : "text-gray-700"
+          }`}
+        >
           <TranslatableText>Phone Number</TranslatableText>
         </label>
         <input
@@ -344,11 +378,19 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
           required
           value={formData.phone}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+          className={`mt-1 block w-full rounded-md ${
+            darkMode
+              ? "bg-dark-bg-tertiary border-gray-700 text-dark-text-primary placeholder-gray-500"
+              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+          } shadow-sm`}
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          className={`block text-sm font-medium ${
+            darkMode ? "text-dark-text-primary" : "text-gray-700"
+          } mb-1`}
+        >
           <TranslatableText>Skills (Select all that apply)</TranslatableText>
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -359,11 +401,17 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
                 type="checkbox"
                 checked={formData.skills.includes(skill)}
                 onChange={() => handleSkillChange(skill)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className={`h-4 w-4 ${
+                  darkMode
+                    ? "text-blue-500 focus:ring-blue-400 border-gray-700"
+                    : "text-blue-600 focus:ring-blue-500 border-gray-300"
+                } rounded`}
               />
               <label
                 htmlFor={`skill-${skill}`}
-                className="ml-2 block text-sm text-gray-700"
+                className={`ml-2 block text-sm ${
+                  darkMode ? "text-dark-text-secondary" : "text-gray-700"
+                }`}
               >
                 <TranslatableText>{skill}</TranslatableText>
               </label>
@@ -372,7 +420,11 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label
+          className={`block text-sm font-medium ${
+            darkMode ? "text-dark-text-primary" : "text-gray-700"
+          }`}
+        >
           <TranslatableText>Availability</TranslatableText>
         </label>
         <select
@@ -380,7 +432,11 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
           required
           value={formData.availability}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+          className={`mt-1 block w-full rounded-md ${
+            darkMode
+              ? "bg-dark-bg-tertiary border-gray-700 text-dark-text-primary"
+              : "bg-white border-gray-300 text-gray-900"
+          } shadow-sm`}
         >
           <option value="">
             <TranslatableText>Select your availability</TranslatableText>
@@ -393,7 +449,11 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label
+          className={`block text-sm font-medium ${
+            darkMode ? "text-dark-text-primary" : "text-gray-700"
+          }`}
+        >
           <TranslatableText>Relevant Experience</TranslatableText>
         </label>
         <textarea
@@ -401,11 +461,19 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
           rows="2"
           value={formData.experience}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+          className={`mt-1 block w-full rounded-md ${
+            darkMode
+              ? "bg-dark-bg-tertiary border-gray-700 text-dark-text-primary placeholder-gray-500"
+              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+          } shadow-sm`}
         ></textarea>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label
+          className={`block text-sm font-medium ${
+            darkMode ? "text-dark-text-primary" : "text-gray-700"
+          }`}
+        >
           <TranslatableText>Additional Information (Optional)</TranslatableText>
         </label>
         <textarea
@@ -413,15 +481,21 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
           rows="2"
           value={formData.message}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+          className={`mt-1 block w-full rounded-md ${
+            darkMode
+              ? "bg-dark-bg-tertiary border-gray-700 text-dark-text-primary placeholder-gray-500"
+              : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+          } shadow-sm`}
         ></textarea>
       </div>
       <button
         type="submit"
         disabled={isSubmitting}
-        className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 ${
-          isSubmitting ? "opacity-75 cursor-not-allowed" : ""
-        }`}
+        className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+          darkMode
+            ? "bg-blue-700 hover:bg-blue-800"
+            : "bg-blue-500 hover:bg-blue-600"
+        } ${isSubmitting ? "opacity-75 cursor-not-allowed" : ""}`}
       >
         {isSubmitting ? (
           <TranslatableText>Processing...</TranslatableText>
@@ -434,6 +508,8 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
 };
 
 function CommunityHelp() {
+  const { darkMode } = useTheme();
+
   // Add effect to load TensorFlow
   useEffect(() => {
     loadTensorFlow().catch(console.error);
@@ -944,25 +1020,31 @@ function CommunityHelp() {
 
   // Update the main container structure
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div
+      className={`min-h-screen flex flex-col ${
+        darkMode
+          ? "bg-dark-bg-primary text-dark-text-primary"
+          : "bg-white text-gray-900"
+      }`}
+    >
       <Header />
       <main className="flex-grow md:pl-64 p-4 md:p-6">
         {" "}
         {/* Added responsive padding */}
         {!user ? (
           // Login/Register container with responsive classes
-          <div className={loginContainerStyle}>
+          <div className={getLoginContainerStyle()}>
             {/* Animated background elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute -top-4 -right-4 w-64 h-64 bg-yellow-200 rounded-full opacity-20 blur-3xl animate-pulse"></div>
-              <div className="absolute -bottom-8 -left-8 w-96 h-96 bg-yellow-300 rounded-full opacity-10 blur-3xl animate-pulse delay-700"></div>
+              <div className="absolute -top-4 -right-4 w-64 h-64 bg-yellow-600 rounded-full opacity-20 blur-3xl animate-pulse"></div>
+              <div className="absolute -bottom-8 -left-8 w-96 h-96 bg-yellow-700 rounded-full opacity-10 blur-3xl animate-pulse delay-700"></div>
             </div>
 
-            <div className={formCardStyle}>
+            <div className={getFormCardStyle()}>
               <div className="px-4 sm:px-8 py-6 sm:py-8">
                 {/* Logo/Header Section with animation */}
                 <div className="text-center space-y-3 mb-8">
-                  <div className="inline-block p-3 bg-yellow-100 rounded-full animate-bounce">
+                  <div className="inline-block p-3 bg-yellow-900/30 rounded-full animate-bounce">
                     <svg
                       className="w-8 h-8 sm:w-10 sm:h-10 text-yellow-500 transform rotate-12"
                       fill="none"
@@ -978,14 +1060,14 @@ function CommunityHelp() {
                       />
                     </svg>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-dark-text-primary tracking-tight">
                     {isLoginMode ? (
                       <TranslatableText>Welcome Back</TranslatableText>
                     ) : (
                       <TranslatableText>Create Account</TranslatableText>
                     )}
                   </h2>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-dark-text-secondary">
                     {isLoginMode ? (
                       <TranslatableText>
                         Sign in to access your account
@@ -1003,8 +1085,9 @@ function CommunityHelp() {
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
                   className="group w-full flex items-center justify-center gap-3 px-4 py-2.5 sm:py-3
-                    border border-gray-300 rounded-xl text-gray-700 bg-white
-                    hover:bg-gray-50 hover:border-yellow-300 hover:shadow-md
+                    border border-gray-700 bg-dark-bg-tertiary text-dark-text-primary
+                    rounded-xl
+                    hover:bg-dark-bg-hover hover:border-yellow-700 hover:shadow-md
                     focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500
                     transition-all duration-300 ease-out text-sm sm:text-base font-medium"
                 >
@@ -1037,10 +1120,10 @@ function CommunityHelp() {
                 {/* Animated divider */}
                 <div className="relative my-6">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200"></div>
+                    <div className="w-full border-t border-gray-700"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500 animate-pulse">
+                    <span className="px-2 bg-dark-bg-secondary text-dark-text-secondary animate-pulse">
                       <TranslatableText>
                         or continue with email
                       </TranslatableText>
@@ -1050,42 +1133,42 @@ function CommunityHelp() {
 
                 {/* Error Message with shake animation */}
                 {authError && (
-                  <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 animate-[shake_0.5s_ease-in-out]">
-                    <p className="text-sm text-red-600">{authError}</p>
+                  <div className="mb-4 p-3 rounded-lg bg-red-900/20 border-red-800/30 animate-[shake_0.5s_ease-in-out] border">
+                    <p className="text-sm text-red-400">{authError}</p>
                   </div>
                 )}
 
                 {/* Login Form with animated inputs */}
                 <form onSubmit={handleAuth} className="space-y-4">
                   <div className={slideIn}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-dark-text-primary mb-1">
                       <TranslatableText>Email</TranslatableText>
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg
+                      className="w-full px-3 py-2 sm:py-2.5 border bg-dark-bg-tertiary border-gray-700 text-dark-text-primary placeholder-gray-500 rounded-lg
                         focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500
                         transition-all duration-300 ease-out text-sm sm:text-base
-                        hover:border-yellow-300"
+                        hover:border-yellow-700"
                       placeholder="Enter your email" // This will be handled by browser translation
                       required
                     />
                   </div>
 
                   <div className={slideIn} style={{ animationDelay: "150ms" }}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-dark-text-primary mb-1">
                       <TranslatableText>Password</TranslatableText>
                     </label>
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg
+                      className="w-full px-3 py-2 sm:py-2.5 border bg-dark-bg-tertiary border-gray-700 text-dark-text-primary placeholder-gray-500 rounded-lg
                         focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500
                         transition-all duration-300 ease-out text-sm sm:text-base
-                        hover:border-yellow-300"
+                        hover:border-yellow-700"
                       placeholder="Enter your password" // This will be handled by browser translation
                       required
                     />
@@ -1094,8 +1177,8 @@ function CommunityHelp() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-2.5 sm:py-3 px-4 bg-yellow-500 text-white rounded-lg
-                      hover:bg-yellow-600 hover:shadow-lg transform hover:-translate-y-0.5
+                    className="w-full py-2.5 sm:py-3 px-4 bg-yellow-600 text-white rounded-lg
+                      hover:bg-yellow-700 hover:shadow-lg transform hover:-translate-y-0.5
                       focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500
                       transition-all duration-300 ease-out text-sm sm:text-base font-medium
                       disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1126,7 +1209,7 @@ function CommunityHelp() {
                 </form>
 
                 {/* Toggle Login/Register with animation */}
-                <p className="mt-6 text-center text-sm text-gray-600">
+                <p className="mt-6 text-center text-sm text-dark-text-secondary">
                   {isLoginMode ? (
                     <TranslatableText>Don't have an account?</TranslatableText>
                   ) : (
@@ -1139,8 +1222,7 @@ function CommunityHelp() {
                       setIsLoginMode(!isLoginMode);
                       setAuthError("");
                     }}
-                    className="font-medium text-yellow-600 hover:text-yellow-700
-                      transition-colors duration-300 hover:underline transform hover:scale-105"
+                    className="font-medium text-yellow-500 hover:text-yellow-400 transition-colors duration-300 hover:underline transform hover:scale-105"
                   >
                     {isLoginMode ? (
                       <TranslatableText>Sign up</TranslatableText>
@@ -1154,7 +1236,11 @@ function CommunityHelp() {
           </div>
         ) : (
           // Main content area with responsive grid
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 max-w-7xl mx-auto">
+          <div
+            className={`grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 max-w-7xl mx-auto ${
+              darkMode ? "text-dark-text-primary" : "text-gray-900"
+            }`}
+          >
             {/* Alerts Feed - Takes full width on mobile, 2/3 on desktop */}
             <div className="lg:col-span-2 order-2 lg:order-1">
               <div className="sticky top-4">
@@ -1177,7 +1263,11 @@ function CommunityHelp() {
                     </div>
                   ) : activeTab === "volunteers" ? (
                     <div className="mt-6">
-                      <h2 className="text-xl font-bold mb-4 text-gray-900">
+                      <h2
+                        className={`text-xl font-bold mb-4 ${
+                          darkMode ? "text-dark-text-primary" : "text-gray-900"
+                        }`}
+                      >
                         <TranslatableText>
                           Volunteer Registration
                         </TranslatableText>
@@ -1188,7 +1278,13 @@ function CommunityHelp() {
                           onRegister={() => fetchUserProfile()}
                         />
                       ) : (
-                        <div className="bg-green-50 p-6 rounded-lg text-green-800 font-semibold shadow">
+                        <div
+                          className={`p-6 rounded-lg font-semibold shadow ${
+                            darkMode
+                              ? "bg-green-900/20 text-green-400"
+                              : "bg-green-100 text-green-800"
+                          }`}
+                        >
                           <TranslatableText>
                             You are registered as a volunteer! You can now
                             report incidents as a volunteer.
@@ -1207,11 +1303,11 @@ function CommunityHelp() {
                         onImageClick={() => handleImageClick(alert.imageUrl)}
                         isUpvoting={upvotingId === alert.id}
                         isSaved={user?.savedAlerts?.includes(alert.id)}
-                        className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                        className="bg-dark-bg-secondary rounded-lg shadow-md hover:shadow-lg transition-shadow"
                       />
                     ))
                   ) : (
-                    <div className="text-center py-8 text-gray-400">
+                    <div className="text-center py-8 text-dark-text-secondary">
                       {activeTab === "my-posts" ? (
                         <TranslatableText>
                           You haven't posted any alerts yet
@@ -1231,23 +1327,42 @@ function CommunityHelp() {
 
             {/* Report Form - Takes full width on mobile, 1/3 on desktop */}
             <div className="lg:col-span-1 order-1 lg:order-2">
-              <div className="bg-[#F8F8F8] rounded-xl p-4 md:p-6 sticky top-4">
-                <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-gray-900">
+              <div
+                className={`${
+                  darkMode
+                    ? "bg-dark-bg-secondary border-gray-700"
+                    : "bg-white border-gray-300"
+                } border rounded-xl p-4 md:p-6 sticky top-4 ${
+                  darkMode ? "shadow-lg shadow-black/20" : "shadow-md"
+                }`}
+              >
+                <h2
+                  className={`text-xl md:text-2xl font-bold mb-4 md:mb-6 ${
+                    darkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   <TranslatableText>Report Incident</TranslatableText>
                 </h2>
                 <form onSubmit={handleSubmitAlert} className="space-y-4">
                   {/* Location inputs with responsive grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="form-group">
-                      <label className="form-label">
+                      <label
+                        className={`form-label font-medium ${
+                          darkMode ? "text-white" : "text-gray-700"
+                        }`}
+                      >
                         <TranslatableText>State *</TranslatableText>
                       </label>
                       <div className="select-wrapper">
                         <select
                           value={selectedState}
                           onChange={(e) => setSelectedState(e.target.value)}
-                          className="custom-select"
-                          style={{ backgroundColor: "#F8F8F8", color: "gray" }}
+                          className={`custom-select ${
+                            darkMode
+                              ? "bg-dark-bg-secondary text-dark-text-primary border-gray-700 focus:border-blue-600 focus:ring-blue-600/25"
+                              : "bg-white text-gray-700 border-gray-300 focus:border-blue-500 focus:ring-blue-500/25"
+                          }`}
                           required
                         >
                           <option value="">
@@ -1263,14 +1378,22 @@ function CommunityHelp() {
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label">
+                      <label
+                        className={`form-label font-medium ${
+                          darkMode ? "text-white" : "text-gray-700"
+                        }`}
+                      >
                         <TranslatableText>City/District *</TranslatableText>
                       </label>
                       <input
                         type="text"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className={inputStyle}
+                        className={`w-full px-4 py-3 rounded-xl ${
+                          darkMode
+                            ? "bg-dark-bg-secondary text-dark-text-primary border-gray-700 placeholder-gray-500 focus:border-blue-600 focus:ring-blue-600/25"
+                            : "bg-white text-gray-700 border-gray-300 placeholder-gray-500 focus:border-blue-500/50 focus:ring-blue-500/20"
+                        } border focus:ring-2 transition-all duration-300`}
                         placeholder="Enter city or district" // HTML attributes can't use TranslatableText directly
                         required
                       />
@@ -1280,7 +1403,11 @@ function CommunityHelp() {
                   {/* Other form fields remain the same but with responsive padding/margins */}
                   {/* Incident Category */}
                   <div className="form-group">
-                    <label className="form-label">
+                    <label
+                      className={`form-label font-medium ${
+                        darkMode ? "text-white" : "text-gray-700"
+                      }`}
+                    >
                       <TranslatableText>Incident Category *</TranslatableText>
                     </label>
                     <div className="select-wrapper">
@@ -1290,8 +1417,11 @@ function CommunityHelp() {
                           setSelectedCategory(e.target.value);
                           setSelectedIncident("");
                         }}
-                        className="custom-select"
-                        style={{ backgroundColor: "#F8F8F8", color: "gray" }}
+                        className={`custom-select ${
+                          darkMode
+                            ? "bg-dark-bg-secondary text-dark-text-primary border-gray-700 focus:border-blue-600 focus:ring-blue-600/25"
+                            : "bg-white text-gray-700 border-gray-300 focus:border-blue-500 focus:ring-blue-500/25"
+                        }`}
                         required
                       >
                         <option value="">
@@ -1309,15 +1439,22 @@ function CommunityHelp() {
                   {/* Specific Incident Dropdown */}
                   {selectedCategory && (
                     <div className="form-group">
-                      <label className="form-label">
+                      <label
+                        className={`form-label font-medium ${
+                          darkMode ? "text-white" : "text-gray-700"
+                        }`}
+                      >
                         <TranslatableText>Specific Incident *</TranslatableText>
                       </label>
                       <div className="select-wrapper">
                         <select
                           value={selectedIncident}
                           onChange={(e) => setSelectedIncident(e.target.value)}
-                          className="custom-select"
-                          style={{ backgroundColor: "#F8F8F8" }}
+                          className={`custom-select ${
+                            darkMode
+                              ? "bg-dark-bg-secondary text-dark-text-primary border-gray-700 focus:border-blue-600 focus:ring-blue-600/25"
+                              : "bg-white text-gray-700 border-gray-300 focus:border-blue-500 focus:ring-blue-500/25"
+                          }`}
                           required
                         >
                           <option value="">
@@ -1344,16 +1481,23 @@ function CommunityHelp() {
 
                   {/* Description Second */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label
+                      className={`block text-sm font-medium mb-2 ${
+                        darkMode ? "text-white" : "text-gray-700"
+                      }`}
+                    >
                       <TranslatableText>Description *</TranslatableText>
                     </label>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      className="input-field"
+                      className={`w-full px-4 py-3 rounded-xl ${
+                        darkMode
+                          ? "bg-dark-bg-secondary text-dark-text-primary border-gray-700 placeholder-gray-500 focus:border-blue-600 focus:ring-blue-600/25"
+                          : "bg-white text-gray-700 border-gray-300 placeholder-gray-500 focus:border-blue-500/50 focus:ring-blue-500/20"
+                      } border focus:ring-2 transition-all duration-300`}
                       rows="3"
                       placeholder="Describe the incident and current conditions" // HTML attributes can't use TranslatableText directly
-                      style={{ backgroundColor: "#F8F8F8" }}
                       required
                     />
                   </div>
@@ -1364,19 +1508,29 @@ function CommunityHelp() {
                       <label
                         className={`
     w-full flex flex-col items-center px-4 py-6
-    bg-[#F8F8F8]/50 backdrop-blur-sm
-    border-2 border-dashed border-gray-600
+    ${darkMode ? "bg-dark-bg-tertiary" : "bg-gray-100/50"} backdrop-blur-sm
+    border-2 border-dashed ${darkMode ? "border-gray-600" : "border-gray-400"}
     rounded-xl
     cursor-pointer
     transition-all duration-300
-    hover:border-blue-500/50 hover:bg-gray-800/70
+    ${
+      darkMode
+        ? "hover:border-blue-600/70 hover:bg-dark-bg-hover"
+        : "hover:border-blue-500/50 hover:bg-gray-200"
+    }
     ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}
   `}
                       >
                         {isProcessing ? (
                           <div className="flex flex-col items-center">
                             <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                            <span className="mt-2 text-sm">
+                            <span
+                              className={`mt-2 text-sm ${
+                                darkMode
+                                  ? "text-dark-text-primary"
+                                  : "text-gray-900"
+                              }`}
+                            >
                               <TranslatableText>
                                 Processing image...
                               </TranslatableText>
@@ -1385,7 +1539,11 @@ function CommunityHelp() {
                         ) : !imageFile ? (
                           <>
                             <svg
-                              className="w-8 h-8"
+                              className={`w-8 h-8 ${
+                                darkMode
+                                  ? "text-dark-text-primary"
+                                  : "text-gray-900"
+                              }`}
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -1397,7 +1555,13 @@ function CommunityHelp() {
                                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                               />
                             </svg>
-                            <span className="mt-2 text-sm">
+                            <span
+                              className={`mt-2 text-sm ${
+                                darkMode
+                                  ? "text-dark-text-primary"
+                                  : "text-gray-900"
+                              }`}
+                            >
                               <TranslatableText>
                                 Select an image that shows current conditions
                               </TranslatableText>
@@ -1406,7 +1570,11 @@ function CommunityHelp() {
                         ) : (
                           <div className="text-center">
                             <svg
-                              className="w-8 h-8 mx-auto"
+                              className={`w-8 h-8 mx-auto ${
+                                darkMode
+                                  ? "text-dark-text-primary"
+                                  : "text-gray-900"
+                              }`}
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -1418,7 +1586,13 @@ function CommunityHelp() {
                                 d="M5 13l4 4L19 7"
                               />
                             </svg>
-                            <span className="mt-2 text-sm">
+                            <span
+                              className={`mt-2 text-sm ${
+                                darkMode
+                                  ? "text-dark-text-primary"
+                                  : "text-gray-900"
+                              }`}
+                            >
                               <TranslatableText>
                                 Image selected - Click to change
                               </TranslatableText>
@@ -1447,7 +1621,11 @@ function CommunityHelp() {
                               setImageFile(null);
                               setImagePreview(null);
                             }}
-                            className="absolute top-2 right-2 bg-red-500 p-1 rounded-full hover:bg-red-600 transition-colors"
+                            className={`absolute top-2 right-2 ${
+                              darkMode ? "bg-red-800" : "bg-red-500"
+                            } p-1 rounded-full ${
+                              darkMode ? "hover:bg-red-900" : "hover:bg-red-600"
+                            } transition-colors`}
                           >
                             <svg
                               className="w-4 h-4"
@@ -1473,7 +1651,7 @@ function CommunityHelp() {
                     disabled={
                       isUploading || !imageFile || !location || !description
                     }
-                    className={`${gradientButtonStyle} w-full py-2 md:py-3 text-sm md:text-base`}
+                    className={`${getGradientButtonStyle()} w-full py-2 md:py-3 text-sm md:text-base`}
                   >
                     {isUploading ? (
                       <div className="flex items-center justify-center gap-2">
@@ -1490,7 +1668,7 @@ function CommunityHelp() {
 
                 <button
                   onClick={() => signOut(auth)}
-                  className="mt-4 w-full bg-red-600 px-4 py-2 md:py-3 rounded text-white hover:bg-red-700 transition-colors text-sm md:text-base"
+                  className="mt-4 w-full bg-red-800 px-4 py-2 md:py-3 rounded text-white hover:bg-red-900 transition-colors text-sm md:text-base"
                 >
                   <TranslatableText>Logout</TranslatableText>
                 </button>

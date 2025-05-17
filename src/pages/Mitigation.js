@@ -8,6 +8,7 @@ import ChatBot from "../components/ChatBot";
 import Footer from "../components/Footer";
 import Header from "../components/Header"; // Import Header component
 import TranslatableText from "../components/TranslatableText"; // Import TranslatableText component
+import { useTheme } from "../contexts/ThemeContext"; // Import ThemeContext
 
 const useLocalStorage = (key, initialValue) => {
   const [storedValue, setStoredValue] = useState(() => {
@@ -702,24 +703,32 @@ const DisasterBox = ({ item, activeTab, onGuideSelect }) => (
 );
 
 // Modify the DisasterSection component's grid layout
-const DisasterSection = ({ section, activeTab, onGuideSelect }) => (
-  <div className="mb-8">
-    <h2 className="text-2xl font-bold text-black mb-4 flex items-center gap-3">
-      <span className="text-3xl">{section.icon}</span>
-      <TranslatableText>{section.title}</TranslatableText>
-    </h2>
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-      {section.items.map((item) => (
-        <DisasterBox
-          key={item.id}
-          item={item}
-          activeTab={activeTab}
-          onGuideSelect={onGuideSelect}
-        />
-      ))}
+const DisasterSection = ({ section, activeTab, onGuideSelect }) => {
+  const { darkMode } = useTheme();
+
+  return (
+    <div className="mb-8">
+      <h2
+        className={`text-2xl font-bold mb-4 flex items-center gap-3 ${
+          darkMode ? "text-white" : "text-black"
+        }`}
+      >
+        <span className="text-3xl">{section.icon}</span>
+        <TranslatableText>{section.title}</TranslatableText>
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-full">
+        {section.items.map((item) => (
+          <DisasterBox
+            key={item.id}
+            item={item}
+            activeTab={activeTab}
+            onGuideSelect={onGuideSelect}
+          />
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 function Mitigation() {
   const location = useLocation();
@@ -811,10 +820,16 @@ function Mitigation() {
     [activeTab]
   );
 
+  const { darkMode } = useTheme();
+
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div
+      className={`min-h-screen flex flex-col overflow-x-hidden ${
+        darkMode ? "bg-dark-bg-primary" : "bg-white"
+      }`}
+    >
       <Header /> {/* Use imported Header component */}
-      <main className="flex-grow container mx-auto px-6 py-8 md:ml-48">
+      <main className="flex-grow container mx-auto px-6 py-8 md:ml-48 overflow-x-hidden">
         <div className="mb-8">
           <div className="max-w-2xl mx-auto relative">
             <input
@@ -822,17 +837,22 @@ function Mitigation() {
               placeholder="Search for disasters, guides, or keywords..." // We can't use JSX in placeholder, but this will be handled by browser translation
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full px-4 py-3 pl-12 pr-10
-                bg-[#F8F8F8] text-black
-                placeholder-gray-400
-                border border-gray-700
+              className={`w-full px-4 py-3 pl-12 pr-10
+                ${
+                  darkMode
+                    ? "bg-dark-bg-tertiary text-dark-text-primary placeholder-gray-500 border-gray-600"
+                    : "bg-[#F8F8F8] text-black placeholder-gray-400 border-gray-700"
+                }
+                border
                 rounded-xl
                 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20
-                transition-all duration-300"
+                transition-all duration-300`}
             />
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <svg
-                className="w-5 h-5 text-gray-400"
+                className={`w-5 h-5 ${
+                  darkMode ? "text-gray-500" : "text-gray-400"
+                }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -848,7 +868,11 @@ function Mitigation() {
             {searchQuery && (
               <button
                 onClick={() => handleSearch("")}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white"
+                className={`absolute inset-y-0 right-3 flex items-center ${
+                  darkMode
+                    ? "text-gray-500 hover:text-dark-text-primary"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
               >
                 <svg
                   className="w-5 h-5"
@@ -868,10 +892,18 @@ function Mitigation() {
           </div>
         </div>
         <div className="max-w-4xl mx-auto mb-8 text-center">
-          <h1 className="text-4xl font-bold text-black mb-4">
+          <h1
+            className={`text-4xl font-bold ${
+              darkMode ? "text-dark-text-primary" : "text-black"
+            } mb-4`}
+          >
             <TranslatableText>Disaster Management Guidelines</TranslatableText>
           </h1>
-          <p className="text-gray-500 text-lg">
+          <p
+            className={`${
+              darkMode ? "text-dark-text-secondary" : "text-gray-500"
+            } text-lg`}
+          >
             <TranslatableText>
               Comprehensive guides for disaster preparedness and recovery
             </TranslatableText>
@@ -884,7 +916,11 @@ function Mitigation() {
             onClick={() => setActiveTab("pre")}
             className={`flex-1 px-6 py-3 rounded-lg font-medium transition-colors ${
               activeTab === "pre"
-                ? "bg-yellow-400 text-white"
+                ? darkMode
+                  ? "bg-yellow-600 text-white"
+                  : "bg-yellow-400 text-white"
+                : darkMode
+                ? "bg-dark-bg-tertiary text-dark-text-secondary hover:bg-dark-bg-hover"
                 : "bg-gray-800 text-gray-300 hover:bg-gray-700"
             }`}
           >
@@ -894,7 +930,11 @@ function Mitigation() {
             onClick={() => setActiveTab("post")}
             className={`flex-1 px-6 py-3 rounded-lg font-medium transition-colors ${
               activeTab === "post"
-                ? "bg-yellow-400 text-white"
+                ? darkMode
+                  ? "bg-yellow-600 text-white"
+                  : "bg-yellow-400 text-white"
+                : darkMode
+                ? "bg-dark-bg-tertiary text-dark-text-secondary hover:bg-dark-bg-hover"
                 : "bg-gray-800 text-gray-300 hover:bg-gray-700"
             }`}
           >
@@ -903,7 +943,7 @@ function Mitigation() {
         </div>
 
         {/* Disaster Sections */}
-        <div className="space-y-12">
+        <div className="space-y-12 max-w-full">
           {filteredSections.map((section) => (
             <DisasterSection
               key={section.id}

@@ -3,10 +3,12 @@ import Header from "../components/Header";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import TranslatableText from "../components/TranslatableText";
+import { useTheme } from "../contexts/ThemeContext";
 // We're using TranslatableText directly, so we don't need useTranslation here
 
 function Welcome() {
   const navigate = useNavigate();
+  const { darkMode } = useTheme();
 
   // Updated and expanded icon elements
   const iconElements = [
@@ -96,7 +98,13 @@ function Welcome() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-br from-gray-50 via-gray-50 to-yellow-50">
+    <div
+      className={`min-h-screen flex flex-col relative overflow-hidden w-full ${
+        darkMode
+          ? "bg-gradient-to-br from-dark-bg-primary via-dark-bg-secondary to-dark-bg-tertiary"
+          : "bg-gradient-to-br from-gray-50 via-gray-50 to-yellow-50"
+      }`}
+    >
       <Header />
 
       {/* Animated background elements */}
@@ -106,8 +114,16 @@ function Welcome() {
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-yellow-200 rounded-full filter blur-[80px] opacity-20 animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-yellow-300 rounded-full filter blur-[80px] opacity-20 animate-pulse delay-700" />
+        <div
+          className={`absolute top-0 right-0 w-1/3 h-1/3 ${
+            darkMode ? "bg-yellow-600" : "bg-yellow-200"
+          } rounded-full filter blur-[80px] opacity-20 animate-pulse`}
+        />
+        <div
+          className={`absolute bottom-0 left-0 w-1/3 h-1/3 ${
+            darkMode ? "bg-yellow-700" : "bg-yellow-300"
+          } rounded-full filter blur-[80px] opacity-20 animate-pulse delay-700`}
+        />
       </motion.div>
 
       {/* Animated icons */}
@@ -165,9 +181,9 @@ function Welcome() {
       ))}
 
       {/* Main content */}
-      <main className="flex-grow flex items-center justify-center px-4 relative z-10">
+      <main className="flex-grow flex items-center justify-center w-full px-4 sm:px-6 md:px-8 relative z-10">
         <motion.div
-          className="text-center max-w-3xl mx-auto"
+          className="text-center max-w-3xl w-full mx-auto"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
@@ -182,13 +198,13 @@ function Welcome() {
               delay: 0.8,
             }}
           >
-            <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-yellow-600 to-yellow-400 bg-clip-text text-transparent">
+            <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-yellow-600 to-yellow-400 bg-clip-text text-transparent text-center mx-auto">
               ResQPortal
             </h1>
           </motion.div>
 
           <motion.div
-            className="text-xl md:text-2xl text-gray-600 mb-8"
+            className="text-xl md:text-2xl text-gray-600 dark:text-dark-text-secondary mb-8 text-center w-full mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2 }}
@@ -200,7 +216,7 @@ function Welcome() {
           </motion.div>
 
           <motion.div
-            className="flex flex-col md:flex-row gap-4 justify-center items-center"
+            className="flex flex-col md:flex-row gap-4 justify-center items-center w-full mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.5 }}
@@ -208,7 +224,7 @@ function Welcome() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-yellow-500 text-white rounded-xl font-medium shadow-lg hover:bg-yellow-600 transition-colors"
+              className="px-8 py-3 bg-yellow-500 text-white rounded-xl font-medium shadow-lg hover:bg-yellow-600 transition-colors min-w-[150px]"
               onClick={() => navigate("/Home")}
             >
               <TranslatableText>Get Started</TranslatableText>
@@ -224,7 +240,7 @@ function Welcome() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-gray-800 text-white rounded-xl font-medium shadow-lg hover:bg-gray-700 transition-colors"
+              className="px-8 py-3 bg-gray-800 text-white rounded-xl font-medium shadow-lg hover:bg-gray-700 transition-colors min-w-[150px]"
               onClick={() => navigate("/community-help")}
             >
               <TranslatableText>Sign In</TranslatableText>

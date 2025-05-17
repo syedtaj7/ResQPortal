@@ -1,7 +1,9 @@
 import React from "react";
 import TranslatableText from "../components/TranslatableText";
+import { useTheme } from "../contexts/ThemeContext";
 
 export const AlertTabs = ({ activeTab, setActiveTab }) => {
+  const { darkMode } = useTheme();
   const tabs = [
     { id: "recent", label: "Recent Alerts", icon: "clock" },
     { id: "my-posts", label: "My Posts", icon: "user" },
@@ -10,7 +12,13 @@ export const AlertTabs = ({ activeTab, setActiveTab }) => {
   ];
 
   return (
-    <div className="bg-[#F8F8F8]/90 backdrop-blur-sm rounded-lg p-1 flex space-x-1 mb-6 shadow-lg mt-1 border border-gray-200 - box shadow">
+    <div
+      className={`${
+        darkMode
+          ? "bg-dark-bg-secondary/90 border-gray-700"
+          : "bg-white/90 border-gray-300"
+      } backdrop-blur-sm rounded-lg p-1 flex space-x-1 mb-6 shadow-lg mt-1 border`}
+    >
       {tabs.map((tab) => (
         <button
           key={tab.id}
@@ -18,8 +26,10 @@ export const AlertTabs = ({ activeTab, setActiveTab }) => {
           className={`flex-1 flex items-center justify-center px-4 py-2.5 rounded-md text-sm font-medium transition-all
             ${
               activeTab === tab.id
-                ? "bg-yellow-300 text-white shadow-lg"
-                : "text-gray-400 hover:text-white hover:bg-yellow-300"
+                ? "bg-yellow-500 text-white shadow-lg"
+                : darkMode
+                ? "text-dark-text-secondary hover:text-white hover:bg-yellow-600/70"
+                : "text-gray-600 hover:text-gray-800 hover:bg-yellow-400/70"
             }`}
         >
           <span className="mr-2">{getIcon(tab.icon)}</span>

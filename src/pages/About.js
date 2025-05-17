@@ -4,6 +4,7 @@ import { FaPhone, FaHandsHelping } from "react-icons/fa";
 import Footer from "../components/Footer";
 import Header from "../components/Header"; // Import Header component
 import TranslatableText from "../components/TranslatableText"; // Import TranslatableText component
+import { useTheme } from "../contexts/ThemeContext"; // Import useTheme hook
 
 // Add this after your imports
 const stateColors = {
@@ -100,132 +101,206 @@ const itemVariants = {
   },
 };
 
-const SearchBar = ({ onSearch }) => (
-  <div className="relative max-w-2xl mx-auto mb-12">
-    <input
-      type="text"
-      placeholder="Search by state name or NGO..." // We can't use JSX in placeholder
-      className="w-full bg-[#F8F8F8] text-black px-6 py-4 rounded-xl border border-gray-700
-        focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
-      onChange={(e) => onSearch(e.target.value)}
-    />
-    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
+const SearchBar = ({ onSearch }) => {
+  const { darkMode } = useTheme();
+
+  return (
+    <div className="relative max-w-2xl mx-auto mb-12">
+      <input
+        type="text"
+        placeholder="Search by state name or NGO..." // We can't use JSX in placeholder
+        className={`w-full px-6 py-4 rounded-xl border transition-all
+          ${
+            darkMode
+              ? "bg-dark-bg-secondary text-white border-gray-700 placeholder-gray-500"
+              : "bg-[#F8F8F8] text-black border-gray-300 placeholder-gray-400"
+          }
+          focus:ring-2 focus:ring-yellow-500 focus:border-transparent`}
+        onChange={(e) => onSearch(e.target.value)}
+      />
+      <div
+        className={`absolute right-4 top-1/2 -translate-y-1/2 ${
+          darkMode ? "text-gray-400" : "text-gray-500"
+        }`}
       >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-    </div>
-  </div>
-);
-
-const DetailModal = ({ state, onClose }) => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 overflow-y-auto"
-    onClick={onClose}
-  >
-    <motion.div
-      initial={{ scale: 0.95, y: 20 }}
-      animate={{ scale: 1, y: 0 }}
-      exit={{ scale: 0.95, y: 20 }}
-      onClick={(e) => e.stopPropagation()}
-      className="bg-gray-900 rounded-xl w-full max-w-2xl my-8"
-    >
-      <div className="max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-gray-900 p-6 border-b border-gray-800 z-10">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-white">{state.state}</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-6">
-          <div className="space-y-4">
-            <div className="bg-blue-900/50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold text-blue-200 mb-2">
-                <TranslatableText>Emergency Contacts</TranslatableText>
-              </h3>
-              <div className="space-y-2 text-blue-100">
-                <p>
-                  <span className="font-medium">
-                    <TranslatableText>Main:</TranslatableText>
-                  </span>{" "}
-                  {state.contacts.main}
-                </p>
-                <p>
-                  <span className="font-medium">
-                    <TranslatableText>Email:</TranslatableText>
-                  </span>{" "}
-                  {state.contacts.email}
-                </p>
-                <p>
-                  <span className="font-medium">
-                    <TranslatableText>Address:</TranslatableText>
-                  </span>{" "}
-                  {state.contacts.address}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-green-900/50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold text-green-200 mb-4">
-                <TranslatableText>Local NGOs</TranslatableText>
-              </h3>
-              <div className="grid gap-4">
-                {state.ngos.map((ngo, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-black/25 p-3 rounded-lg hover:bg-black/40 transition-colors"
-                  >
-                    <p className="font-medium text-white">{ngo.name}</p>
-                    <p className="text-sm text-green-200">
-                      <TranslatableText as="span">Address:</TranslatableText>{" "}
-                      {ngo.address}
-                    </p>
-                    <p className="text-sm text-green-200">
-                      <TranslatableText as="span">Phone:</TranslatableText>{" "}
-                      {ngo.phone}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
       </div>
+    </div>
+  );
+};
+
+const DetailModal = ({ state, onClose }) => {
+  const { darkMode } = useTheme();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 overflow-y-auto"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.95, y: 20 }}
+        onClick={(e) => e.stopPropagation()}
+        className={`${
+          darkMode ? "bg-gray-900" : "bg-white"
+        } rounded-xl w-full max-w-2xl my-8`}
+      >
+        <div className="max-h-[90vh] overflow-y-auto">
+          <div
+            className={`sticky top-0 ${
+              darkMode
+                ? "bg-gray-900 border-gray-800"
+                : "bg-white border-gray-200"
+            } px-8 py-6 border-b z-10`}
+          >
+            <div className="flex justify-between items-center">
+              <h2
+                className={`text-2xl font-bold ml-2 ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                {state.state}
+              </h2>
+              <button
+                onClick={onClose}
+                className={`transition-colors p-2 rounded-lg ${
+                  darkMode
+                    ? "text-gray-400 hover:text-white hover:bg-gray-800"
+                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div className="px-10 py-8 space-y-6">
+            <div className="space-y-4">
+              <div
+                className={`p-4 rounded-lg ${
+                  darkMode ? "bg-blue-900/50" : "bg-blue-100"
+                }`}
+              >
+                <h3
+                  className={`text-lg font-semibold mb-2 ${
+                    darkMode ? "text-blue-200" : "text-blue-800"
+                  }`}
+                >
+                  <TranslatableText>Emergency Contacts</TranslatableText>
+                </h3>
+                <div
+                  className={`space-y-2 ${
+                    darkMode ? "text-blue-100" : "text-blue-900"
+                  }`}
+                >
+                  <p>
+                    <span className="font-medium">
+                      <TranslatableText>Main:</TranslatableText>
+                    </span>{" "}
+                    {state.contacts.main}
+                  </p>
+                  <p>
+                    <span className="font-medium">
+                      <TranslatableText>Email:</TranslatableText>
+                    </span>{" "}
+                    {state.contacts.email}
+                  </p>
+                  <p>
+                    <span className="font-medium">
+                      <TranslatableText>Address:</TranslatableText>
+                    </span>{" "}
+                    {state.contacts.address}
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className={`p-4 rounded-lg ${
+                  darkMode ? "bg-green-900/50" : "bg-green-100"
+                }`}
+              >
+                <h3
+                  className={`text-lg font-semibold mb-4 ${
+                    darkMode ? "text-green-200" : "text-green-800"
+                  }`}
+                >
+                  <TranslatableText>Local NGOs</TranslatableText>
+                </h3>
+                <div className="grid gap-4">
+                  {state.ngos.map((ngo, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-3 rounded-lg transition-colors ${
+                        darkMode
+                          ? "bg-black/25 hover:bg-black/40"
+                          : "bg-white hover:bg-gray-50 shadow-sm"
+                      }`}
+                    >
+                      <p
+                        className={`font-medium ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        {ngo.name}
+                      </p>
+                      <p
+                        className={`text-sm ${
+                          darkMode ? "text-green-200" : "text-green-800"
+                        }`}
+                      >
+                        <TranslatableText as="span">Address:</TranslatableText>{" "}
+                        {ngo.address}
+                      </p>
+                      <p
+                        className={`text-sm ${
+                          darkMode ? "text-green-200" : "text-green-800"
+                        }`}
+                      >
+                        <TranslatableText as="span">Phone:</TranslatableText>{" "}
+                        {ngo.phone}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </motion.div>
-  </motion.div>
-);
+  );
+};
 
 function About() {
+  const { darkMode } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedState, setSelectedState] = useState(null);
   const [error] = useState(null);
@@ -1243,16 +1318,22 @@ function About() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div
+      className={`min-h-screen overflow-x-hidden ${
+        darkMode ? "bg-dark-bg-primary" : "bg-white"
+      }`}
+    >
       <Header /> {/* Use imported Header component */}
-      <main className="container mx-auto px-6 py-12 pt-24 md:ml-48">
+      <main className="container mx-auto px-6 py-12 pt-24 md:ml-48 overflow-x-hidden">
         {" "}
         {/* Added pt-24 */}
         <div className="mb-16">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl font-bold text-black text-center mb-8"
+            className={`text-4xl font-bold ${
+              darkMode ? "text-white" : "text-black"
+            } text-center mb-8`}
           >
             <TranslatableText>Emergency Services Directory</TranslatableText>
           </motion.h1>
@@ -1260,7 +1341,7 @@ function About() {
           <SearchBar onSearch={setSearchTerm} />
         </div>
         {/* State Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16 max-w-full">
           {filteredStates.map((state, index) => {
             const region = getStateRegion(state.state);
             const colors = stateColors[region];
@@ -1302,15 +1383,19 @@ function About() {
         </div>
         {/* About Section - Moved down */}
         <section
-          className="max-w-4xl mx-auto mb-20 bg-[#F8F8F8]
-"
+          className={`max-w-4xl mx-auto mb-20 ${
+            darkMode ? "bg-dark-bg-secondary" : "bg-[#F8F8F8]"
+          }`}
         >
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="bg-[#F8F8F8] backdrop-blur-sm
-              border border-gray-700/50 rounded-2xl p-8 shadow-xl"
+            className={`${
+              darkMode
+                ? "bg-dark-bg-secondary border-gray-700/50"
+                : "bg-[#F8F8F8] border-gray-300/50"
+            } backdrop-blur-sm border rounded-2xl p-8 shadow-xl`}
           >
             <motion.h2
               variants={itemVariants}
@@ -1328,7 +1413,11 @@ function About() {
                 <h3 className="text-xl font-semibold text-yellow-400">
                   <TranslatableText>Our Mission</TranslatableText>
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p
+                  className={`${
+                    darkMode ? "text-gray-300" : "text-gray-600"
+                  } leading-relaxed`}
+                >
                   <TranslatableText>
                     ResQTech is dedicated to revolutionizing disaster management
                     through technology. We provide real-time monitoring, early
@@ -1342,7 +1431,11 @@ function About() {
                 <h3 className="text-xl font-semibold text-yellow-400">
                   <TranslatableText>Our Impact</TranslatableText>
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p
+                  className={`${
+                    darkMode ? "text-gray-300" : "text-gray-600"
+                  } leading-relaxed`}
+                >
                   <TranslatableText>
                     We've helped communities across India prepare for, respond
                     to, and recover from disasters effectively. Our platform
@@ -1357,25 +1450,65 @@ function About() {
               variants={itemVariants}
               className="grid md:grid-cols-3 gap-6 text-center"
             >
-              <div className="bg-[#F8F8F8]/50 p-6 rounded-xl border border-gray-700/50">
-                <div className="text-black text-4xl font-bold mb-2">24/7</div>
-                <div className="text-gray-400">
+              <div
+                className={`${
+                  darkMode
+                    ? "bg-dark-bg-tertiary/50 border-gray-700/50"
+                    : "bg-[#F8F8F8]/50 border-gray-300/50"
+                } p-6 rounded-xl border`}
+              >
+                <div
+                  className={`${
+                    darkMode ? "text-white" : "text-black"
+                  } text-4xl font-bold mb-2`}
+                >
+                  24/7
+                </div>
+                <div
+                  className={`${darkMode ? "text-gray-300" : "text-gray-500"}`}
+                >
                   <TranslatableText>Emergency Support</TranslatableText>
                 </div>
               </div>
 
-              <div className="bg-[#F8F8F8]/50 p-6 rounded-xl border border-gray-700/50">
-                <div className="text-black text-4xl font-bold mb-2">
+              <div
+                className={`${
+                  darkMode
+                    ? "bg-dark-bg-tertiary/50 border-gray-700/50"
+                    : "bg-[#F8F8F8]/50 border-gray-300/50"
+                } p-6 rounded-xl border`}
+              >
+                <div
+                  className={`${
+                    darkMode ? "text-white" : "text-black"
+                  } text-4xl font-bold mb-2`}
+                >
                   <TranslatableText>One Stop</TranslatableText>
                 </div>
-                <div className="text-gray-400">
+                <div
+                  className={`${darkMode ? "text-gray-300" : "text-gray-500"}`}
+                >
                   <TranslatableText>For all Disaster needs</TranslatableText>
                 </div>
               </div>
 
-              <div className="bg-[#F8F8F8]/50 p-6 rounded-xl border border-gray-700/50">
-                <div className="text-black text-4xl font-bold mb-2">28+</div>
-                <div className="text-gray-400">
+              <div
+                className={`${
+                  darkMode
+                    ? "bg-dark-bg-tertiary/50 border-gray-700/50"
+                    : "bg-[#F8F8F8]/50 border-gray-300/50"
+                } p-6 rounded-xl border`}
+              >
+                <div
+                  className={`${
+                    darkMode ? "text-white" : "text-black"
+                  } text-4xl font-bold mb-2`}
+                >
+                  28+
+                </div>
+                <div
+                  className={`${darkMode ? "text-gray-300" : "text-gray-500"}`}
+                >
                   <TranslatableText>States Covered</TranslatableText>
                 </div>
               </div>
