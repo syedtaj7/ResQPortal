@@ -829,7 +829,7 @@ function Mitigation() {
       }`}
     >
       <Header /> {/* Use imported Header component */}
-      <main className="flex-grow container mx-auto px-6 py-8 md:ml-48 overflow-x-hidden">
+      <main className="flex-grow container mx-auto px-6 pr-8 md:pr-12 py-8 md:ml-48 overflow-x-hidden">
         <div className="mb-8">
           <div className="max-w-2xl mx-auto relative">
             <input

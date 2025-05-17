@@ -1028,7 +1028,7 @@ function CommunityHelp() {
       }`}
     >
       <Header />
-      <main className="flex-grow md:pl-64 p-4 md:p-6">
+      <main className="flex-grow md:pl-64 p-4 md:p-6 md:pr-10 lg:pr-12">
         {" "}
         {/* Added responsive padding */}
         {!user ? (

@@ -1324,7 +1324,7 @@ function About() {
       }`}
     >
       <Header /> {/* Use imported Header component */}
-      <main className="container mx-auto px-6 py-12 pt-24 md:ml-48 overflow-x-hidden">
+      <main className="container mx-auto px-6 pr-8 md:pr-12 py-12 pt-24 md:ml-48 overflow-x-hidden">
         {" "}
         {/* Added pt-24 */}
         <div className="mb-16">
