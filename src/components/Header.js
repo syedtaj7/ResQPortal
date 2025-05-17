@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import TranslatableText from "./TranslatableText";
+import LanguageSelector from "./LanguageSelector";
 // import resqportalImg from '../assets/images/resqlogo.png';
 
 function Header() {
@@ -24,6 +26,11 @@ function Header() {
           />
         </div> */}
 
+        {/* Language Selector */}
+        <div className="px-5 mb-6">
+          <LanguageSelector />
+        </div>
+
         <nav className="space-y-6 px-5">
           {" "}
           {/* Increase space between links */}
@@ -37,7 +44,7 @@ function Header() {
               } hover:text-[#F6C708] hover:bg-[#F6C70833] p-2 rounded-md`
             }
           >
-            Welcome
+            <TranslatableText>Welcome</TranslatableText>
           </NavLink>
           <NavLink
             to="/home"
@@ -47,7 +54,7 @@ function Header() {
               } hover:text-[#F6C708] hover:bg-[#F6C70833] p-2 rounded-md`
             }
           >
-            Disasters
+            <TranslatableText>Disasters</TranslatableText>
           </NavLink>
           <NavLink
             to="/relocation"
@@ -57,7 +64,7 @@ function Header() {
               } hover:text-[#F6C708] hover:bg-[#F6C70833] p-2 rounded-md`
             }
           >
-            Relocation
+            <TranslatableText>Relocation</TranslatableText>
           </NavLink>
           <NavLink
             to="/community-help"
@@ -67,7 +74,7 @@ function Header() {
               } hover:text-[#F6C708] hover:bg-[#F6C70833] p-2 rounded-md`
             }
           >
-            Alerts
+            <TranslatableText>Alerts</TranslatableText>
           </NavLink>
           <NavLink
             to="/mitigation"
@@ -77,7 +84,7 @@ function Header() {
               } hover:text-[#F6C708] hover:bg-[#F6C70833] p-2 rounded-md`
             }
           >
-            Mitigation
+            <TranslatableText>Mitigation</TranslatableText>
           </NavLink>
           <NavLink
             to="/about"
@@ -87,7 +94,7 @@ function Header() {
               } hover:text-[#F6C708] hover:bg-[#F6C70833] p-2 rounded-md`
             }
           >
-            Helplines
+            <TranslatableText>Helplines</TranslatableText>
           </NavLink>
           <NavLink
             to="/donation"
@@ -97,7 +104,7 @@ function Header() {
               } hover:text-[#F6C708] hover:bg-[#F6C70833] p-2 rounded-md`
             }
           >
-            Donation
+            <TranslatableText>Donation</TranslatableText>
           </NavLink>
         </nav>
       </div>

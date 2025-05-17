@@ -1,4 +1,5 @@
 import React from "react";
+import TranslatableText from "../components/TranslatableText";
 
 export const AlertTabs = ({ activeTab, setActiveTab }) => {
   const tabs = [
@@ -22,7 +23,7 @@ export const AlertTabs = ({ activeTab, setActiveTab }) => {
             }`}
         >
           <span className="mr-2">{getIcon(tab.icon)}</span>
-          {tab.label}
+          <TranslatableText>{tab.label}</TranslatableText>
         </button>
       ))}
     </div>

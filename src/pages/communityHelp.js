@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Header from "../components/Header";
 import { initializeApp } from "firebase/app";
+import TranslatableText from "../components/TranslatableText";
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -124,7 +125,7 @@ const INDIAN_STATES = [
 // Add these styles near the top of your file, after imports
 const gradientButtonStyle = `
   relative overflow-hidden
-  bg-yellow-300 
+  bg-yellow-300
   text-black font-medium
   rounded-xl
   transition-all duration-300
@@ -138,11 +139,11 @@ const gradientButtonStyle = `
 
 // Update form input styles
 const inputStyle = `
-  w-full px-4 py-3 
-  bg-[#F8F8F8] 
-  border border-gray-700 
+  w-full px-4 py-3
+  bg-[#F8F8F8]
+  border border-gray-700
   rounded-xl
-  focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 
+  focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20
   transition-all duration-300
   placeholder-gray-500
   text-gray-900
@@ -191,9 +192,9 @@ const slideIn = `animate-[slideIn_0.3s_ease-out]`;
 
 // Update the login container and styles
 const loginContainerStyle = `
-  min-h-[calc(100vh-4rem)] 
-  flex items-center justify-center 
-  px-4 sm:px-6 md:px-8 
+  min-h-[calc(100vh-4rem)]
+  flex items-center justify-center
+  px-4 sm:px-6 md:px-8
   py-8 sm:py-12
   bg-gradient-to-br from-gray-50 via-gray-50 to-yellow-50
   relative
@@ -201,8 +202,8 @@ const loginContainerStyle = `
 `;
 
 const formCardStyle = `
-  w-full 
-  max-w-[420px] 
+  w-full
+  max-w-[420px]
   mx-auto
   bg-white/80
   backdrop-blur-xl
@@ -291,11 +292,13 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
           </svg>
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">
-          Registration Successful!
+          <TranslatableText>Registration Successful!</TranslatableText>
         </h3>
         <p className="text-sm text-gray-500 mb-4">
-          Thank you for registering as a volunteer. You can now report incidents
-          as a volunteer.
+          <TranslatableText>
+            Thank you for registering as a volunteer. You can now report
+            incidents as a volunteer.
+          </TranslatableText>
         </p>
       </div>
     );
@@ -307,7 +310,7 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
     >
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Full Name
+          <TranslatableText>Full Name</TranslatableText>
         </label>
         <input
           type="text"
@@ -320,7 +323,7 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Email Address
+          <TranslatableText>Email Address</TranslatableText>
         </label>
         <input
           type="email"
@@ -333,7 +336,7 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Phone Number
+          <TranslatableText>Phone Number</TranslatableText>
         </label>
         <input
           type="tel"
@@ -346,7 +349,7 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Skills (Select all that apply)
+          <TranslatableText>Skills (Select all that apply)</TranslatableText>
         </label>
         <div className="grid grid-cols-2 gap-2">
           {volunteerData[0].skillsNeeded.map((skill) => (
@@ -362,7 +365,7 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
                 htmlFor={`skill-${skill}`}
                 className="ml-2 block text-sm text-gray-700"
               >
-                {skill}
+                <TranslatableText>{skill}</TranslatableText>
               </label>
             </div>
           ))}
@@ -370,7 +373,7 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Availability
+          <TranslatableText>Availability</TranslatableText>
         </label>
         <select
           name="availability"
@@ -379,17 +382,19 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
           onChange={handleChange}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
         >
-          <option value="">Select your availability</option>
+          <option value="">
+            <TranslatableText>Select your availability</TranslatableText>
+          </option>
           {availabilityOptions.map((option) => (
             <option key={option} value={option}>
-              {option}
+              <TranslatableText>{option}</TranslatableText>
             </option>
           ))}
         </select>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Relevant Experience
+          <TranslatableText>Relevant Experience</TranslatableText>
         </label>
         <textarea
           name="experience"
@@ -401,7 +406,7 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Additional Information (Optional)
+          <TranslatableText>Additional Information (Optional)</TranslatableText>
         </label>
         <textarea
           name="message"
@@ -418,7 +423,11 @@ const VolunteerRegistrationForm = ({ user, onRegister }) => {
           isSubmitting ? "opacity-75 cursor-not-allowed" : ""
         }`}
       >
-        {isSubmitting ? "Processing..." : "Register as Volunteer"}
+        {isSubmitting ? (
+          <TranslatableText>Processing...</TranslatableText>
+        ) : (
+          <TranslatableText>Register as Volunteer</TranslatableText>
+        )}
       </button>
     </form>
   );
@@ -970,12 +979,22 @@ function CommunityHelp() {
                     </svg>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-                    {isLoginMode ? "Welcome Back" : "Create Account"}
+                    {isLoginMode ? (
+                      <TranslatableText>Welcome Back</TranslatableText>
+                    ) : (
+                      <TranslatableText>Create Account</TranslatableText>
+                    )}
                   </h2>
                   <p className="text-sm text-gray-600">
-                    {isLoginMode
-                      ? "Sign in to access your account"
-                      : "Join us to help your community"}
+                    {isLoginMode ? (
+                      <TranslatableText>
+                        Sign in to access your account
+                      </TranslatableText>
+                    ) : (
+                      <TranslatableText>
+                        Join us to help your community
+                      </TranslatableText>
+                    )}
                   </p>
                 </div>
 
@@ -1011,7 +1030,7 @@ function CommunityHelp() {
                     />
                   </svg>
                   <span className="group-hover:translate-x-1 transition-transform duration-300">
-                    Continue with Google
+                    <TranslatableText>Continue with Google</TranslatableText>
                   </span>
                 </button>
 
@@ -1022,7 +1041,9 @@ function CommunityHelp() {
                   </div>
                   <div className="relative flex justify-center text-sm">
                     <span className="px-2 bg-white text-gray-500 animate-pulse">
-                      or continue with email
+                      <TranslatableText>
+                        or continue with email
+                      </TranslatableText>
                     </span>
                   </div>
                 </div>
@@ -1038,7 +1059,7 @@ function CommunityHelp() {
                 <form onSubmit={handleAuth} className="space-y-4">
                   <div className={slideIn}>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
+                      <TranslatableText>Email</TranslatableText>
                     </label>
                     <input
                       type="email"
@@ -1048,14 +1069,14 @@ function CommunityHelp() {
                         focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500
                         transition-all duration-300 ease-out text-sm sm:text-base
                         hover:border-yellow-300"
-                      placeholder="Enter your email"
+                      placeholder="Enter your email" // This will be handled by browser translation
                       required
                     />
                   </div>
 
                   <div className={slideIn} style={{ animationDelay: "150ms" }}>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Password
+                      <TranslatableText>Password</TranslatableText>
                     </label>
                     <input
                       type="password"
@@ -1065,7 +1086,7 @@ function CommunityHelp() {
                         focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500
                         transition-all duration-300 ease-out text-sm sm:text-base
                         hover:border-yellow-300"
-                      placeholder="Enter your password"
+                      placeholder="Enter your password" // This will be handled by browser translation
                       required
                     />
                   </div>
@@ -1076,29 +1097,43 @@ function CommunityHelp() {
                     className="w-full py-2.5 sm:py-3 px-4 bg-yellow-500 text-white rounded-lg
                       hover:bg-yellow-600 hover:shadow-lg transform hover:-translate-y-0.5
                       focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500
-                      transition-all duration-300 ease-out text-sm sm:text-base font-medium 
+                      transition-all duration-300 ease-out text-sm sm:text-base font-medium
                       disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                         <span>
-                          {isLoginMode
-                            ? "Signing in..."
-                            : "Creating account..."}
+                          {isLoginMode ? (
+                            <TranslatableText>Signing in...</TranslatableText>
+                          ) : (
+                            <TranslatableText>
+                              Creating account...
+                            </TranslatableText>
+                          )}
                         </span>
                       </div>
                     ) : (
-                      <span>{isLoginMode ? "Sign in" : "Create account"}</span>
+                      <span>
+                        {isLoginMode ? (
+                          <TranslatableText>Sign in</TranslatableText>
+                        ) : (
+                          <TranslatableText>Create account</TranslatableText>
+                        )}
+                      </span>
                     )}
                   </button>
                 </form>
 
                 {/* Toggle Login/Register with animation */}
                 <p className="mt-6 text-center text-sm text-gray-600">
-                  {isLoginMode
-                    ? "Don't have an account?"
-                    : "Already have an account?"}{" "}
+                  {isLoginMode ? (
+                    <TranslatableText>Don't have an account?</TranslatableText>
+                  ) : (
+                    <TranslatableText>
+                      Already have an account?
+                    </TranslatableText>
+                  )}{" "}
                   <button
                     onClick={() => {
                       setIsLoginMode(!isLoginMode);
@@ -1107,7 +1142,11 @@ function CommunityHelp() {
                     className="font-medium text-yellow-600 hover:text-yellow-700
                       transition-colors duration-300 hover:underline transform hover:scale-105"
                   >
-                    {isLoginMode ? "Sign up" : "Sign in"}
+                    {isLoginMode ? (
+                      <TranslatableText>Sign up</TranslatableText>
+                    ) : (
+                      <TranslatableText>Sign in</TranslatableText>
+                    )}
                   </button>
                 </p>
               </div>
@@ -1139,7 +1178,9 @@ function CommunityHelp() {
                   ) : activeTab === "volunteers" ? (
                     <div className="mt-6">
                       <h2 className="text-xl font-bold mb-4 text-gray-900">
-                        Volunteer Registration
+                        <TranslatableText>
+                          Volunteer Registration
+                        </TranslatableText>
                       </h2>
                       {!userProfile?.isVolunteer ? (
                         <VolunteerRegistrationForm
@@ -1148,8 +1189,10 @@ function CommunityHelp() {
                         />
                       ) : (
                         <div className="bg-green-50 p-6 rounded-lg text-green-800 font-semibold shadow">
-                          You are registered as a volunteer! You can now report
-                          incidents as a volunteer.
+                          <TranslatableText>
+                            You are registered as a volunteer! You can now
+                            report incidents as a volunteer.
+                          </TranslatableText>
                         </div>
                       )}
                     </div>
@@ -1169,11 +1212,17 @@ function CommunityHelp() {
                     ))
                   ) : (
                     <div className="text-center py-8 text-gray-400">
-                      {activeTab === "my-posts"
-                        ? "You haven't posted any alerts yet"
-                        : activeTab === "saved"
-                        ? "No saved alerts"
-                        : "No alerts found. Be the first to report an incident!"}
+                      {activeTab === "my-posts" ? (
+                        <TranslatableText>
+                          You haven't posted any alerts yet
+                        </TranslatableText>
+                      ) : activeTab === "saved" ? (
+                        <TranslatableText>No saved alerts</TranslatableText>
+                      ) : (
+                        <TranslatableText>
+                          No alerts found. Be the first to report an incident!
+                        </TranslatableText>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1184,13 +1233,15 @@ function CommunityHelp() {
             <div className="lg:col-span-1 order-1 lg:order-2">
               <div className="bg-[#F8F8F8] rounded-xl p-4 md:p-6 sticky top-4">
                 <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-gray-900">
-                  Report Incident
+                  <TranslatableText>Report Incident</TranslatableText>
                 </h2>
                 <form onSubmit={handleSubmitAlert} className="space-y-4">
                   {/* Location inputs with responsive grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="form-group">
-                      <label className="form-label">State *</label>
+                      <label className="form-label">
+                        <TranslatableText>State *</TranslatableText>
+                      </label>
                       <div className="select-wrapper">
                         <select
                           value={selectedState}
@@ -1199,10 +1250,12 @@ function CommunityHelp() {
                           style={{ backgroundColor: "#F8F8F8", color: "gray" }}
                           required
                         >
-                          <option value="">Select state</option>
+                          <option value="">
+                            <TranslatableText>Select state</TranslatableText>
+                          </option>
                           {INDIAN_STATES.map((state) => (
                             <option key={state} value={state}>
-                              {state}
+                              <TranslatableText>{state}</TranslatableText>
                             </option>
                           ))}
                         </select>
@@ -1210,13 +1263,15 @@ function CommunityHelp() {
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label">City/District *</label>
+                      <label className="form-label">
+                        <TranslatableText>City/District *</TranslatableText>
+                      </label>
                       <input
                         type="text"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                         className={inputStyle}
-                        placeholder="Enter city or district"
+                        placeholder="Enter city or district" // HTML attributes can't use TranslatableText directly
                         required
                       />
                     </div>
@@ -1225,7 +1280,9 @@ function CommunityHelp() {
                   {/* Other form fields remain the same but with responsive padding/margins */}
                   {/* Incident Category */}
                   <div className="form-group">
-                    <label className="form-label">Incident Category *</label>
+                    <label className="form-label">
+                      <TranslatableText>Incident Category *</TranslatableText>
+                    </label>
                     <div className="select-wrapper">
                       <select
                         value={selectedCategory}
@@ -1237,10 +1294,12 @@ function CommunityHelp() {
                         style={{ backgroundColor: "#F8F8F8", color: "gray" }}
                         required
                       >
-                        <option value="">Select category</option>
+                        <option value="">
+                          <TranslatableText>Select category</TranslatableText>
+                        </option>
                         {Object.keys(DISASTER_CATEGORIES).map((category) => (
                           <option key={category} value={category}>
-                            {category}
+                            <TranslatableText>{category}</TranslatableText>
                           </option>
                         ))}
                       </select>
@@ -1250,7 +1309,9 @@ function CommunityHelp() {
                   {/* Specific Incident Dropdown */}
                   {selectedCategory && (
                     <div className="form-group">
-                      <label className="form-label">Specific Incident *</label>
+                      <label className="form-label">
+                        <TranslatableText>Specific Incident *</TranslatableText>
+                      </label>
                       <div className="select-wrapper">
                         <select
                           value={selectedIncident}
@@ -1259,14 +1320,20 @@ function CommunityHelp() {
                           style={{ backgroundColor: "#F8F8F8" }}
                           required
                         >
-                          <option value="">Select incident type</option>
+                          <option value="">
+                            <TranslatableText>
+                              Select incident type
+                            </TranslatableText>
+                          </option>
                           {DISASTER_CATEGORIES[selectedCategory].map(
                             (incident) => (
                               <option
                                 key={incident.value}
                                 value={incident.value}
                               >
-                                {incident.label}
+                                <TranslatableText>
+                                  {incident.label}
+                                </TranslatableText>
                               </option>
                             )
                           )}
@@ -1278,14 +1345,14 @@ function CommunityHelp() {
                   {/* Description Second */}
                   <div>
                     <label className="block text-sm font-medium mb-2">
-                      Description *
+                      <TranslatableText>Description *</TranslatableText>
                     </label>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       className="input-field"
                       rows="3"
-                      placeholder="Describe the incident and current conditions"
+                      placeholder="Describe the incident and current conditions" // HTML attributes can't use TranslatableText directly
                       style={{ backgroundColor: "#F8F8F8" }}
                       required
                     />
@@ -1310,7 +1377,9 @@ function CommunityHelp() {
                           <div className="flex flex-col items-center">
                             <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"></div>
                             <span className="mt-2 text-sm">
-                              Processing image...
+                              <TranslatableText>
+                                Processing image...
+                              </TranslatableText>
                             </span>
                           </div>
                         ) : !imageFile ? (
@@ -1329,7 +1398,9 @@ function CommunityHelp() {
                               />
                             </svg>
                             <span className="mt-2 text-sm">
-                              Select an image that shows current conditions
+                              <TranslatableText>
+                                Select an image that shows current conditions
+                              </TranslatableText>
                             </span>
                           </>
                         ) : (
@@ -1348,7 +1419,9 @@ function CommunityHelp() {
                               />
                             </svg>
                             <span className="mt-2 text-sm">
-                              Image selected - Click to change
+                              <TranslatableText>
+                                Image selected - Click to change
+                              </TranslatableText>
                             </span>
                           </div>
                         )}
@@ -1405,10 +1478,12 @@ function CommunityHelp() {
                     {isUploading ? (
                       <div className="flex items-center justify-center gap-2">
                         <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                        <span>Processing...</span>
+                        <span>
+                          <TranslatableText>Processing...</TranslatableText>
+                        </span>
                       </div>
                     ) : (
-                      "Submit Alert"
+                      <TranslatableText>Submit Alert</TranslatableText>
                     )}
                   </button>
                 </form>
@@ -1417,7 +1492,7 @@ function CommunityHelp() {
                   onClick={() => signOut(auth)}
                   className="mt-4 w-full bg-red-600 px-4 py-2 md:py-3 rounded text-white hover:bg-red-700 transition-colors text-sm md:text-base"
                 >
-                  Logout
+                  <TranslatableText>Logout</TranslatableText>
                 </button>
               </div>
             </div>

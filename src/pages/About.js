@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaPhone, FaHandsHelping } from "react-icons/fa";
 import Footer from "../components/Footer";
 import Header from "../components/Header"; // Import Header component
+import TranslatableText from "../components/TranslatableText"; // Import TranslatableText component
 
 // Add this after your imports
 const stateColors = {
@@ -103,8 +104,8 @@ const SearchBar = ({ onSearch }) => (
   <div className="relative max-w-2xl mx-auto mb-12">
     <input
       type="text"
-      placeholder="Search by state name or NGO..."
-      className="w-full bg-[#F8F8F8] text-black px-6 py-4 rounded-xl border border-gray-700 
+      placeholder="Search by state name or NGO..." // We can't use JSX in placeholder
+      className="w-full bg-[#F8F8F8] text-black px-6 py-4 rounded-xl border border-gray-700
         focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
       onChange={(e) => onSearch(e.target.value)}
     />
@@ -170,19 +171,25 @@ const DetailModal = ({ state, onClose }) => (
           <div className="space-y-4">
             <div className="bg-blue-900/50 p-4 rounded-lg">
               <h3 className="text-lg font-semibold text-blue-200 mb-2">
-                Emergency Contacts
+                <TranslatableText>Emergency Contacts</TranslatableText>
               </h3>
               <div className="space-y-2 text-blue-100">
                 <p>
-                  <span className="font-medium">Main:</span>{" "}
+                  <span className="font-medium">
+                    <TranslatableText>Main:</TranslatableText>
+                  </span>{" "}
                   {state.contacts.main}
                 </p>
                 <p>
-                  <span className="font-medium">Email:</span>{" "}
+                  <span className="font-medium">
+                    <TranslatableText>Email:</TranslatableText>
+                  </span>{" "}
                   {state.contacts.email}
                 </p>
                 <p>
-                  <span className="font-medium">Address:</span>{" "}
+                  <span className="font-medium">
+                    <TranslatableText>Address:</TranslatableText>
+                  </span>{" "}
                   {state.contacts.address}
                 </p>
               </div>
@@ -190,7 +197,7 @@ const DetailModal = ({ state, onClose }) => (
 
             <div className="bg-green-900/50 p-4 rounded-lg">
               <h3 className="text-lg font-semibold text-green-200 mb-4">
-                Local NGOs
+                <TranslatableText>Local NGOs</TranslatableText>
               </h3>
               <div className="grid gap-4">
                 {state.ngos.map((ngo, idx) => (
@@ -199,8 +206,14 @@ const DetailModal = ({ state, onClose }) => (
                     className="bg-black/25 p-3 rounded-lg hover:bg-black/40 transition-colors"
                   >
                     <p className="font-medium text-white">{ngo.name}</p>
-                    <p className="text-sm text-green-200">{ngo.address}</p>
-                    <p className="text-sm text-green-200">{ngo.phone}</p>
+                    <p className="text-sm text-green-200">
+                      <TranslatableText as="span">Address:</TranslatableText>{" "}
+                      {ngo.address}
+                    </p>
+                    <p className="text-sm text-green-200">
+                      <TranslatableText as="span">Phone:</TranslatableText>{" "}
+                      {ngo.phone}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -216,8 +229,6 @@ function About() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedState, setSelectedState] = useState(null);
   const [error] = useState(null);
-
-
 
   const stateContacts = {
     national: {
@@ -1243,7 +1254,7 @@ function About() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl font-bold text-black text-center mb-8"
           >
-            Emergency Services Directory
+            <TranslatableText>Emergency Services Directory</TranslatableText>
           </motion.h1>
 
           <SearchBar onSearch={setSearchTerm} />
@@ -1261,13 +1272,13 @@ function About() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => setSelectedState(state)}
-                className={`bg-gray-800 rounded-xl overflow-hidden cursor-pointer hover:bg-gray-750 
-                  transition-all hover:shadow-xl ${colors.hover} border border-gray-700 
+                className={`bg-gray-800 rounded-xl overflow-hidden cursor-pointer hover:bg-gray-750
+                  transition-all hover:shadow-xl ${colors.hover} border border-gray-700
                   ${colors.border}`}
               >
                 <div className={`bg-gradient-to-r ${colors.gradient} p-4`}>
                   <h3 className="text-xl font-bold text-white">
-                    {state.state}
+                    <TranslatableText>{state.state}</TranslatableText>
                   </h3>
                 </div>
 
@@ -1278,7 +1289,11 @@ function About() {
                   </div>
                   <div className="flex items-center space-x-2 text-gray-300">
                     <FaHandsHelping className="w-4 h-4" />
-                    <span>{state.ngos.length} NGOs Available</span>
+                    <span>
+                      <TranslatableText>
+                        {state.ngos.length} <span>NGOs Available</span>
+                      </TranslatableText>
+                    </span>
                   </div>
                 </div>
               </motion.div>
@@ -1294,15 +1309,15 @@ function About() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="bg-[#F8F8F8] backdrop-blur-sm 
+            className="bg-[#F8F8F8] backdrop-blur-sm
               border border-gray-700/50 rounded-2xl p-8 shadow-xl"
           >
             <motion.h2
               variants={itemVariants}
-              className="text-3xl font-bold text-transparent bg-clip-text bg-yellow-300 
+              className="text-3xl font-bold text-transparent bg-clip-text bg-yellow-300
                  mb-8 text-center"
             >
-              About ResQTech
+              <TranslatableText>About ResQTech</TranslatableText>
             </motion.h2>
 
             <motion.div
@@ -1311,25 +1326,29 @@ function About() {
             >
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-yellow-400">
-                  Our Mission
+                  <TranslatableText>Our Mission</TranslatableText>
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  ResQTech is dedicated to revolutionizing disaster management
-                  through technology. We provide real-time monitoring, early
-                  warnings, and comprehensive support during various types of
-                  disasters.
+                  <TranslatableText>
+                    ResQTech is dedicated to revolutionizing disaster management
+                    through technology. We provide real-time monitoring, early
+                    warnings, and comprehensive support during various types of
+                    disasters.
+                  </TranslatableText>
                 </p>
               </div>
 
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-yellow-400">
-                  Our Impact
+                  <TranslatableText>Our Impact</TranslatableText>
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  We've helped communities across India prepare for, respond to,
-                  and recover from disasters effectively. Our platform connects
-                  those in need with emergency services and relief
-                  organizations.
+                  <TranslatableText>
+                    We've helped communities across India prepare for, respond
+                    to, and recover from disasters effectively. Our platform
+                    connects those in need with emergency services and relief
+                    organizations.
+                  </TranslatableText>
                 </p>
               </div>
             </motion.div>
@@ -1340,19 +1359,25 @@ function About() {
             >
               <div className="bg-[#F8F8F8]/50 p-6 rounded-xl border border-gray-700/50">
                 <div className="text-black text-4xl font-bold mb-2">24/7</div>
-                <div className="text-gray-400">Emergency Support</div>
+                <div className="text-gray-400">
+                  <TranslatableText>Emergency Support</TranslatableText>
+                </div>
               </div>
 
               <div className="bg-[#F8F8F8]/50 p-6 rounded-xl border border-gray-700/50">
                 <div className="text-black text-4xl font-bold mb-2">
-                  One Stop
+                  <TranslatableText>One Stop</TranslatableText>
                 </div>
-                <div className="text-gray-400">For all Disaster needs</div>
+                <div className="text-gray-400">
+                  <TranslatableText>For all Disaster needs</TranslatableText>
+                </div>
               </div>
 
               <div className="bg-[#F8F8F8]/50 p-6 rounded-xl border border-gray-700/50">
                 <div className="text-black text-4xl font-bold mb-2">28+</div>
-                <div className="text-gray-400">States Covered</div>
+                <div className="text-gray-400">
+                  <TranslatableText>States Covered</TranslatableText>
+                </div>
               </div>
             </motion.div>
           </motion.div>

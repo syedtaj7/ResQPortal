@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import TranslatableText from "../components/TranslatableText";
 
 // Dummy data for disaster areas needing donations
 const disasterData = [
@@ -233,6 +234,7 @@ const VolunteerRegistrationForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // These will be translated when rendered in the options
   const availabilityOptions = [
     "Weekdays",
     "Weekends",
@@ -294,11 +296,16 @@ const VolunteerRegistrationForm = ({
               </svg>
             </div>
             <h3 className="mt-4 text-lg font-medium text-gray-900">
-              Registration Successful!
+              <TranslatableText>Registration Successful!</TranslatableText>
             </h3>
             <p className="mt-2 text-sm text-gray-500">
-              Thank you for volunteering with {volunteer.name}. Your skills and
-              time will make a real difference.
+              <TranslatableText>
+                Thank you for volunteering with
+              </TranslatableText>{" "}
+              <TranslatableText>{volunteer.name}</TranslatableText>
+              <TranslatableText>
+                . Your skills and time will make a real difference.
+              </TranslatableText>
             </p>
             <div className="mt-6">
               <button
@@ -306,7 +313,7 @@ const VolunteerRegistrationForm = ({
                 onClick={onClose}
                 className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
               >
-                Close
+                <TranslatableText>Close</TranslatableText>
               </button>
             </div>
           </div>
@@ -325,7 +332,8 @@ const VolunteerRegistrationForm = ({
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">
-            Volunteer for {volunteer.name}
+            <TranslatableText>Volunteer for</TranslatableText>{" "}
+            <TranslatableText>{volunteer.name}</TranslatableText>
           </h2>
           <button
             onClick={onClose}
@@ -353,7 +361,7 @@ const VolunteerRegistrationForm = ({
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
             >
-              Full Name
+              <TranslatableText>Full Name</TranslatableText>
             </label>
             <input
               type="text"
@@ -371,7 +379,7 @@ const VolunteerRegistrationForm = ({
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Email Address
+              <TranslatableText>Email Address</TranslatableText>
             </label>
             <input
               type="email"
@@ -389,7 +397,7 @@ const VolunteerRegistrationForm = ({
               htmlFor="phone"
               className="block text-sm font-medium text-gray-700"
             >
-              Phone Number
+              <TranslatableText>Phone Number</TranslatableText>
             </label>
             <input
               type="tel"
@@ -404,7 +412,9 @@ const VolunteerRegistrationForm = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Skills (Select all that apply)
+              <TranslatableText>
+                Skills (Select all that apply)
+              </TranslatableText>
             </label>
             <div className="grid grid-cols-2 gap-2">
               {volunteer.skillsNeeded.map((skill) => (
@@ -420,7 +430,7 @@ const VolunteerRegistrationForm = ({
                     htmlFor={`skill-${skill}`}
                     className="ml-2 block text-sm text-gray-700"
                   >
-                    {skill}
+                    <TranslatableText>{skill}</TranslatableText>
                   </label>
                 </div>
               ))}
@@ -432,7 +442,7 @@ const VolunteerRegistrationForm = ({
               htmlFor="availability"
               className="block text-sm font-medium text-gray-700"
             >
-              Availability
+              <TranslatableText>Availability</TranslatableText>
             </label>
             <select
               id="availability"
@@ -442,10 +452,12 @@ const VolunteerRegistrationForm = ({
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             >
-              <option value="">Select your availability</option>
+              <option value="">
+                <TranslatableText>Select your availability</TranslatableText>
+              </option>
               {availabilityOptions.map((option) => (
                 <option key={option} value={option}>
-                  {option}
+                  <TranslatableText>{option}</TranslatableText>
                 </option>
               ))}
             </select>
@@ -456,7 +468,7 @@ const VolunteerRegistrationForm = ({
               htmlFor="experience"
               className="block text-sm font-medium text-gray-700"
             >
-              Relevant Experience
+              <TranslatableText>Relevant Experience</TranslatableText>
             </label>
             <textarea
               id="experience"
@@ -473,7 +485,9 @@ const VolunteerRegistrationForm = ({
               htmlFor="message"
               className="block text-sm font-medium text-gray-700"
             >
-              Additional Information (Optional)
+              <TranslatableText>
+                Additional Information (Optional)
+              </TranslatableText>
             </label>
             <textarea
               id="message"
@@ -515,10 +529,10 @@ const VolunteerRegistrationForm = ({
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Processing...
+                  <TranslatableText>Processing...</TranslatableText>
                 </>
               ) : (
-                "Register as Volunteer"
+                <TranslatableText>Register as Volunteer</TranslatableText>
               )}
             </button>
           </div>
@@ -539,7 +553,9 @@ const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
         className="bg-white rounded-lg overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
       >
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold text-gray-900">{volunteer.name}</h2>
+          <h2 className="text-xl font-bold text-gray-900">
+            <TranslatableText>{volunteer.name}</TranslatableText>
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-500"
@@ -575,21 +591,27 @@ const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                About the Volunteer Opportunity
+                <TranslatableText>
+                  About the Volunteer Opportunity
+                </TranslatableText>
               </h3>
-              <p className="text-gray-700">{volunteer.description}</p>
+              <p className="text-gray-700">
+                <TranslatableText>{volunteer.description}</TranslatableText>
+              </p>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Impact
+                <TranslatableText>Impact</TranslatableText>
               </h3>
-              <p className="text-gray-700">{volunteer.impact}</p>
+              <p className="text-gray-700">
+                <TranslatableText>{volunteer.impact}</TranslatableText>
+              </p>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Skills Needed
+                <TranslatableText>Skills Needed</TranslatableText>
               </h3>
               <div className="flex flex-wrap gap-2">
                 {volunteer.skillsNeeded.map((skill) => (
@@ -597,7 +619,7 @@ const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
                     key={skill}
                     className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
                   >
-                    {skill}
+                    <TranslatableText>{skill}</TranslatableText>
                   </span>
                 ))}
               </div>
@@ -605,39 +627,43 @@ const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
 
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Requirements
+                <TranslatableText>Requirements</TranslatableText>
               </h3>
-              <p className="text-gray-700">{volunteer.requirements}</p>
+              <p className="text-gray-700">
+                <TranslatableText>{volunteer.requirements}</TranslatableText>
+              </p>
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium text-gray-500">
-                  Organization
+                  <TranslatableText>Organization</TranslatableText>
                 </span>
                 <span className="text-sm font-semibold text-gray-900">
-                  {volunteer.organization}
+                  <TranslatableText>{volunteer.organization}</TranslatableText>
                 </span>
               </div>
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium text-gray-500">
-                  Location
+                  <TranslatableText>Location</TranslatableText>
                 </span>
                 <span className="text-sm font-semibold text-gray-900">
-                  {volunteer.location}
+                  <TranslatableText>{volunteer.location}</TranslatableText>
                 </span>
               </div>
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium text-gray-500">
-                  Time Commitment
+                  <TranslatableText>Time Commitment</TranslatableText>
                 </span>
                 <span className="text-sm font-semibold text-gray-900">
-                  {volunteer.timeCommitment}
+                  <TranslatableText>
+                    {volunteer.timeCommitment}
+                  </TranslatableText>
                 </span>
               </div>
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium text-gray-500">
-                  Urgency Level
+                  <TranslatableText>Urgency Level</TranslatableText>
                 </span>
                 <span
                   className={`text-sm font-semibold ${
@@ -648,16 +674,17 @@ const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
                       : "text-yellow-600"
                   }`}
                 >
-                  {volunteer.urgencyLevel}
+                  <TranslatableText>{volunteer.urgencyLevel}</TranslatableText>
                 </span>
               </div>
               <div className="mt-4">
                 <div className="flex justify-between mb-1">
                   <span className="text-sm font-medium text-gray-500">
-                    Volunteers Registered
+                    <TranslatableText>Volunteers Registered</TranslatableText>
                   </span>
                   <span className="text-sm font-semibold text-gray-900">
-                    {volunteer.volunteersRegistered} of{" "}
+                    {volunteer.volunteersRegistered}{" "}
+                    <TranslatableText>of</TranslatableText>{" "}
                     {volunteer.volunteersNeeded}
                   </span>
                 </div>
@@ -696,7 +723,7 @@ const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
               />
             </svg>
-            Register as Volunteer
+            <TranslatableText>Register as Volunteer</TranslatableText>
           </button>
         </div>
       </motion.div>
@@ -724,7 +751,7 @@ const VolunteerCard = ({ volunteer, onClick }) => {
       <div className="p-4">
         <div className="flex justify-between items-start">
           <h3 className="text-lg font-semibold text-gray-900">
-            {volunteer.name}
+            <TranslatableText>{volunteer.name}</TranslatableText>
           </h3>
           <span
             className={`text-xs px-2 py-1 rounded-full ${
@@ -735,20 +762,23 @@ const VolunteerCard = ({ volunteer, onClick }) => {
                 : "bg-yellow-100 text-yellow-800"
             }`}
           >
-            {volunteer.urgencyLevel}
+            <TranslatableText>{volunteer.urgencyLevel}</TranslatableText>
           </span>
         </div>
-        <p className="text-sm text-gray-500 mt-1">{volunteer.location}</p>
         <p className="text-sm text-gray-500 mt-1">
-          Organization: {volunteer.organization}
+          <TranslatableText>{volunteer.location}</TranslatableText>
+        </p>
+        <p className="text-sm text-gray-500 mt-1">
+          <TranslatableText>Organization:</TranslatableText>{" "}
+          <TranslatableText>{volunteer.organization}</TranslatableText>
         </p>
         <p className="text-sm text-gray-700 mt-2 line-clamp-2">
-          {volunteer.description}
+          <TranslatableText>{volunteer.description}</TranslatableText>
         </p>
 
         <div className="mt-3">
           <p className="text-xs font-medium text-gray-500 mb-1">
-            Skills Needed:
+            <TranslatableText>Skills Needed:</TranslatableText>
           </p>
           <div className="flex flex-wrap gap-1">
             {volunteer.skillsNeeded.slice(0, 3).map((skill) => (
@@ -756,12 +786,14 @@ const VolunteerCard = ({ volunteer, onClick }) => {
                 key={skill}
                 className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded"
               >
-                {skill}
+                <TranslatableText>{skill}</TranslatableText>
               </span>
             ))}
             {volunteer.skillsNeeded.length > 3 && (
               <span className="text-xs text-gray-500">
-                +{volunteer.skillsNeeded.length - 3} more
+                <TranslatableText>
+                  +{volunteer.skillsNeeded.length - 3} more
+                </TranslatableText>
               </span>
             )}
           </div>
@@ -770,10 +802,12 @@ const VolunteerCard = ({ volunteer, onClick }) => {
         <div className="mt-4">
           <div className="flex justify-between mb-1">
             <span className="text-xs font-medium text-gray-500">
-              Volunteers Registered
+              <TranslatableText>Volunteers Registered</TranslatableText>
             </span>
             <span className="text-xs font-semibold text-gray-900">
-              {volunteer.volunteersRegistered} of {volunteer.volunteersNeeded}
+              {volunteer.volunteersRegistered}{" "}
+              <TranslatableText>of</TranslatableText>{" "}
+              {volunteer.volunteersNeeded}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
@@ -806,7 +840,7 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
       >
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-xl font-bold text-gray-900">
-            Volunteer Dashboard
+            <TranslatableText>Volunteer Dashboard</TranslatableText>
           </h2>
           <button
             onClick={onClose}
@@ -834,31 +868,39 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
               <p className="text-3xl font-bold text-blue-600">
                 {volunteerStats.hoursLogged}
               </p>
-              <p className="text-sm text-gray-600">Hours Logged</p>
+              <p className="text-sm text-gray-600">
+                <TranslatableText>Hours Logged</TranslatableText>
+              </p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg text-center">
               <p className="text-3xl font-bold text-green-600">
                 {volunteerStats.activitiesCompleted}
               </p>
-              <p className="text-sm text-gray-600">Activities</p>
+              <p className="text-sm text-gray-600">
+                <TranslatableText>Activities</TranslatableText>
+              </p>
             </div>
             <div className="bg-purple-50 p-4 rounded-lg text-center">
               <p className="text-3xl font-bold text-purple-600">
                 {volunteerStats.peopleHelped}
               </p>
-              <p className="text-sm text-gray-600">People Helped</p>
+              <p className="text-sm text-gray-600">
+                <TranslatableText>People Helped</TranslatableText>
+              </p>
             </div>
             <div className="bg-yellow-50 p-4 rounded-lg text-center">
               <p className="text-3xl font-bold text-yellow-600">
                 {volunteerStats.skillsUtilized.length}
               </p>
-              <p className="text-sm text-gray-600">Skills Used</p>
+              <p className="text-sm text-gray-600">
+                <TranslatableText>Skills Used</TranslatableText>
+              </p>
             </div>
           </div>
 
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Skills Utilized
+              <TranslatableText>Skills Utilized</TranslatableText>
             </h3>
             <div className="flex flex-wrap gap-2">
               {volunteerStats.skillsUtilized.length > 0 ? (
@@ -867,37 +909,51 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
                     key={skill}
                     className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
                   >
-                    {skill}
+                    <TranslatableText>{skill}</TranslatableText>
                   </span>
                 ))
               ) : (
-                <p className="text-sm text-gray-500">No skills recorded yet</p>
+                <p className="text-sm text-gray-500">
+                  <TranslatableText>No skills recorded yet</TranslatableText>
+                </p>
               )}
             </div>
           </div>
 
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Log Hours
+              <TranslatableText>Log Hours</TranslatableText>
             </h3>
             <form className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Activity
+                    <TranslatableText>Activity</TranslatableText>
                   </label>
                   <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option>Select an activity</option>
-                    <option>Supply Distribution</option>
-                    <option>Medical Support</option>
-                    <option>Construction</option>
-                    <option>Logistics</option>
-                    <option>Community Outreach</option>
+                    <option>
+                      <TranslatableText>Select an activity</TranslatableText>
+                    </option>
+                    <option>
+                      <TranslatableText>Supply Distribution</TranslatableText>
+                    </option>
+                    <option>
+                      <TranslatableText>Medical Support</TranslatableText>
+                    </option>
+                    <option>
+                      <TranslatableText>Construction</TranslatableText>
+                    </option>
+                    <option>
+                      <TranslatableText>Logistics</TranslatableText>
+                    </option>
+                    <option>
+                      <TranslatableText>Community Outreach</TranslatableText>
+                    </option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Hours
+                    <TranslatableText>Hours</TranslatableText>
                   </label>
                   <input
                     type="number"
@@ -908,7 +964,7 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Date
+                  <TranslatableText>Date</TranslatableText>
                 </label>
                 <input
                   type="date"
@@ -917,7 +973,7 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Notes
+                  <TranslatableText>Notes</TranslatableText>
                 </label>
                 <textarea
                   rows="2"
@@ -928,7 +984,7 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
                 type="submit"
                 className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Log Hours
+                <TranslatableText>Log Hours</TranslatableText>
               </button>
             </form>
           </div>
@@ -992,11 +1048,16 @@ const DonationForm = ({ disaster, onClose }) => {
               </svg>
             </div>
             <h3 className="mt-4 text-lg font-medium text-gray-900">
-              Donation Successful!
+              <TranslatableText>Donation Successful!</TranslatableText>
             </h3>
             <p className="mt-2 text-sm text-gray-500">
-              Thank you for your generous donation to {disaster.name}. Your
-              contribution will make a real difference.
+              <TranslatableText>
+                Thank you for your generous donation to
+              </TranslatableText>{" "}
+              <TranslatableText>{disaster.name}</TranslatableText>
+              <TranslatableText>
+                . Your contribution will make a real difference.
+              </TranslatableText>
             </p>
             <div className="mt-6">
               <button
@@ -1004,7 +1065,7 @@ const DonationForm = ({ disaster, onClose }) => {
                 onClick={onClose}
                 className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-500 text-base font-medium text-white hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:text-sm"
               >
-                Close
+                <TranslatableText>Close</TranslatableText>
               </button>
             </div>
           </div>
@@ -1023,7 +1084,8 @@ const DonationForm = ({ disaster, onClose }) => {
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">
-            Donate to {disaster.name}
+            <TranslatableText>Donate to</TranslatableText>{" "}
+            <TranslatableText>{disaster.name}</TranslatableText>
           </h2>
           <button
             onClick={onClose}
@@ -1051,7 +1113,7 @@ const DonationForm = ({ disaster, onClose }) => {
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
             >
-              Full Name
+              <TranslatableText>Full Name</TranslatableText>
             </label>
             <input
               type="text"
@@ -1069,7 +1131,7 @@ const DonationForm = ({ disaster, onClose }) => {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Email Address
+              <TranslatableText>Email Address</TranslatableText>
             </label>
             <input
               type="email"
@@ -1087,7 +1149,7 @@ const DonationForm = ({ disaster, onClose }) => {
               htmlFor="amount"
               className="block text-sm font-medium text-gray-700"
             >
-              Donation Amount (₹)
+              <TranslatableText>Donation Amount (₹)</TranslatableText>
             </label>
             <input
               type="number"
@@ -1103,7 +1165,7 @@ const DonationForm = ({ disaster, onClose }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Payment Method
+              <TranslatableText>Payment Method</TranslatableText>
             </label>
             <div className="mt-2 space-y-2">
               <div className="flex items-center">
@@ -1120,7 +1182,7 @@ const DonationForm = ({ disaster, onClose }) => {
                   htmlFor="creditCard"
                   className="ml-3 block text-sm font-medium text-gray-700"
                 >
-                  Credit/Debit Card
+                  <TranslatableText>Credit/Debit Card</TranslatableText>
                 </label>
               </div>
               <div className="flex items-center">
@@ -1137,7 +1199,7 @@ const DonationForm = ({ disaster, onClose }) => {
                   htmlFor="upi"
                   className="ml-3 block text-sm font-medium text-gray-700"
                 >
-                  UPI
+                  <TranslatableText>UPI</TranslatableText>
                 </label>
               </div>
               <div className="flex items-center">
@@ -1154,7 +1216,7 @@ const DonationForm = ({ disaster, onClose }) => {
                   htmlFor="netBanking"
                   className="ml-3 block text-sm font-medium text-gray-700"
                 >
-                  Net Banking
+                  <TranslatableText>Net Banking</TranslatableText>
                 </label>
               </div>
             </div>
@@ -1165,7 +1227,7 @@ const DonationForm = ({ disaster, onClose }) => {
               htmlFor="message"
               className="block text-sm font-medium text-gray-700"
             >
-              Message (Optional)
+              <TranslatableText>Message (Optional)</TranslatableText>
             </label>
             <textarea
               id="message"
@@ -1207,10 +1269,10 @@ const DonationForm = ({ disaster, onClose }) => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Processing...
+                  <TranslatableText>Processing...</TranslatableText>
                 </>
               ) : (
-                "Donate Now"
+                <TranslatableText>Donate Now</TranslatableText>
               )}
             </button>
           </div>
@@ -1241,7 +1303,9 @@ const DisasterDetailModal = ({
         className="bg-white rounded-lg overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
       >
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold text-gray-900">{disaster.name}</h2>
+          <h2 className="text-xl font-bold text-gray-900">
+            <TranslatableText>{disaster.name}</TranslatableText>
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-500"
@@ -1281,35 +1345,43 @@ const DisasterDetailModal = ({
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                About the Disaster
+                <TranslatableText>About the Disaster</TranslatableText>
               </h3>
-              <p className="text-gray-700">{disaster.description}</p>
+              <p className="text-gray-700">
+                <TranslatableText>{disaster.description}</TranslatableText>
+              </p>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Impact
+                <TranslatableText>Impact</TranslatableText>
               </h3>
-              <p className="text-gray-700">{disaster.impact}</p>
+              <p className="text-gray-700">
+                <TranslatableText>{disaster.impact}</TranslatableText>
+              </p>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                How Your Donation Helps
+                <TranslatableText>How Your Donation Helps</TranslatableText>
               </h3>
-              <p className="text-gray-700">{disaster.howHelpWorks}</p>
+              <p className="text-gray-700">
+                <TranslatableText>{disaster.howHelpWorks}</TranslatableText>
+              </p>
             </div>
 
             {relatedVolunteers.length > 0 && (
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Volunteer Opportunities
+                  <TranslatableText>Volunteer Opportunities</TranslatableText>
                 </h3>
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <p className="text-gray-700 mb-2">
-                    We need volunteers to help with this disaster relief effort.
-                    There are currently {relatedVolunteers.length} volunteer
-                    opportunities available.
+                    <TranslatableText>
+                      We need volunteers to help with this disaster relief
+                      effort. There are currently {relatedVolunteers.length}{" "}
+                      volunteer opportunities available.
+                    </TranslatableText>
                   </p>
                   <button
                     onClick={() =>
@@ -1331,7 +1403,9 @@ const DisasterDetailModal = ({
                         d="M13 7l5 5m0 0l-5 5m5-5H6"
                       />
                     </svg>
-                    View volunteer opportunities
+                    <TranslatableText>
+                      View volunteer opportunities
+                    </TranslatableText>
                   </button>
                 </div>
               </div>
@@ -1340,23 +1414,23 @@ const DisasterDetailModal = ({
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium text-gray-500">
-                  Organization
+                  <TranslatableText>Organization</TranslatableText>
                 </span>
                 <span className="text-sm font-semibold text-gray-900">
-                  {disaster.organization}
+                  <TranslatableText>{disaster.organization}</TranslatableText>
                 </span>
               </div>
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium text-gray-500">
-                  Location
+                  <TranslatableText>Location</TranslatableText>
                 </span>
                 <span className="text-sm font-semibold text-gray-900">
-                  {disaster.location}
+                  <TranslatableText>{disaster.location}</TranslatableText>
                 </span>
               </div>
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium text-gray-500">
-                  Urgency Level
+                  <TranslatableText>Urgency Level</TranslatableText>
                 </span>
                 <span
                   className={`text-sm font-semibold ${
@@ -1367,16 +1441,18 @@ const DisasterDetailModal = ({
                       : "text-yellow-600"
                   }`}
                 >
-                  {disaster.urgencyLevel}
+                  <TranslatableText>{disaster.urgencyLevel}</TranslatableText>
                 </span>
               </div>
               <div className="mt-4">
                 <div className="flex justify-between mb-1">
                   <span className="text-sm font-medium text-gray-500">
-                    Funds Raised
+                    <TranslatableText>Funds Raised</TranslatableText>
                   </span>
                   <span className="text-sm font-semibold text-gray-900">
-                    {disaster.amountRaised} of {disaster.amountNeeded}
+                    {disaster.amountRaised}{" "}
+                    <TranslatableText>of</TranslatableText>{" "}
+                    {disaster.amountNeeded}
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -1419,7 +1495,7 @@ const DisasterDetailModal = ({
                   d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                 />
               </svg>
-              Donate Now
+              <TranslatableText>Donate Now</TranslatableText>
             </button>
 
             {relatedVolunteers.length > 0 && (
@@ -1443,7 +1519,7 @@ const DisasterDetailModal = ({
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
                 </svg>
-                Volunteer Instead
+                <TranslatableText>Volunteer Instead</TranslatableText>
               </button>
             )}
           </div>
@@ -1473,7 +1549,7 @@ const DisasterCard = ({ disaster, onClick }) => {
       <div className="p-4">
         <div className="flex justify-between items-start">
           <h3 className="text-lg font-semibold text-gray-900">
-            {disaster.name}
+            <TranslatableText>{disaster.name}</TranslatableText>
           </h3>
           <span
             className={`text-xs px-2 py-1 rounded-full ${
@@ -1484,24 +1560,28 @@ const DisasterCard = ({ disaster, onClick }) => {
                 : "bg-yellow-100 text-yellow-800"
             }`}
           >
-            {disaster.urgencyLevel}
+            <TranslatableText>{disaster.urgencyLevel}</TranslatableText>
           </span>
         </div>
-        <p className="text-sm text-gray-500 mt-1">{disaster.location}</p>
         <p className="text-sm text-gray-500 mt-1">
-          Organization: {disaster.organization}
+          <TranslatableText>{disaster.location}</TranslatableText>
+        </p>
+        <p className="text-sm text-gray-500 mt-1">
+          <TranslatableText>Organization:</TranslatableText>{" "}
+          <TranslatableText>{disaster.organization}</TranslatableText>
         </p>
         <p className="text-sm text-gray-700 mt-2 line-clamp-2">
-          {disaster.description}
+          <TranslatableText>{disaster.description}</TranslatableText>
         </p>
 
         <div className="mt-4">
           <div className="flex justify-between mb-1">
             <span className="text-xs font-medium text-gray-500">
-              Funds Raised
+              <TranslatableText>Funds Raised</TranslatableText>
             </span>
             <span className="text-xs font-semibold text-gray-900">
-              {disaster.amountRaised} of {disaster.amountNeeded}
+              {disaster.amountRaised} <TranslatableText>of</TranslatableText>{" "}
+              {disaster.amountNeeded}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
@@ -1596,7 +1676,9 @@ function Donation() {
               transition={{ duration: 0.5 }}
               className="text-3xl font-bold text-gray-900 sm:text-4xl mb-4"
             >
-              Support Disaster Relief Efforts
+              <TranslatableText>
+                Support Disaster Relief Efforts
+              </TranslatableText>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
@@ -1604,8 +1686,10 @@ function Donation() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="max-w-2xl mx-auto text-lg text-gray-600"
             >
-              Your contribution can make a significant difference in the lives
-              of those affected by natural disasters across India.
+              <TranslatableText>
+                Your contribution can make a significant difference in the lives
+                of those affected by natural disasters across India.
+              </TranslatableText>
             </motion.p>
           </div>
 
@@ -1621,7 +1705,7 @@ function Donation() {
                     : "bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                Donate Funds
+                <TranslatableText>Donate Funds</TranslatableText>
               </button>
               <button
                 type="button"
@@ -1632,7 +1716,7 @@ function Donation() {
                     : "bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                Volunteer Time
+                <TranslatableText>Volunteer Time</TranslatableText>
               </button>
             </div>
             {activeTab === "volunteers" && (
@@ -1653,7 +1737,7 @@ function Donation() {
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                   />
                 </svg>
-                My Volunteer Dashboard
+                <TranslatableText>My Volunteer Dashboard</TranslatableText>
               </button>
             )}
           </div>

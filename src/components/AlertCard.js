@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import TranslatableText from "../components/TranslatableText";
 
 export const AlertCard = ({
   alert,
@@ -45,7 +46,7 @@ export const AlertCard = ({
               alert.category
             )}`}
           >
-            {alert.category}
+            <TranslatableText>{alert.category}</TranslatableText>
           </span>
         </div>
       </div>
@@ -54,7 +55,7 @@ export const AlertCard = ({
         <div className="flex justify-between items-start mb-3">
           <div>
             <h3 className="text-lg font-semibold text-white mb-1">
-              {alert.location}
+              <TranslatableText>{alert.location}</TranslatableText>
             </h3>
             <p className="text-sm text-gray-400">
               {formatTimestamp(alert.timestamp)}
@@ -82,14 +83,16 @@ export const AlertCard = ({
         </div>
 
         <p className={`text-gray-300 ${!isExpanded && "line-clamp-3"}`}>
-          {alert.description}
+          <TranslatableText>{alert.description}</TranslatableText>
         </p>
         {alert.description.length > 150 && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="text-blue-400 hover:text-blue-300 text-sm mt-2"
           >
-            {isExpanded ? "Show less" : "Read more"}
+            <TranslatableText>
+              {isExpanded ? "Show less" : "Read more"}
+            </TranslatableText>
           </button>
         )}
 
@@ -116,16 +119,18 @@ export const AlertCard = ({
                   : "bg-gray-500 text-white"
               }`}
             >
-              {alert.postedByVolunteer
-                ? "Posted by Volunteer"
-                : "Posted by Non-Volunteer"}
+              <TranslatableText>
+                {alert.postedByVolunteer
+                  ? "Posted by Volunteer"
+                  : "Posted by Non-Volunteer"}
+              </TranslatableText>
             </span>
           </div>
           <div className="flex space-x-2">
             <button
               onClick={onShare}
               className="p-2 hover:bg-gray-700 rounded-full transition-colors"
-              title="Share alert"
+              title="Share alert" // Note: HTML attributes can't use React components
             >
               <svg
                 className="w-5 h-5"
@@ -148,7 +153,7 @@ export const AlertCard = ({
                   ? "text-blue-400 hover:text-blue-300 bg-blue-500/10"
                   : "text-gray-400 hover:text-white hover:bg-gray-700"
               }`}
-              title={isSaved ? "Remove from saved" : "Save alert"}
+              title={isSaved ? "Remove from saved" : "Save alert"} // HTML attributes can't use React components
             >
               <svg
                 className="w-5 h-5"

@@ -11,6 +11,7 @@ import "leaflet/dist/leaflet.css";
 import { safeLocations as safeLocationsData } from "../data/safeLocations";
 import Header from "../components/Header"; // Import Header component
 import Footer from "../components/Footer"; // Import Footer component
+import TranslatableText from "../components/TranslatableText"; // Import TranslatableText component
 
 // Add debounce utility
 const debounce = (func, wait) => {
@@ -478,41 +479,60 @@ function Relocation() {
                   }`}
                 ></div>
                 <span className="text-lg font-medium text-white">
-                  Safety Score: {location.score}%
+                  <TranslatableText>Safety Score:</TranslatableText>{" "}
+                  {location.score}%
                 </span>
               </div>
-              <p className="text-gray-300 mt-2">{location.description}</p>
+              <p className="text-gray-300 mt-2">
+                <TranslatableText>{location.description}</TranslatableText>
+              </p>
             </div>
 
             {/* Location Details */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="bg-gray-700 p-3 rounded-lg">
-                <p className="text-gray-400">State</p>
-                <p className="text-white font-medium">{location.state}</p>
+                <p className="text-gray-400">
+                  <TranslatableText>State</TranslatableText>
+                </p>
+                <p className="text-white font-medium">
+                  <TranslatableText>{location.state}</TranslatableText>
+                </p>
               </div>
               <div className="bg-gray-700 p-3 rounded-lg">
-                <p className="text-gray-400">Elevation</p>
-                <p className="text-white font-medium">{location.elevation}</p>
+                <p className="text-gray-400">
+                  <TranslatableText>Elevation</TranslatableText>
+                </p>
+                <p className="text-white font-medium">
+                  <TranslatableText>{location.elevation}</TranslatableText>
+                </p>
               </div>
               <div className="bg-gray-700 p-3 rounded-lg">
-                <p className="text-gray-400">Capacity</p>
-                <p className="text-white font-medium">{location.capacity}</p>
+                <p className="text-gray-400">
+                  <TranslatableText>Capacity</TranslatableText>
+                </p>
+                <p className="text-white font-medium">
+                  <TranslatableText>{location.capacity}</TranslatableText>
+                </p>
               </div>
             </div>
 
             {/* Transport Information */}
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-white mb-3">
-                Transport Options
+                <TranslatableText>Transport Options</TranslatableText>
               </h3>
               <div className="space-y-3">
                 {location.hasAirport && (
                   <div className="bg-gray-700 p-3 rounded-lg flex items-start">
                     <span className="text-2xl mr-3">✈️</span>
                     <div>
-                      <p className="text-white font-medium">Air Travel</p>
+                      <p className="text-white font-medium">
+                        <TranslatableText>Air Travel</TranslatableText>
+                      </p>
                       <p className="text-gray-400 text-sm">
-                        {location.transportInfo?.nearestAirport}
+                        <TranslatableText>
+                          {location.transportInfo?.nearestAirport}
+                        </TranslatableText>
                       </p>
                     </div>
                   </div>
@@ -521,9 +541,13 @@ function Relocation() {
                   <div className="bg-gray-700 p-3 rounded-lg flex items-start">
                     <span className="text-2xl mr-3">🚂</span>
                     <div>
-                      <p className="text-white font-medium">Railway</p>
+                      <p className="text-white font-medium">
+                        <TranslatableText>Railway</TranslatableText>
+                      </p>
                       <p className="text-gray-400 text-sm">
-                        {location.transportInfo?.nearestStation}
+                        <TranslatableText>
+                          {location.transportInfo?.nearestStation}
+                        </TranslatableText>
                       </p>
                     </div>
                   </div>
@@ -531,9 +555,13 @@ function Relocation() {
                 <div className="bg-gray-700 p-3 rounded-lg flex items-start">
                   <span className="text-2xl mr-3">🚌</span>
                   <div>
-                    <p className="text-white font-medium">Bus Transport</p>
+                    <p className="text-white font-medium">
+                      <TranslatableText>Bus Transport</TranslatableText>
+                    </p>
                     <p className="text-gray-400 text-sm">
-                      {location.transportInfo?.busTerminal}
+                      <TranslatableText>
+                        {location.transportInfo?.busTerminal}
+                      </TranslatableText>
                     </p>
                   </div>
                 </div>
@@ -541,9 +569,13 @@ function Relocation() {
                   <div className="bg-gray-700 p-3 rounded-lg flex items-start">
                     <span className="text-2xl mr-3">🛣️</span>
                     <div>
-                      <p className="text-white font-medium">Major Highways</p>
+                      <p className="text-white font-medium">
+                        <TranslatableText>Major Highways</TranslatableText>
+                      </p>
                       <p className="text-gray-400 text-sm">
-                        {location.transportInfo.majorHighways.join(", ")}
+                        <TranslatableText>
+                          {location.transportInfo.majorHighways.join(", ")}
+                        </TranslatableText>
                       </p>
                     </div>
                   </div>
@@ -554,7 +586,7 @@ function Relocation() {
             {/* Available Facilities */}
             <div>
               <h3 className="text-lg font-semibold text-white mb-3">
-                Available Facilities
+                <TranslatableText>Available Facilities</TranslatableText>
               </h3>
               <div className="bg-gray-700 p-4 rounded-lg">
                 <div className="flex flex-wrap gap-2">
@@ -563,7 +595,7 @@ function Relocation() {
                       key={index}
                       className="bg-gray-600 text-gray-200 px-3 py-1 rounded-full text-sm"
                     >
-                      {facility}
+                      <TranslatableText>{facility}</TranslatableText>
                     </span>
                   ))}
                 </div>
@@ -574,7 +606,7 @@ function Relocation() {
             <div className="mt-6">
               <h3 className="text-lg font-semibold text-white mb-3">
                 <span className="mr-2">🏥</span>
-                Nearby Hospitals
+                <TranslatableText>Nearby Hospitals</TranslatableText>
               </h3>
               {loadingHospitals ? (
                 <div className="animate-pulse space-y-3">
@@ -592,14 +624,19 @@ function Relocation() {
                       <div className="flex justify-between items-start">
                         <div>
                           <h4 className="text-white font-medium">
-                            {hospital.name}
+                            <TranslatableText>{hospital.name}</TranslatableText>
                           </h4>
                           <p className="text-gray-400 text-sm">
-                            {hospital.address}
+                            <TranslatableText>
+                              {hospital.address}
+                            </TranslatableText>
                           </p>
                           {hospital.phone !== "N/A" && (
                             <p className="text-gray-400 text-sm">
-                              📞 {hospital.phone}
+                              📞{" "}
+                              <TranslatableText>
+                                {hospital.phone}
+                              </TranslatableText>
                             </p>
                           )}
                         </div>
@@ -610,7 +647,7 @@ function Relocation() {
                           className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded flex items-center"
                         >
                           <span className="mr-1">🚗</span>
-                          Directions
+                          <TranslatableText>Directions</TranslatableText>
                         </a>
                       </div>
                     </div>
@@ -618,7 +655,9 @@ function Relocation() {
                 </div>
               ) : (
                 <div className="text-center py-4 text-gray-400">
-                  No hospitals found in the nearby area
+                  <TranslatableText>
+                    No hospitals found in the nearby area
+                  </TranslatableText>
                 </div>
               )}
             </div>
@@ -643,7 +682,7 @@ function Relocation() {
                 onClick={getUserLocation}
                 className="bg-yellow-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors text-black whitespace-nowrap"
               >
-                Use My Location
+                <TranslatableText>Use My Location</TranslatableText>
               </button>
               <div className="flex-1 relative">
                 <input
@@ -660,8 +699,18 @@ function Relocation() {
                   onClick={() => handleLocationSearch(locationSearch)}
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800 p-2"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                 </button>
               </div>
@@ -681,15 +730,27 @@ function Relocation() {
                 minZoom={3}
                 maxBounds={[
                   [8.4, 68.7], // Southwest coordinates of India
-                  [37.6, 97.25] // Northeast coordinates of India
+                  [37.6, 97.25], // Northeast coordinates of India
                 ]}
               >
                 {/* Add zoom control to right side */}
                 <div className="leaflet-control-container">
                   <div className="leaflet-top leaflet-right">
                     <div className="leaflet-control-zoom leaflet-bar leaflet-control">
-                      <button className="leaflet-control-zoom-in" type="button" title="Zoom in">+</button>
-                      <button className="leaflet-control-zoom-out" type="button" title="Zoom out">-</button>
+                      <button
+                        className="leaflet-control-zoom-in"
+                        type="button"
+                        title="Zoom in"
+                      >
+                        +
+                      </button>
+                      <button
+                        className="leaflet-control-zoom-out"
+                        type="button"
+                        title="Zoom out"
+                      >
+                        -
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -706,7 +767,9 @@ function Relocation() {
                     radius={5000}
                     pathOptions={{ color: "red", fillColor: "red" }}
                   >
-                    <Popup>Your Location</Popup>
+                    <Popup>
+                      <TranslatableText>Your Location</TranslatableText>
+                    </Popup>
                   </Circle>
                 )}
 
@@ -786,54 +849,82 @@ function Relocation() {
 
                           <div className="text-gray-600 mb-3">
                             <p className="mb-1">
-                              <span className="font-medium">State:</span>{" "}
-                              {zone.state}
+                              <span className="font-medium">
+                                <TranslatableText>State:</TranslatableText>
+                              </span>{" "}
+                              <TranslatableText>{zone.state}</TranslatableText>
                             </p>
                             <p className="mb-1">
-                              <span className="font-medium">Elevation:</span>{" "}
-                              {zone.elevation}
+                              <span className="font-medium">
+                                <TranslatableText>Elevation:</TranslatableText>
+                              </span>{" "}
+                              <TranslatableText>
+                                {zone.elevation}
+                              </TranslatableText>
                             </p>
                             <p>
-                              <span className="font-medium">Capacity:</span>{" "}
-                              {zone.capacity}
+                              <span className="font-medium">
+                                <TranslatableText>Capacity:</TranslatableText>
+                              </span>{" "}
+                              <TranslatableText>
+                                {zone.capacity}
+                              </TranslatableText>
                             </p>
                           </div>
 
                           <div className="mb-4">
-                            <p className="text-gray-700">{zone.description}</p>
+                            <p className="text-gray-700">
+                              <TranslatableText>
+                                {zone.description}
+                              </TranslatableText>
+                            </p>
                           </div>
 
                           <div className="border-t pt-3">
                             <h4 className="font-semibold text-gray-800 mb-2">
-                              Transport Info
+                              <TranslatableText>
+                                Transport Info
+                              </TranslatableText>
                             </h4>
                             <ul className="space-y-2 text-sm text-gray-600">
                               {zone.hasAirport &&
                                 zone.transportInfo?.nearestAirport && (
                                   <li className="flex items-center">
                                     <span className="mr-2">✈️</span>
-                                    {zone.transportInfo.nearestAirport}
+                                    <TranslatableText>
+                                      {zone.transportInfo.nearestAirport}
+                                    </TranslatableText>
                                   </li>
                                 )}
                               {zone.hasRailway &&
                                 zone.transportInfo?.nearestStation && (
                                   <li className="flex items-center">
                                     <span className="mr-2">🚂</span>
-                                    {zone.transportInfo.nearestStation}
+                                    <TranslatableText>
+                                      {zone.transportInfo.nearestStation}
+                                    </TranslatableText>
                                   </li>
                                 )}
                               {zone.transportInfo?.busTerminal && (
                                 <li className="flex items-center">
                                   <span className="mr-2">🚌</span>
-                                  {zone.transportInfo.busTerminal}
+                                  <TranslatableText>
+                                    {zone.transportInfo.busTerminal}
+                                  </TranslatableText>
                                 </li>
                               )}
                               {zone.transportInfo?.majorHighways?.length >
                                 0 && (
                                 <li className="flex items-center">
                                   <span className="mr-2">🛣️</span>
-                                  Highways:{" "}
-                                  {zone.transportInfo.majorHighways.join(", ")}
+                                  <TranslatableText>
+                                    Highways:
+                                  </TranslatableText>{" "}
+                                  <TranslatableText>
+                                    {zone.transportInfo.majorHighways.join(
+                                      ", "
+                                    )}
+                                  </TranslatableText>
                                 </li>
                               )}
                             </ul>
@@ -841,11 +932,17 @@ function Relocation() {
 
                           <div className="border-t pt-3 mt-3">
                             <h4 className="font-semibold text-gray-800 mb-2">
-                              Available Facilities
+                              <TranslatableText>
+                                Available Facilities
+                              </TranslatableText>
                             </h4>
                             <ul className="list-disc list-inside text-gray-600 text-sm">
                               {zone.facilities.map((facility, index) => (
-                                <li key={index}>{facility}</li>
+                                <li key={index}>
+                                  <TranslatableText>
+                                    {facility}
+                                  </TranslatableText>
+                                </li>
                               ))}
                             </ul>
                           </div>
@@ -892,7 +989,7 @@ function Relocation() {
                 <div className="p-4 bg-gray-750 border-b border-gray-700">
                   <div className="flex justify-between items-center mb-3">
                     <h2 className="text-lg font-semibold text-blue-400">
-                      Nearest Safe Zone
+                      <TranslatableText>Nearest Safe Zone</TranslatableText>
                     </h2>
                     <button
                       onClick={() => {
@@ -915,7 +1012,7 @@ function Relocation() {
                           d="M6 18L18 6M6 6l12 12"
                         />
                       </svg>
-                      Clear
+                      <TranslatableText>Clear</TranslatableText>
                     </button>
                   </div>
 
@@ -923,7 +1020,9 @@ function Relocation() {
                     {/* Basic Info */}
                     <div>
                       <h3 className="font-medium text-white mb-2">
-                        {nearestSafeZone.name}
+                        <TranslatableText>
+                          {nearestSafeZone.name}
+                        </TranslatableText>
                       </h3>
                       <div className="flex items-center space-x-2 mb-2">
                         <div
@@ -936,16 +1035,27 @@ function Relocation() {
                           }`}
                         ></div>
                         <span className="text-sm text-gray-300">
-                          Safety Score: {nearestSafeZone.score}%
+                          <TranslatableText>Safety Score:</TranslatableText>{" "}
+                          {nearestSafeZone.score}%
                         </span>
                       </div>
                       <div className="text-sm text-gray-400">
                         <p>
-                          From: {nearestSafeZone.userState || "Your Location"}
+                          <TranslatableText>From:</TranslatableText>{" "}
+                          <TranslatableText>
+                            {nearestSafeZone.userState || "Your Location"}
+                          </TranslatableText>
                         </p>
-                        <p>To: {nearestSafeZone.state}</p>
+                        <p>
+                          <TranslatableText>To:</TranslatableText>{" "}
+                          <TranslatableText>
+                            {nearestSafeZone.state}
+                          </TranslatableText>
+                        </p>
                         <p className="text-green-400">
-                          Distance: {nearestSafeZone.distance} km
+                          <TranslatableText>Distance:</TranslatableText>{" "}
+                          {nearestSafeZone.distance}{" "}
+                          <TranslatableText>km</TranslatableText>
                         </p>
                       </div>
                     </div>
@@ -954,33 +1064,57 @@ function Relocation() {
                     {travelDetails && (
                       <div className="border-t border-gray-600 pt-4">
                         <h4 className="text-sm font-semibold text-white mb-3">
-                          Recommended Travel Route
+                          <TranslatableText>
+                            Recommended Travel Route
+                          </TranslatableText>
                         </h4>
                         <div className="space-y-3">
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-400">Best Mode:</span>
+                            <span className="text-gray-400">
+                              <TranslatableText>Best Mode:</TranslatableText>
+                            </span>
                             <span className="text-white">
-                              {travelDetails.recommendedMode === "air"
-                                ? "✈️ Air Travel"
-                                : travelDetails.recommendedMode === "rail"
-                                ? "🚂 Railway"
-                                : "🚗 Road Transport"}
+                              {travelDetails.recommendedMode === "air" ? (
+                                <>
+                                  <span>✈️</span>{" "}
+                                  <TranslatableText>
+                                    Air Travel
+                                  </TranslatableText>
+                                </>
+                              ) : travelDetails.recommendedMode === "rail" ? (
+                                <>
+                                  <span>🚂</span>{" "}
+                                  <TranslatableText>Railway</TranslatableText>
+                                </>
+                              ) : (
+                                <>
+                                  <span>🚗</span>{" "}
+                                  <TranslatableText>
+                                    Road Transport
+                                  </TranslatableText>
+                                </>
+                              )}
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-400">
-                              Est. Travel Time:
+                              <TranslatableText>
+                                Est. Travel Time:
+                              </TranslatableText>
                             </span>
                             <span className="text-white">
-                              {travelDetails.estimatedTime} hours
+                              {travelDetails.estimatedTime}{" "}
+                              <TranslatableText>hours</TranslatableText>
                             </span>
                           </div>
                           <div className="text-sm">
-                            <p className="text-gray-400 mb-2">Route Steps:</p>
+                            <p className="text-gray-400 mb-2">
+                              <TranslatableText>Route Steps:</TranslatableText>
+                            </p>
                             <ol className="list-decimal list-inside space-y-1">
                               {travelDetails.route.steps.map((step, index) => (
                                 <li key={index} className="text-gray-300">
-                                  {step}
+                                  <TranslatableText>{step}</TranslatableText>
                                 </li>
                               ))}
                             </ol>
@@ -991,7 +1125,10 @@ function Relocation() {
                             rel="noopener noreferrer"
                             className="block text-center bg-blue-600 hover:bg-blue-700 transition-colors text-white py-2 px-4 rounded-lg text-sm"
                           >
-                            View Route on Google Maps 🗺️
+                            <TranslatableText>
+                              View Route on Google Maps
+                            </TranslatableText>{" "}
+                            🗺️
                           </a>
                         </div>
                       </div>
@@ -1004,7 +1141,7 @@ function Relocation() {
                         setShowDetails(true);
                       }}
                     >
-                      View Full Details →
+                      <TranslatableText>View Full Details</TranslatableText> →
                     </button>
                     {/* Add Nearby Hospitals Section */}
                     {nearestSafeZone.nearbyHospitals &&
@@ -1012,7 +1149,9 @@ function Relocation() {
                         <div className="border-t border-gray-600 pt-4 mt-4">
                           <h4 className="text-sm font-semibold text-white mb-3">
                             <span className="mr-2">🏥</span>
-                            Nearby Hospitals
+                            <TranslatableText>
+                              Nearby Hospitals
+                            </TranslatableText>
                           </h4>
                           <div className="space-y-2">
                             {nearestSafeZone.nearbyHospitals
@@ -1025,10 +1164,15 @@ function Relocation() {
                                   <div className="flex justify-between items-start">
                                     <div>
                                       <p className="text-sm text-white">
-                                        {hospital.name}
+                                        <TranslatableText>
+                                          {hospital.name}
+                                        </TranslatableText>
                                       </p>
                                       <p className="text-xs text-gray-400">
-                                        {hospital.distance}km away
+                                        {hospital.distance}
+                                        <TranslatableText>
+                                          km away
+                                        </TranslatableText>
                                       </p>
                                     </div>
                                     <a
@@ -1037,12 +1181,16 @@ function Relocation() {
                                       rel="noopener noreferrer"
                                       className="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-white"
                                     >
-                                      🚗 Route
+                                      🚗{" "}
+                                      <TranslatableText>Route</TranslatableText>
                                     </a>
                                   </div>
                                   {hospital.phone !== "N/A" && (
                                     <p className="text-xs text-gray-400 mt-1">
-                                      📞 {hospital.phone}
+                                      📞{" "}
+                                      <TranslatableText>
+                                        {hospital.phone}
+                                      </TranslatableText>
                                     </p>
                                   )}
                                 </div>
@@ -1059,7 +1207,7 @@ function Relocation() {
                   className="text-lg font-semibold text-black mb-3 sticky top-0 py-2"
                   style={{ backgroundColor: "#F8F8F8" }}
                 >
-                  Available Safe Zones
+                  <TranslatableText>Available Safe Zones</TranslatableText>
                 </h2>
                 <div className="space-y-3">
                   {loading ? (
@@ -1084,7 +1232,7 @@ function Relocation() {
                         }}
                       >
                         <h3 className="font-medium text-white text-sm mb-1">
-                          {location.name}
+                          <TranslatableText>{location.name}</TranslatableText>
                         </h3>
                         <div className="flex items-center space-x-2 mb-2">
                           <div
@@ -1097,10 +1245,14 @@ function Relocation() {
                             }`}
                           ></div>
                           <span className="text-xs text-gray-400">
-                            Score: {location.score}%
+                            <TranslatableText>Score:</TranslatableText>{" "}
+                            {location.score}%
                           </span>
                           <span className="text-xs text-gray-400">
-                            • {location.state}
+                            •{" "}
+                            <TranslatableText>
+                              {location.state}
+                            </TranslatableText>
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-1">
@@ -1125,7 +1277,7 @@ function Relocation() {
                             setShowDetails(true);
                           }}
                         >
-                          View Details →
+                          <TranslatableText>View Details</TranslatableText> →
                         </button>
                       </button>
                     ))
@@ -1145,8 +1297,14 @@ function Relocation() {
                         />
                       </svg>
                       <p>
-                        No safe locations found
-                        {safeZoneSearch ? " for your search" : ""}
+                        <TranslatableText>
+                          No safe locations found
+                        </TranslatableText>
+                        {safeZoneSearch ? (
+                          <TranslatableText> for your search</TranslatableText>
+                        ) : (
+                          ""
+                        )}
                       </p>
                     </div>
                   )}

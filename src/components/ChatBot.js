@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { CHATBOT_RESPONSES } from "../data/chatbotResponses";
+import TranslatableText from "../components/TranslatableText";
 
 const ChatBot = () => {
   const navigate = useNavigate();
@@ -228,7 +229,7 @@ const ChatBot = () => {
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-800">
               <h3 className="text-lg font-semibold text-white">
-                Disaster Support
+                <TranslatableText>Disaster Support</TranslatableText>
               </h3>
               <button
                 onClick={() => setIsOpen(false)}
@@ -268,14 +269,15 @@ const ChatBot = () => {
                     }`}
                   >
                     <pre className="whitespace-pre-wrap font-sans">
-                      {message.content}
+                      <TranslatableText>{message.content}</TranslatableText>
                     </pre>
                     {message.link && (
                       <button
                         onClick={() => handleLinkClick(message.link)}
                         className="mt-2 text-blue-400 hover:text-blue-300 text-sm underline"
                       >
-                        View detailed guide →
+                        <TranslatableText>View detailed guide</TranslatableText>{" "}
+                        →
                       </button>
                     )}
                   </div>
@@ -288,7 +290,7 @@ const ChatBot = () => {
                           onClick={() => handleSuggestionClick(suggestion)}
                           className="text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full transition-colors"
                         >
-                          {suggestion.text}
+                          <TranslatableText>{suggestion.text}</TranslatableText>
                         </button>
                       ))}
                     </div>
@@ -302,7 +304,7 @@ const ChatBot = () => {
                   className="flex justify-start"
                 >
                   <div className="bg-gray-800 text-gray-300 p-3 rounded-lg">
-                    Typing...
+                    <TranslatableText>Typing...</TranslatableText>
                   </div>
                 </motion.div>
               )}
@@ -318,7 +320,7 @@ const ChatBot = () => {
                   type="text"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Ask about disasters..."
+                  placeholder="Ask about disasters..." // HTML attributes can't use React components directly
                   className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button

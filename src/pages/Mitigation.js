@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import ChatBot from "../components/ChatBot";
 import Footer from "../components/Footer";
 import Header from "../components/Header"; // Import Header component
+import TranslatableText from "../components/TranslatableText"; // Import TranslatableText component
 
 const useLocalStorage = (key, initialValue) => {
   const [storedValue, setStoredValue] = useState(() => {
@@ -88,7 +89,9 @@ const GuideModal = ({
       >
         {/* Header */}
         <div className={`${getThemeColor()} p-6`}>
-          <h2 className="text-2xl font-bold text-white mb-2">{guide.title}</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            <TranslatableText>{guide.title}</TranslatableText>
+          </h2>
           <div className="flex space-x-4">
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -97,7 +100,11 @@ const GuideModal = ({
               className="flex items-center px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
             >
               <span className="mr-2">
-                {isBookmarked(guide) ? "🔖 Bookmarked" : "🏷️ Bookmark"}
+                {isBookmarked(guide) ? (
+                  <TranslatableText>🔖 Bookmarked</TranslatableText>
+                ) : (
+                  <TranslatableText>🏷️ Bookmark</TranslatableText>
+                )}
               </span>
             </motion.button>
 
@@ -107,15 +114,19 @@ const GuideModal = ({
               onClick={() => handleDownload(guide)}
               className="flex items-center px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
             >
-              <span className="mr-2">📥 Download</span>
+              <span className="mr-2">
+                <TranslatableText>📥 Download</TranslatableText>
+              </span>
             </motion.button>
 
             <WhatsappShareButton
               url={window.location.href}
-              title={`Check out this disaster guide: ${guide.title}`}
+              title={`Check out this disaster guide: ${guide.title}`} // Note: WhatsApp share title can't use JSX
               className="flex items-center px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
             >
-              <span className="mr-2">📱 Share</span>
+              <span className="mr-2">
+                <TranslatableText>📱 Share</TranslatableText>
+              </span>
               <WhatsappIcon size={20} round />
             </WhatsappShareButton>
           </div>
@@ -132,7 +143,7 @@ const GuideModal = ({
                     animate={{ opacity: 1, y: 0 }}
                     className="text-3xl font-bold mb-6 text-white"
                   >
-                    {children}
+                    <TranslatableText>{children}</TranslatableText>
                   </motion.h1>
                 ),
                 h2: ({ children }) => (
@@ -143,7 +154,7 @@ const GuideModal = ({
                       activeTab === "pre" ? "text-blue-400" : "text-orange-400"
                     }`}
                   >
-                    {children}
+                    <TranslatableText>{children}</TranslatableText>
                   </motion.h2>
                 ),
                 ul: ({ children }) => (
@@ -169,7 +180,9 @@ const GuideModal = ({
                     >
                       •
                     </span>
-                    <span className="text-gray-300">{children}</span>
+                    <span className="text-gray-300">
+                      <TranslatableText>{children}</TranslatableText>
+                    </span>
                   </motion.li>
                 ),
                 blockquote: ({ children }) => (
@@ -182,7 +195,7 @@ const GuideModal = ({
                         : "border-orange-500 bg-orange-500/10"
                     } pl-4 py-2 my-4 text-gray-300`}
                   >
-                    {children}
+                    <TranslatableText>{children}</TranslatableText>
                   </motion.blockquote>
                 ),
                 code: ({ children }) => (
@@ -191,8 +204,15 @@ const GuideModal = ({
                     animate={{ opacity: 1 }}
                     className="bg-gray-800 rounded-lg p-4 my-4"
                   >
-                    <pre className="text-gray-300">{children}</pre>
+                    <pre className="text-gray-300">
+                      <TranslatableText>{children}</TranslatableText>
+                    </pre>
                   </motion.div>
+                ),
+                p: ({ children }) => (
+                  <p className="mb-4 text-gray-300">
+                    <TranslatableText>{children}</TranslatableText>
+                  </p>
                 ),
               }}
             >
@@ -629,7 +649,9 @@ const DisasterBox = ({ item, activeTab, onGuideSelect }) => (
       <div className="flex items-center gap-2 mb-2">
         <span className="text-2xl">{item.icon}</span>
         <div>
-          <h3 className="text-sm font-semibold text-white">{item.name}</h3>
+          <h3 className="text-sm font-semibold text-white">
+            <TranslatableText>{item.name}</TranslatableText>
+          </h3>
           <span
             className={`text-xs px-1.5 py-0.5 rounded-full ${
               activeTab === "pre"
@@ -637,7 +659,11 @@ const DisasterBox = ({ item, activeTab, onGuideSelect }) => (
                 : "bg-orange-500/20 text-orange-100"
             }`}
           >
-            {activeTab === "pre" ? "Prevention" : "Recovery"}
+            {activeTab === "pre" ? (
+              <TranslatableText>Prevention</TranslatableText>
+            ) : (
+              <TranslatableText>Recovery</TranslatableText>
+            )}
           </span>
         </div>
       </div>
@@ -652,7 +678,9 @@ const DisasterBox = ({ item, activeTab, onGuideSelect }) => (
               className="flex items-center space-x-1 text-xs text-white/80 hover:text-white transition-colors cursor-pointer"
             >
               <span>•</span>
-              <span>{guide.title}</span>
+              <span>
+                <TranslatableText>{guide.title}</TranslatableText>
+              </span>
             </motion.div>
           ))
           .slice(0, 2)}
@@ -661,7 +689,7 @@ const DisasterBox = ({ item, activeTab, onGuideSelect }) => (
       {/* Action Button */}
       <div className="mt-auto">
         <button className="w-full py-1.5 px-3 bg-white/10 hover:bg-white/20 rounded-md text-xs text-white transition-colors">
-          View Guide
+          <TranslatableText>View Guide</TranslatableText>
         </button>
       </div>
     </div>
@@ -678,7 +706,7 @@ const DisasterSection = ({ section, activeTab, onGuideSelect }) => (
   <div className="mb-8">
     <h2 className="text-2xl font-bold text-black mb-4 flex items-center gap-3">
       <span className="text-3xl">{section.icon}</span>
-      {section.title}
+      <TranslatableText>{section.title}</TranslatableText>
     </h2>
     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
       {section.items.map((item) => (
@@ -791,15 +819,15 @@ function Mitigation() {
           <div className="max-w-2xl mx-auto relative">
             <input
               type="text"
-              placeholder="Search for disasters, guides, or keywords..."
+              placeholder="Search for disasters, guides, or keywords..." // We can't use JSX in placeholder, but this will be handled by browser translation
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full px-4 py-3 pl-12 pr-10 
+              className="w-full px-4 py-3 pl-12 pr-10
                 bg-[#F8F8F8] text-black
                 placeholder-gray-400
-                border border-gray-700 
+                border border-gray-700
                 rounded-xl
-                focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 
+                focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20
                 transition-all duration-300"
             />
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -841,10 +869,12 @@ function Mitigation() {
         </div>
         <div className="max-w-4xl mx-auto mb-8 text-center">
           <h1 className="text-4xl font-bold text-black mb-4">
-            Disaster Management Guidelines
+            <TranslatableText>Disaster Management Guidelines</TranslatableText>
           </h1>
           <p className="text-gray-500 text-lg">
-            Comprehensive guides for disaster preparedness and recovery
+            <TranslatableText>
+              Comprehensive guides for disaster preparedness and recovery
+            </TranslatableText>
           </p>
         </div>
 
@@ -858,7 +888,7 @@ function Mitigation() {
                 : "bg-gray-800 text-gray-300 hover:bg-gray-700"
             }`}
           >
-            Prevention & Preparedness
+            <TranslatableText>Prevention & Preparedness</TranslatableText>
           </button>
           <button
             onClick={() => setActiveTab("post")}
@@ -868,7 +898,7 @@ function Mitigation() {
                 : "bg-gray-800 text-gray-300 hover:bg-gray-700"
             }`}
           >
-            Recovery & Response
+            <TranslatableText>Recovery & Response</TranslatableText>
           </button>
         </div>
 
