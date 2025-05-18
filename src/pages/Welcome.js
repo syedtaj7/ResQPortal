@@ -40,7 +40,7 @@ function Welcome() {
             transition={{ duration: 0.8 }}
           >
             <motion.h1
-              className="text-5xl sm:text-6xl font-bold mb-6 leading-tight"
+              className="text-5xl sm:text-6xl font-bold mb-6 leading-tight text-yellow-500 dark:text-yellow-400"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.8 }}
