@@ -10,243 +10,391 @@ function Welcome() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
 
-  // Updated and expanded icon elements
-  const iconElements = [
-    // Existing icons...
-    {
-      svg: (
-        <path d="M12 21c-3.17 0-6.34-.77-9.25-2.31L1 18v-3.75L3.75 12 1 9.75V6l1.75-.69C5.66 3.77 8.83 3 12 3s6.34.77 9.25 2.31L23 6v3.75L20.25 12 23 14.25V18l-1.75.69C18.34 20.23 15.17 21 12 21z" />
-      ),
-      top: "10%",
-      left: "35%",
-      rotation: "-5deg",
-      color: "#EF4444", // red
-    },
-    // Add new scattered icons
-    {
-      svg: (
-        <path d="M19 14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H5C3.9 4 3 4.9 3 6v6c0 1.1.9 2 2 2h1v2h2v-2h8v2h2v-2h1zm-6-3H7V7h6v4zM5 13V7h2v6H5zm12 0h-2V7h2v6z" />
-      ),
-      top: "15%",
-      right: "25%",
-      rotation: "15deg",
-      color: "#3B82F6",
-    },
-    {
-      svg: (
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-14h2v7h-2zm0 8h2v2h-2z" />
-      ),
-      top: "75%",
-      left: "15%",
-      rotation: "-15deg",
-      color: "#F59E0B",
-    },
-    {
-      svg: (
-        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
-      ),
-      top: "30%",
-      right: "10%",
-      rotation: "20deg",
-      color: "#10B981",
-    },
-    {
-      svg: (
-        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
-      ),
-      bottom: "20%",
-      right: "25%",
-      rotation: "-10deg",
-      color: "#8B5CF6",
-    },
-    {
-      svg: (
-        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-2h2v2zm0-4h-2V7h2v6z" />
-      ),
-      top: "45%",
-      left: "5%",
-      rotation: "8deg",
-      color: "#EC4899",
-    },
-    {
-      svg: (
-        <path d="M17.5 3H6.5C5.12 3 4 4.12 4 5.5v13C4 19.88 5.12 21 6.5 21h11c1.38 0 2.5-1.12 2.5-2.5v-13C20 4.12 18.88 3 17.5 3zM12 17.5c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5z" />
-      ),
-      bottom: "15%",
-      left: "40%",
-      rotation: "-12deg",
-      color: "#6366F1",
-    },
-    {
-      svg: (
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v2h-2v-2zm0-10h2v8h-2V6z" />
-      ),
-      top: "60%",
-      right: "15%",
-      rotation: "25deg",
-      color: "#EF4444",
-    },
-    {
-      svg: (
-        <path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" />
-      ),
-      bottom: "30%",
-      left: "20%",
-      rotation: "-20deg",
-      color: "#059669",
-    },
-  ];
-
   return (
     <div
       className={`min-h-screen flex flex-col relative overflow-hidden w-full ${
-        darkMode
-          ? "bg-gradient-to-br from-dark-bg-primary via-dark-bg-secondary to-dark-bg-tertiary"
-          : "bg-gradient-to-br from-gray-50 via-gray-50 to-yellow-50"
+        darkMode ? "bg-black text-white" : "bg-gray-100 text-gray-900"
       }`}
+      style={{
+        backgroundImage: `url('/resqbg.jpg')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundBlendMode: darkMode ? "darken" : "lighten",
+        backgroundColor: darkMode
+          ? "rgba(0, 0, 0, 0.9)"
+          : "rgba(255, 255, 255, 0.9)",
+        backgroundAttachment: "fixed",
+      }}
     >
       <Header />
 
-      {/* Animated background elements */}
-      <motion.div
-        className="absolute inset-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-      >
-        <div
-          className={`absolute top-0 right-0 w-1/3 h-1/3 ${
-            darkMode ? "bg-yellow-600" : "bg-yellow-200"
-          } rounded-full filter blur-[80px] opacity-20 animate-pulse`}
-        />
-        <div
-          className={`absolute bottom-0 left-0 w-1/3 h-1/3 ${
-            darkMode ? "bg-yellow-700" : "bg-yellow-300"
-          } rounded-full filter blur-[80px] opacity-20 animate-pulse delay-700`}
-        />
-      </motion.div>
-
-      {/* Animated icons */}
-      {iconElements.map((icon, index) => (
-        <motion.div
-          key={index}
-          className="absolute"
-          initial={{
-            opacity: 0,
-            scale: 0,
-            rotate: -180,
-            x: Math.random() * 100 - 50, // Random initial position
-          }}
-          animate={{
-            opacity: 0.7,
-            scale: 1,
-            rotate: parseInt(icon.rotation),
-            x: 0,
-          }}
-          transition={{
-            type: "spring",
-            stiffness: 100,
-            damping: 12,
-            delay: index * 0.1, // Staggered animation
-            duration: 1.2,
-          }}
-          whileHover={{
-            scale: 1.2,
-            opacity: 1,
-            rotate: parseInt(icon.rotation) + 360,
-            transition: {
-              duration: 0.8,
-              type: "spring",
-              stiffness: 200,
-            },
-          }}
-          style={{
-            top: icon.top,
-            left: icon.left,
-            right: icon.right,
-            bottom: icon.bottom,
-            zIndex: 1,
-          }}
-        >
-          <svg
-            width="40"
-            height="40"
-            viewBox="0 0 24 24"
-            fill={icon.color}
-            className="drop-shadow-lg filter hover:drop-shadow-2xl transition-all duration-300"
-          >
-            {icon.svg}
-          </svg>
-        </motion.div>
-      ))}
-
       {/* Main content */}
-      <main className="flex-grow flex items-center justify-center w-full px-4 sm:px-6 md:px-8 relative z-10">
-        <motion.div
-          className="text-center max-w-3xl w-full mx-auto"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-        >
+      <main className="flex-grow flex items-center w-full px-4 sm:px-6 md:px-8 relative z-10 md:ml-48 pr-8 md:pr-16 lg:pr-32">
+        <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-8 py-12 px-4 md:px-8 lg:px-12 max-w-5xl">
+          {/* Left side - Text content */}
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{
-              type: "spring",
-              stiffness: 260,
-              damping: 20,
-              delay: 0.8,
-            }}
+            className="lg:w-2/3 text-left max-w-xl"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-yellow-600 to-yellow-400 bg-clip-text text-transparent text-center mx-auto">
-              ResQPortal
-            </h1>
-          </motion.div>
-
-          <motion.div
-            className="text-xl md:text-2xl text-gray-600 dark:text-dark-text-secondary mb-8 text-center w-full mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2 }}
-          >
-            <TranslatableText as="p">
-              Empowering communities for effective disaster response and
-              coordination
-            </TranslatableText>
-          </motion.div>
-
-          <motion.div
-            className="flex flex-col md:flex-row gap-4 justify-center items-center w-full mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.5 }}
-          >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-yellow-500 text-white rounded-xl font-medium shadow-lg hover:bg-yellow-600 transition-colors min-w-[150px]"
-              onClick={() => navigate("/Home")}
+            <motion.h1
+              className="text-5xl sm:text-6xl font-bold mb-6 leading-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
             >
-              <TranslatableText>Get Started</TranslatableText>
-              <motion.span
-                className="inline-block ml-2"
-                animate={{ x: [0, 5, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
+              <TranslatableText>ResQPortal</TranslatableText>
+            </motion.h1>
+
+            <motion.div
+              className="text-lg sm:text-xl mb-8 max-w-xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+            >
+              <TranslatableText as="p">
+                Connect and live more safely. ResQPortal is a personal safety
+                network that empowers you to protect yourself and the people and
+                places you care about.
+              </TranslatableText>
+            </motion.div>
+
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 0.8 }}
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-3 bg-yellow-500 text-white rounded-xl font-medium shadow-lg hover:bg-yellow-600 transition-colors"
+                onClick={() => navigate("/Home")}
               >
-                →
-              </motion.span>
-            </motion.button>
+                <TranslatableText>Get Started</TranslatableText>
+                <motion.span
+                  className="inline-block ml-2"
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  →
+                </motion.span>
+              </motion.button>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-gray-800 text-white rounded-xl font-medium shadow-lg hover:bg-gray-700 transition-colors min-w-[150px]"
-              onClick={() => navigate("/community-help")}
-            >
-              <TranslatableText>Sign In</TranslatableText>
-            </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-3 bg-gray-800 text-white rounded-xl font-medium shadow-lg hover:bg-gray-700 transition-colors"
+                onClick={() => navigate("/community-help")}
+              >
+                <TranslatableText>Sign In</TranslatableText>
+              </motion.button>
+            </motion.div>
           </motion.div>
-        </motion.div>
+
+          {/* Right side - Image */}
+          <motion.div
+            className="lg:w-1/3 flex justify-start items-center"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <motion.div
+              className="relative rounded-[40px] overflow-hidden shadow-2xl border-[8px] border-gray-900 mx-4 md:mx-8 lg:mx-0"
+              style={{
+                maxWidth: "260px",
+                height: "auto",
+                aspectRatio: "9/19",
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+                margin: "0 auto",
+                marginRight: "auto",
+                marginLeft: "0",
+              }}
+              initial={{ y: 20 }}
+              animate={{ y: [0, -10, 0] }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+              }}
+            >
+              {/* Phone notch removed */}
+
+              {/* Status bar */}
+              <div className="absolute top-0 left-0 right-0 bg-transparent text-white px-4 pt-1.5 pb-1 flex items-center justify-between text-xs z-10">
+                <div className="flex items-center w-16">
+                  {/* Empty left side */}
+                </div>
+                <div className="flex items-center space-x-2">
+                  {/* Signal indicators removed */}
+                  <span className="font-medium">3:17</span>
+                </div>
+              </div>
+
+              {/* Map interface */}
+              <div className="w-full h-full bg-gray-100 flex flex-col">
+                {/* App header */}
+                <div className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white p-3 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center">
+                    <svg
+                      className="w-5 h-5 mr-2 text-gray-700 dark:text-gray-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                      />
+                    </svg>
+                    <span className="font-semibold text-gray-800 dark:text-white">
+                      <TranslatableText>ResQPortal</TranslatableText>
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <svg
+                      className="w-5 h-5 mr-2 text-gray-700 dark:text-gray-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                    <svg
+                      className="w-5 h-5 text-gray-700 dark:text-gray-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6h16M4 12h16M4 18h16"
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Map content */}
+                <div className="flex-grow relative bg-sky-100 overflow-hidden">
+                  {/* India map container */}
+                  <div className="relative w-full h-full">
+                    {/* India SVG map */}
+                    <div className="w-full h-full flex items-center justify-center p-1 pb-12">
+                      <img
+                        src="/india.svg"
+                        alt="India Map"
+                        className="w-[95%] h-[95%] object-contain mt-[-20px]"
+                        style={{
+                          filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.1))",
+                          transform: "scale(1.1)",
+                        }}
+                      />
+                    </div>
+
+                    {/* Overlay markers for danger zones */}
+                    <div className="absolute top-[40%] left-[10%] w-8 h-8 rounded-full bg-red-500 bg-opacity-70 border-2 border-red-600 flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 z-10 shadow-md">
+                      <span className="text-white text-[8px] font-bold">
+                        <TranslatableText>Gujarat</TranslatableText>
+                      </span>
+                    </div>
+
+                    <div className="absolute top-[65%] left-[25%] w-8 h-8 rounded-full bg-red-500 bg-opacity-70 border-2 border-red-600 flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 z-10 shadow-md">
+                      <span className="text-white text-[8px] font-bold">
+                        <TranslatableText>Kerala</TranslatableText>
+                      </span>
+                    </div>
+
+                    <div className="absolute top-[48%] left-[55%] w-8 h-8 rounded-full bg-red-500 bg-opacity-70 border-2 border-red-600 flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 z-10 shadow-md">
+                      <span className="text-white text-[8px] font-bold">
+                        <TranslatableText>Odisha</TranslatableText>
+                      </span>
+                    </div>
+
+                    {/* Overlay markers for safe zones */}
+                    <div className="absolute top-[40%] left-[35%] w-7 h-7 rounded-full bg-green-500 bg-opacity-70 border-2 border-green-600 flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 z-10 shadow-md">
+                      <span className="text-white text-[8px] font-bold">
+                        <TranslatableText>MP</TranslatableText>
+                      </span>
+                    </div>
+
+                    <div className="absolute top-[60%] left-[22%] w-7 h-7 rounded-full bg-green-500 bg-opacity-70 border-2 border-green-600 flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 z-10 shadow-md">
+                      <span className="text-white text-[8px] font-bold">
+                        <TranslatableText>KA</TranslatableText>
+                      </span>
+                    </div>
+
+                    <div className="absolute top-[49%] left-[25%] w-7 h-7 rounded-full bg-green-500 bg-opacity-70 border-2 border-green-600 flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 z-10 shadow-md">
+                      <span className="text-white text-[8px] font-bold">
+                        <TranslatableText>MH</TranslatableText>
+                      </span>
+                    </div>
+
+                    {/* Overlay markers for warning zones */}
+                    <div className="absolute top-[25%] left-[43%] w-7 h-7 rounded-full bg-yellow-500 bg-opacity-70 border-2 border-yellow-600 flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 z-10 shadow-md">
+                      <span className="text-gray-800 text-[8px] font-bold">
+                        <TranslatableText>UK</TranslatableText>
+                      </span>
+                    </div>
+
+                    <div className="absolute top-[42%] left-[70%] w-7 h-7 rounded-full bg-yellow-500 bg-opacity-70 border-2 border-yellow-600 flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 z-10 shadow-md">
+                      <span className="text-gray-800 text-[8px] font-bold">
+                        <TranslatableText>WB</TranslatableText>
+                      </span>
+                    </div>
+
+                    {/* Current location marker */}
+                    <div className="absolute top-[40%] left-[48%] w-3 h-3 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 z-20 animate-pulse shadow-md">
+                      <div className="w-5 h-5 rounded-full bg-blue-400 bg-opacity-30 absolute"></div>
+                    </div>
+                  </div>
+
+                  {/* Map controls */}
+                  <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-md p-2">
+                    <div className="flex flex-col space-y-2">
+                      <button className="w-8 h-8 bg-white dark:bg-gray-700 rounded-full shadow flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-gray-700 dark:text-gray-200"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                          />
+                        </svg>
+                      </button>
+                      <button className="w-8 h-8 bg-white dark:bg-gray-700 rounded-full shadow flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-gray-700 dark:text-gray-200"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M20 12H4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Legend */}
+                  <div className="absolute bottom-2 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-md p-2 z-30">
+                    <div className="text-xs font-semibold mb-1 text-gray-800 dark:text-white">
+                      <TranslatableText>Map Legend</TranslatableText>
+                    </div>
+                    <div className="flex items-center mb-1">
+                      <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
+                      <span className="text-xs text-gray-700 dark:text-gray-200">
+                        <TranslatableText>Danger Zone</TranslatableText>
+                      </span>
+                    </div>
+                    <div className="flex items-center mb-1">
+                      <div className="w-3 h-3 rounded-full bg-yellow-500 mr-1"></div>
+                      <span className="text-xs text-gray-700 dark:text-gray-200">
+                        <TranslatableText>Warning Zone</TranslatableText>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
+                      <span className="text-xs text-gray-700 dark:text-gray-200">
+                        <TranslatableText>Safe Zone</TranslatableText>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom navigation */}
+                <div className="bg-white dark:bg-gray-800 p-3 flex justify-around items-center border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex flex-col items-center">
+                    <svg
+                      className="w-6 h-6 text-yellow-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    </svg>
+                    <span className="text-xs text-yellow-500 dark:text-yellow-400 font-medium">
+                      <TranslatableText>Home</TranslatableText>
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <svg
+                      className="w-6 h-6 text-gray-500 dark:text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                      />
+                    </svg>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <TranslatableText>Map</TranslatableText>
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <svg
+                      className="w-6 h-6 text-gray-500 dark:text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                      />
+                    </svg>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <TranslatableText>Alerts</TranslatableText>
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <svg
+                      className="w-6 h-6 text-gray-500 dark:text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <TranslatableText>Helplines</TranslatableText>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
       </main>
     </div>
   );
