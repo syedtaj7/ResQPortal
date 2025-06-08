@@ -1285,7 +1285,7 @@ function Home() {
         )}
 
         {/* Search Bar */}
-        <div className="absolute top-4 left-4 z-[1000] w-80 animate-fade-in-down">
+        <div className="absolute top-20 left-4 z-[1000] w-80 animate-fade-in-down">
           <div className="relative transform transition-all duration-300 hover:scale-105">
             <input
               type="text"
