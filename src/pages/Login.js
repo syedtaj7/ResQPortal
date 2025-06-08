@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 import TranslatableText from '../components/TranslatableText';
 import LanguageSelector from '../components/LanguageSelector';
-import ThemeToggle from '../components/ThemeToggle';
 
 const Login = () => {
   const { user, signIn, signUp, signInWithGoogle } = useAuth();
-  const { darkMode } = useTheme();
   const location = useLocation();
   
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -66,14 +63,9 @@ const Login = () => {
     }
   };
 
-  // Animation classes
-  const slideIn = "transform transition-all duration-500 ease-out";
-
   return (
     <motion.div
-      className={`min-h-screen flex flex-col ${
-        darkMode ? 'bg-gray-900' : 'bg-gray-100'
-      }`}
+      className="min-h-screen flex flex-col bg-gray-900"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
@@ -104,14 +96,14 @@ const Login = () => {
 
       {/* Header with logo and controls */}
       <motion.header
-        className={`w-full ${darkMode ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-sm border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} shadow-sm relative z-10`}
+        className="w-full bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 shadow-sm relative z-10"
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <motion.h1
-            className={`text-2xl font-bold ${darkMode ? 'text-yellow-400' : 'text-gray-900'}`}
+            className="text-2xl font-bold text-yellow-400"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -124,7 +116,6 @@ const Login = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             <LanguageSelector />
-            <ThemeToggle />
           </motion.div>
         </div>
       </motion.header>
@@ -170,11 +161,7 @@ const Login = () => {
 
           {/* Login/Register Card */}
           <motion.div
-            className={`relative ${
-              darkMode ? 'bg-gray-800/90' : 'bg-white/90'
-            } backdrop-blur-sm rounded-2xl shadow-2xl border ${
-              darkMode ? 'border-gray-700' : 'border-gray-200'
-            } p-8 overflow-hidden`}
+            className="relative bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700 p-8 overflow-hidden"
             initial={{ y: 50, opacity: 0, rotateX: -15 }}
             animate={{ y: 0, opacity: 1, rotateX: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
@@ -195,9 +182,7 @@ const Login = () => {
               <AnimatePresence mode="wait">
                 <motion.h2
                   key={isLoginMode ? 'login' : 'signup'}
-                  className={`text-3xl font-bold mb-2 ${
-                    darkMode ? 'text-white' : 'text-gray-900'
-                  }`}
+                  className="text-3xl font-bold mb-2 text-white"
                   initial={{ opacity: 0, y: 20, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -20, scale: 0.9 }}
@@ -212,9 +197,7 @@ const Login = () => {
               <AnimatePresence mode="wait">
                 <motion.p
                   key={isLoginMode ? 'login-desc' : 'signup-desc'}
-                  className={`text-sm ${
-                    darkMode ? 'text-gray-400' : 'text-gray-600'
-                  }`}
+                  className="text-sm text-gray-400"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -269,9 +252,7 @@ const Login = () => {
                     transition={{ duration: 0.4 }}
                   >
                     <motion.label
-                      className={`block text-sm font-medium mb-1 ${
-                        darkMode ? 'text-gray-300' : 'text-gray-700'
-                      }`}
+                      className="block text-sm font-medium mb-1 text-gray-300"
                       initial={{ x: -10, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ duration: 0.3, delay: 0.1 }}
@@ -282,11 +263,7 @@ const Login = () => {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className={`w-full px-3 py-2.5 border rounded-lg transition-all duration-300 ${
-                        darkMode
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-yellow-500 focus:border-yellow-500'
-                          : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-yellow-500 focus:border-yellow-500'
-                      }`}
+                      className="w-full px-3 py-2.5 border rounded-lg transition-all duration-300 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-yellow-500 focus:border-yellow-500"
                       placeholder="Enter your full name"
                       required={!isLoginMode}
                       initial={{ scale: 0.95, opacity: 0 }}
@@ -304,9 +281,7 @@ const Login = () => {
                 transition={{ duration: 0.5, delay: 0.9 }}
               >
                 <motion.label
-                  className={`block text-sm font-medium mb-1 ${
-                    darkMode ? 'text-gray-300' : 'text-gray-700'
-                  }`}
+                  className="block text-sm font-medium mb-1 text-gray-300"
                   initial={{ y: -5, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.3, delay: 1.0 }}
@@ -317,11 +292,7 @@ const Login = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full px-3 py-2.5 border rounded-lg transition-all duration-300 ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-yellow-500 focus:border-yellow-500'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-yellow-500 focus:border-yellow-500'
-                  }`}
+                  className="w-full px-3 py-2.5 border rounded-lg transition-all duration-300 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-yellow-500 focus:border-yellow-500"
                   placeholder="Enter your email"
                   required
                   initial={{ scale: 0.95, opacity: 0 }}
@@ -337,9 +308,7 @@ const Login = () => {
                 transition={{ duration: 0.5, delay: 1.0 }}
               >
                 <motion.label
-                  className={`block text-sm font-medium mb-1 ${
-                    darkMode ? 'text-gray-300' : 'text-gray-700'
-                  }`}
+                  className="block text-sm font-medium mb-1 text-gray-300"
                   initial={{ y: -5, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.3, delay: 1.1 }}
@@ -350,11 +319,7 @@ const Login = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full px-3 py-2.5 border rounded-lg transition-all duration-300 ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-yellow-500 focus:border-yellow-500'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-yellow-500 focus:border-yellow-500'
-                  }`}
+                  className="w-full px-3 py-2.5 border rounded-lg transition-all duration-300 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-yellow-500 focus:border-yellow-500"
                   placeholder="Enter your password"
                   required
                   initial={{ scale: 0.95, opacity: 0 }}
@@ -415,13 +380,13 @@ const Login = () => {
               transition={{ duration: 0.5, delay: 1.4 }}
             >
               <motion.div
-                className={`flex-1 border-t ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
+                className="flex-1 border-t border-gray-600"
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 0.6, delay: 1.5 }}
               />
               <motion.span
-                className={`px-4 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}
+                className="px-4 text-sm text-gray-400"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 1.6 }}
@@ -429,7 +394,7 @@ const Login = () => {
                 <TranslatableText>or</TranslatableText>
               </motion.span>
               <motion.div
-                className={`flex-1 border-t ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
+                className="flex-1 border-t border-gray-600"
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 0.6, delay: 1.5 }}
@@ -440,11 +405,7 @@ const Login = () => {
             <motion.button
               onClick={handleGoogleAuth}
               disabled={isLoading}
-              className={`w-full flex items-center justify-center px-4 py-2.5 border rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
-                darkMode
-                  ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
+              className="w-full flex items-center justify-center px-4 py-2.5 border rounded-lg font-medium transition-all duration-300 relative overflow-hidden border-gray-600 text-gray-300 hover:bg-gray-700"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.5, delay: 1.7 }}
@@ -479,7 +440,7 @@ const Login = () => {
 
             {/* Animated toggle login/register */}
             <motion.p
-              className={`mt-6 text-center text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}
+              className="mt-6 text-center text-sm text-gray-400"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 1.9 }}

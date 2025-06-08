@@ -699,7 +699,7 @@ function Relocation() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      <main className="relative z-10 pt-24 pb-16">
+      <main className="relative z-10 pt-32 pb-16">
         {/* Modern Hero Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
           <div className="text-center mb-12">

@@ -3,19 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import TranslatableText from "./TranslatableText";
 import LanguageSelector from "./LanguageSelector";
-import ThemeToggle from "./ThemeToggle";
-import { useTheme } from "../contexts/ThemeContext";
 
 const WelcomeHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { darkMode } = useTheme();
   const navigate = useNavigate();
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 bg-transparent p-4">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-transparent p-4">
       <div className="max-w-7xl mx-auto">
         <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-full px-6 py-3 shadow-2xl">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             {/* Logo */}
             <div className="flex items-center">
               <h1 className="text-2xl font-bold text-white cursor-pointer drop-shadow-lg"
@@ -25,21 +22,20 @@ const WelcomeHeader = () => {
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-6">
+            <div className="hidden lg:flex items-center space-x-4">
               <LanguageSelector />
-              <ThemeToggle />
 
               {/* Login/Signup Buttons */}
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
                 <button
                   onClick={() => navigate("/login")}
-                  className="px-6 py-2 text-white border border-white/30 rounded-full font-medium transition-all duration-300 hover:bg-white/10 hover:border-white/50 backdrop-blur-sm"
+                  className="px-4 py-2 text-white border border-white/30 rounded-full font-medium transition-all duration-300 hover:bg-white/15 hover:border-white/50 backdrop-blur-sm text-sm"
                 >
                   <TranslatableText>Sign In</TranslatableText>
                 </button>
                 <button
                   onClick={() => navigate("/login")}
-                  className="px-6 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-black rounded-full font-medium transition-all duration-300 hover:from-yellow-400 hover:to-orange-400 hover:scale-105 shadow-lg"
+                  className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-black rounded-full font-medium transition-all duration-300 hover:from-yellow-400 hover:to-orange-400 hover:scale-105 shadow-lg text-sm"
                 >
                   <TranslatableText>Get Started</TranslatableText>
                 </button>
@@ -47,14 +43,13 @@ const WelcomeHeader = () => {
             </div>
 
             {/* Mobile menu button */}
-            <div className="lg:hidden flex items-center space-x-3">
+            <div className="lg:hidden flex items-center space-x-2">
               <LanguageSelector />
-              <ThemeToggle />
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 rounded-full text-white hover:bg-white/10 border border-white/20 hover:border-white/40 transition-all duration-300"
+                className="p-2 rounded-full text-white hover:bg-white/15 border border-white/30 hover:border-white/50 bg-white/10 backdrop-blur-sm transition-all duration-300"
               >
-                {isOpen ? <X size={24} /> : <Menu size={24} />}
+                {isOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
           </div>

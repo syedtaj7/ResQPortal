@@ -1030,7 +1030,7 @@ function CommunityHelp() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-yellow-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      <main className="relative z-10 pt-24 pb-16 px-4 md:px-6 lg:px-8">
+      <main className="relative z-10 pt-32 pb-16 px-4 md:px-6 lg:px-8">
         {" "}
         {/* Added responsive padding */}
         {!user ? (

@@ -2,19 +2,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import TranslatableText from "./TranslatableText";
 import LanguageSelector from "./LanguageSelector";
-import ThemeToggle from "./ThemeToggle";
-import { useTheme } from "../contexts/ThemeContext";
 
 function Footer() {
-  const { darkMode } = useTheme();
 
   return (
     <footer
-      className={`${
-        darkMode
-          ? "bg-dark-bg-secondary text-dark-text-primary"
-          : "bg-[#E5E4E2] text-black"
-      } py-8 md:ml-48`}
+      className="bg-gray-900 text-white py-8 md:ml-48"
     >
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -140,7 +133,6 @@ function Footer() {
             <div className="language-selector">
               <LanguageSelector />
             </div>
-            <ThemeToggle />
           </div>
         </div>
       </div>

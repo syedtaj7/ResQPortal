@@ -3,8 +3,6 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, LogOut, User } from "lucide-react";
 import TranslatableText from "./TranslatableText";
 import LanguageSelector from "./LanguageSelector";
-import ThemeToggle from "./ThemeToggle";
-import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
 
 // Navigation items matching Google Maps style - moved outside component for performance
@@ -21,7 +19,6 @@ const NAVIGATION_ITEMS = [
 const Header = React.memo(({ transparent = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { darkMode } = useTheme();
   const { user, userProfile, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,10 +56,10 @@ const Header = React.memo(({ transparent = false }) => {
 
 
   return (
-    <header className="w-full bg-transparent sticky top-0 z-50 p-4">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-transparent p-4">
       <div className="max-w-7xl mx-auto">
         <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-full px-6 py-3 shadow-2xl">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             {/* Logo */}
             <div className="flex items-center">
               <h1 className="text-xl font-bold text-white drop-shadow-lg cursor-pointer"
@@ -72,19 +69,19 @@ const Header = React.memo(({ transparent = false }) => {
             </div>
 
             {/* Center Navigation Pills */}
-            <nav className="hidden lg:flex items-center space-x-1 bg-white/10 backdrop-blur-md rounded-full p-1 shadow-inner nav-container">
+            <nav className="hidden lg:flex items-center space-x-1 bg-white/10 backdrop-blur-md rounded-full p-1.5 shadow-inner nav-container">
             {NAVIGATION_ITEMS.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
-                className={`nav-pill relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center space-x-2 ${
+                className={`nav-pill relative px-3 py-2 rounded-full text-xs font-medium transition-all duration-300 flex items-center space-x-1.5 whitespace-nowrap ${
                   isActiveRoute(item.path)
-                    ? 'bg-white/20 text-white shadow-md nav-active backdrop-blur-sm border border-white/30'
-                    : 'text-white/80 hover:text-white hover:bg-white/10 hover:shadow-sm hover:border hover:border-white/20'
+                    ? 'bg-white/25 text-white shadow-lg nav-active backdrop-blur-sm border border-white/40'
+                    : 'text-white/80 hover:text-white hover:bg-white/15 hover:shadow-md hover:border hover:border-white/30'
                 }`}
               >
-                <span className="text-base transition-transform duration-200 hover:scale-110">{item.icon}</span>
-                <span className="font-medium"><TranslatableText>{item.label}</TranslatableText></span>
+                <span className="text-sm transition-transform duration-200 hover:scale-110">{item.icon}</span>
+                <span className="font-medium text-xs"><TranslatableText>{item.label}</TranslatableText></span>
                 {isActiveRoute(item.path) && (
                   <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 pointer-events-none animate-pulse" />
                 )}
@@ -95,44 +92,33 @@ const Header = React.memo(({ transparent = false }) => {
             {/* Right side controls */}
             <div className="hidden lg:flex items-center space-x-3">
               <LanguageSelector />
-              <ThemeToggle />
 
               {/* User Menu */}
               {user && (
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-200 text-white/80 hover:text-white hover:bg-white/10 border border-white/20 hover:border-white/40"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-200 text-white/80 hover:text-white hover:bg-white/15 border border-white/30 hover:border-white/50 bg-white/10 backdrop-blur-sm text-xs"
                 >
-                  <User size={20} />
-                  <span className="text-sm font-medium">
+                  <User size={16} />
+                  <span className="text-xs font-medium">
                     {userProfile?.name || user.email?.split('@')[0] || 'User'}
                   </span>
                 </button>
 
                 {/* User dropdown menu */}
                 {showUserMenu && (
-                  <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg border ${
-                    darkMode
-                      ? 'bg-gray-800 border-gray-700'
-                      : 'bg-white border-gray-200'
-                  } z-50`}>
+                  <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg border bg-gray-800 border-gray-700 z-50">
                     <div className="py-1">
-                      <div className={`px-4 py-2 text-sm border-b ${
-                        darkMode ? 'text-gray-300 border-gray-700' : 'text-gray-700 border-gray-200'
-                      }`}>
+                      <div className="px-4 py-2 text-sm border-b text-gray-300 border-gray-700">
                         <p className="font-medium">{userProfile?.name || 'User'}</p>
-                        <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        <p className="text-xs text-gray-400">
                           {user.email}
                         </p>
                       </div>
                       <button
                         onClick={handleLogout}
-                        className={`w-full text-left px-4 py-2 text-sm flex items-center space-x-2 transition-colors ${
-                          darkMode
-                            ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                        }`}
+                        className="w-full text-left px-4 py-2 text-sm flex items-center space-x-2 transition-colors text-gray-300 hover:bg-gray-700 hover:text-white"
                       >
                         <LogOut size={16} />
                         <span><TranslatableText>Sign Out</TranslatableText></span>
@@ -147,12 +133,11 @@ const Header = React.memo(({ transparent = false }) => {
             {/* Mobile menu button */}
             <div className="lg:hidden flex items-center space-x-2">
               <LanguageSelector />
-              <ThemeToggle />
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 border border-white/20 hover:border-white/40 transition-all duration-200"
+                className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/15 border border-white/30 hover:border-white/50 bg-white/10 backdrop-blur-sm transition-all duration-200"
               >
-                {isOpen ? <X size={24} /> : <Menu size={24} />}
+                {isOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
           </div>
@@ -182,10 +167,10 @@ const Header = React.memo(({ transparent = false }) => {
 
               {/* Mobile user info and logout */}
               {user && (
-                <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                  <div className={`px-4 py-2 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <div className="mt-4 pt-4 border-t border-gray-700">
+                  <div className="px-4 py-2 text-sm text-gray-300">
                     <p className="font-medium">{userProfile?.name || 'User'}</p>
-                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <p className="text-xs text-gray-400">
                       {user.email}
                     </p>
                   </div>
@@ -194,9 +179,7 @@ const Header = React.memo(({ transparent = false }) => {
                       handleLogout();
                       setIsOpen(false);
                     }}
-                    className={`w-full text-left py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center space-x-3 ${
-                      darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
+                    className="w-full text-left py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center space-x-3 text-gray-300 hover:text-white hover:bg-gray-700"
                   >
                     <LogOut size={18} />
                     <span><TranslatableText>Sign Out</TranslatableText></span>
