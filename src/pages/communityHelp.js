@@ -1020,15 +1020,17 @@ function CommunityHelp() {
 
   // Update the main container structure
   return (
-    <div
-      className={`min-h-screen flex flex-col ${
-        darkMode
-          ? "bg-dark-bg-primary text-dark-text-primary"
-          : "bg-white text-gray-900"
-      }`}
-    >
-      <Header />
-      <main className="flex-grow md:pl-64 p-4 md:p-6 md:pr-10 lg:pr-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
+      <Header transparent={true} />
+
+      {/* Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-yellow-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+
+      <main className="relative z-10 pt-24 pb-16 px-4 md:px-6 lg:px-8">
         {" "}
         {/* Added responsive padding */}
         {!user ? (

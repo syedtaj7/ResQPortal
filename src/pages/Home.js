@@ -3,7 +3,6 @@ import {
   MapContainer,
   TileLayer,
   Popup,
-  Rectangle,
   Polygon,
   useMap,
 } from "react-leaflet";
@@ -947,6 +946,8 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [mapDisasters, setMapDisasters] = useState([]);
   const [filteredDisasters, setFilteredDisasters] = useState([]);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationPermission, setLocationPermission] = useState(null);
 
   // Remove the notification comment and related code
 
@@ -1024,11 +1025,7 @@ function Home() {
   // Update the LocationSuggestions component to clear suggestions after selection
   const LocationSuggestions = ({ searchTerm, onSelect }) => {
     const [isVisible, setIsVisible] = useState(true);
-    const suggestionsRef = useRef(null);
-
-    useOutsideClick(suggestionsRef, () => setIsVisible(false));
-
-    // Reset visibility when search term changes
+    const suggestionsRef = useRef(null);    useOutsideClick(suggestionsRef, () => setIsVisible(false));    // Reset visibility when search term changes
     useEffect(() => {
       setIsVisible(true);
     }, [searchTerm]);
@@ -1193,29 +1190,120 @@ function Home() {
     setFilteredDisasters(disasters);
   }, [disasters]);
 
-  const { darkMode } = useTheme();
+  // Geolocation function
+  const requestUserLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setLocationPermission('not-supported');
+      console.log('Geolocation is not supported by this browser.');
+      return;
+    }
 
+    setLocationPermission('requesting');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const userCoords = [latitude, longitude];
+        setUserLocation(userCoords);
+        setLocationPermission('granted');
+
+        // Automatically zoom to user location
+        handleZoom(userCoords, 10);
+
+        console.log('User location detected:', userCoords);
+      },
+      (error) => {
+        setLocationPermission('denied');
+        console.error('Error getting user location:', error);
+
+        // Fallback to default India center
+        setUserLocation(null);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutes
+      }
+    );
+  }, [handleZoom]);
+
+  // Request user location on component mount
+  useEffect(() => {
+    requestUserLocation();
+  }, [requestUserLocation]);
+
+  const { darkMode } = useTheme();
   return (
-    <div
-      className={`min-h-screen flex flex-col ${
-        darkMode
-          ? "bg-dark-bg-primary text-dark-text-primary"
-          : "bg-white text-black"
-      }`}
-    >
-      <Header /> {/* Use the Header component */}
-      <main className="flex-grow md:ml-48">
-        <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div
-            className={`md:col-span-2 ${
-              darkMode
-                ? "bg-dark-bg-secondary border-gray-700"
-                : "bg-[#F8F8F8] border-gray-200"
-            } p-6 rounded-xl shadow-lg mt-1 border`}
-          >
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
+    <div className={`min-h-screen ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+      <Header transparent={true} />
+
+      {/* Main Content */}
+      <main className="relative">
+        {/* Location Permission Notification */}
+        {locationPermission === 'requesting' && (
+          <div className="absolute top-4 right-4 z-[1001] animate-fade-in-down">
+            <div className={`${darkMode ? "bg-blue-900/90 border-blue-700" : "bg-blue-100/90 border-blue-300"} backdrop-blur-sm border rounded-lg p-4 shadow-lg max-w-sm`}>
+              <div className="flex items-center space-x-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                <div>
+                  <p className={`text-sm font-medium ${darkMode ? "text-blue-100" : "text-blue-900"}`}>
+                    <TranslatableText>Requesting Location Access</TranslatableText>
+                  </p>
+                  <p className={`text-xs ${darkMode ? "text-blue-200" : "text-blue-700"}`}>
+                    <TranslatableText>Please allow location access to show disasters near you</TranslatableText>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {locationPermission === 'denied' && (
+          <div className="absolute top-4 right-4 z-[1001] animate-fade-in-down">
+            <div className={`${darkMode ? "bg-yellow-900/90 border-yellow-700" : "bg-yellow-100/90 border-yellow-300"} backdrop-blur-sm border rounded-lg p-4 shadow-lg max-w-sm`}>
+              <div className="flex items-start space-x-3">
+                <svg className="w-5 h-5 text-yellow-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="flex-1">
+                  <p className={`text-sm font-medium ${darkMode ? "text-yellow-100" : "text-yellow-900"}`}>
+                    <TranslatableText>Location Access Denied</TranslatableText>
+                  </p>
+                  <p className={`text-xs ${darkMode ? "text-yellow-200" : "text-yellow-700"} mb-2`}>
+                    <TranslatableText>Enable location access in your browser settings for personalized disaster alerts</TranslatableText>
+                  </p>
+                  <button
+                    onClick={requestUserLocation}
+                    className="text-xs bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded transition-colors duration-200"
+                  >
+                    <TranslatableText>Try Again</TranslatableText>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Search Bar */}
+        <div className="absolute top-4 left-4 z-[1000] w-80 animate-fade-in-down">
+          <div className="relative transform transition-all duration-300 hover:scale-105">
+            <input
+              type="text"
+              placeholder="Search location..."
+              value={search}
+              className={`w-full pl-10 pr-10 py-3 rounded-lg border ${
+                darkMode
+                  ? "bg-gray-800/90 backdrop-blur-sm border-gray-600 text-white placeholder-gray-400"
+                  : "bg-white/90 backdrop-blur-sm border-gray-300 text-black placeholder-gray-500"
+              } focus:outline-none focus:ring-2 focus:ring-yellow-400 shadow-lg transition-all duration-300 focus:shadow-xl focus:scale-105`}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                filterDisasters(e.target.value);
+              }}
+            />
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <svg
-                className="w-6 h-6 mr-2"
+                className="w-5 h-5 text-gray-400 transition-colors duration-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -1224,262 +1312,168 @@ function Home() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
               </svg>
-              <TranslatableText>Disaster Map of India</TranslatableText>
-            </h2>
-            <div className="h-[600px] w-full relative rounded-xl overflow-hidden shadow-inner">
-              <MapContainer
-                center={defaultCenter}
-                zoom={5}
-                minZoom={4} // Reduced to allow more zooming out
-                maxZoom={13}
-                scrollWheelZoom={true}
-                className="h-full w-full"
-                boundsOptions={{
-                  padding: [50, 50],
-                  animate: true,
+            </div>
+            {search && (
+              <button
+                onClick={() => {
+                  setSearch("");
+                  filterDisasters("");
                 }}
-                // Add click handler to handle click bubbling
-                onClick={(e) => {
-                  if (
-                    e.originalEvent.target.classList.contains(
-                      "leaflet-container"
-                    )
-                  ) {
-                    e.originalEvent.stopPropagation();
-                  }
-                }}
+                className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 transition-all duration-300 hover:scale-110"
               >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  className="map-tiles"
-                  // Remove bounds restriction
-                  noWrap={false} // Allow map wrapping
-                  opacity={1} // Ensure full opacity
-                />
-                {/* Keep the Rectangle for visual reference but remove bounds restrictions */}
-                <Rectangle
-                  bounds={[
-                    [37.0, 68.0], // Original India bounds for visual reference
-                    [6.0, 97.0],
-                  ]}
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+          <LocationSuggestions
+            searchTerm={search}
+            onSelect={handleLocationSelect}
+          />
+        </div>
+
+        {/* Full Screen Map Container */}
+        <div className="h-screen w-full relative overflow-hidden">
+          <MapContainer
+            center={userLocation || defaultCenter}
+            zoom={userLocation ? 10 : 5}
+            minZoom={2}
+            maxZoom={18}
+            scrollWheelZoom={true}
+            className="h-full w-full"
+            boundsOptions={{
+              padding: [50, 50],
+              animate: true,
+            }}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              className="map-tiles"
+              noWrap={false}
+              opacity={1}
+            />
+
+            {Object.entries(
+              mapDisasters.reduce((grouped, disaster) => {
+                const key = disaster.coordinates.join(",");
+                if (!grouped[key]) {
+                  grouped[key] = [];
+                }
+                grouped[key].push(disaster);
+                return grouped;
+              }, {})
+            ).map(([coordKey, disasterGroup]) => {
+              const [lat, lon] = coordKey.split(",").map(Number);
+              const maxSeverity = disasterGroup.reduce(
+                (max, d) =>
+                  ["high", "moderate", "low"].indexOf(d.severity) <
+                  ["high", "moderate", "low"].indexOf(max)
+                    ? d.severity
+                    : max,
+                "low"
+              );
+
+              const mainDisaster = disasterGroup[0];
+
+              return (
+                <Polygon
+                  key={coordKey}
+                  positions={createCircleCoords([lat, lon], 15)}
                   pathOptions={{
-                    color: "#2563eb", // Blue border
-                    weight: 1.5, // Thinner border
-                    fillColor: "transparent", // Remove white fill
-                    fillOpacity: 0.1, // Very subtle opacity
+                    ...severityColors[maxSeverity],
+                    fillOpacity: 0.2,
+                    smoothFactor: 2,
+                    weight: 1.5,
+                    noClip: true,
+                    interactive: true,
+                    bubblingMouseEvents: false,
                   }}
                   eventHandlers={{
-                    click: (event) => {
-                      // Use the original event from the synthetic React event
-                      if (event && event.originalEvent) {
-                        event.originalEvent.stopPropagation();
-                      }
-                    },
-                  }}
-                />
-                {Object.entries(
-                  mapDisasters.reduce((grouped, disaster) => {
-                    const key = disaster.coordinates.join(",");
-                    if (!grouped[key]) {
-                      grouped[key] = [];
-                    }
-                    grouped[key].push(disaster);
-                    return grouped;
-                  }, {})
-                ).map(([coordKey, disasterGroup]) => {
-                  const [lat, lon] = coordKey.split(",").map(Number);
-                  const maxSeverity = disasterGroup.reduce(
-                    (max, d) =>
-                      ["high", "moderate", "low"].indexOf(d.severity) <
-                      ["high", "moderate", "low"].indexOf(max)
-                        ? d.severity
-                        : max,
-                    "low"
-                  );
+                    mouseover: (e) => {
+                      const layer = e.target;
+                      layer.setStyle({
+                        fillOpacity: 0.4,
+                      });
 
-                  const mainDisaster = disasterGroup[0];
-
-                  return (
-                    // Update the Polygon component
-                    <Polygon
-                      key={coordKey}
-                      positions={createCircleCoords([lat, lon], 15)} // Reduced radius from 20 to 15
-                      pathOptions={{
-                        ...severityColors[maxSeverity],
-                        fillOpacity: 0.2,
-                        smoothFactor: 2, // Increased from 1.5 to 2 for better performance
-                        weight: 1.5,
-                        // Add these options to reduce complexity
-                        noClip: true,
-                        interactive: true,
-                        bubblingMouseEvents: false,
-                      }}
-                      eventHandlers={{
-                        mouseover: (e) => {
-                          const layer = e.target;
-                          layer.setStyle({
-                            fillOpacity: 0.4,
-                          });
-
-                          const getAllWarnings = (disasterGroup) => {
-                            return disasterGroup.map((disaster) => {
-                              const warnings = [];
-                              const details = disaster.details || "";
-
-                              // Temperature warnings with specific thresholds
-                              if (details.includes("Temperature:")) {
-                                const tempMatch = details.match(
-                                  /Temperature:\s*([-\d.]+)/
-                                );
-                                if (tempMatch) {
-                                  const temp = parseFloat(tempMatch[1]);
-                                  if (temp >= 45) {
-                                    warnings.push(
-                                      "🌡️ Extreme Heat Wave (>45°C)"
-                                    );
-                                  } else if (temp >= 40) {
-                                    warnings.push(
-                                      "🌡️ Heat Wave Warning (40-45°C)"
-                                    );
-                                  } else if (temp <= 5) {
-                                    warnings.push("❄️ Severe Cold Wave (<5°C)");
-                                  } else if (temp <= 10) {
-                                    warnings.push(
-                                      "❄️ Cold Wave Warning (5-10°C)"
-                                    );
-                                  }
-                                }
-                              }
-
-                              // Rainfall warnings with specific thresholds
-                              if (details.includes("Rainfall:")) {
-                                const rainMatch =
-                                  details.match(/Rainfall:\s*([\d.]+)/);
-                                if (rainMatch) {
-                                  const rainfall = parseFloat(rainMatch[1]);
-                                  if (rainfall >= 50) {
-                                    warnings.push(
-                                      "🌧️ Extreme Rainfall Warning (>50mm/h)"
-                                    );
-                                  } else if (rainfall >= 30) {
-                                    warnings.push(
-                                      "🌧️ Heavy Rainfall Alert (30-50mm/h)"
-                                    );
-                                  }
-                                }
-                              }
-
-                              // Wind warnings with specific thresholds
-                              if (details.includes("Wind Speed:")) {
-                                const windMatch = details.match(
-                                  /Wind Speed:\s*([\d.]+)/
-                                );
-                                if (windMatch) {
-                                  const windSpeed = parseFloat(windMatch[1]);
-                                  if (windSpeed >= 80) {
-                                    warnings.push(
-                                      "💨 Hurricane Force Winds (>80km/h)"
-                                    );
-                                  } else if (windSpeed >= 60) {
-                                    warnings.push(
-                                      "💨 Storm Force Winds (60-80km/h)"
-                                    );
-                                  } else if (windSpeed >= 40) {
-                                    warnings.push(
-                                      "💨 Strong Wind Alert (40-60km/h)"
-                                    );
-                                  }
-                                }
-                              }
-
-                              // Visibility warnings
-                              if (details.includes("Visibility:")) {
-                                const visMatch = details.match(
-                                  /Visibility:\s*([\d.]+)/
-                                );
-                                if (visMatch) {
-                                  const visibility = parseFloat(visMatch[1]);
-                                  if (visibility < 0.5) {
-                                    warnings.push("🌫️ Very Dense Fog (<0.5km)");
-                                  } else if (visibility < 1) {
-                                    warnings.push(
-                                      "🌫️ Dense Fog Warning (<1km)"
-                                    );
-                                  }
-                                }
-                              }
-
-                              // Humidity related warnings
-                              if (details.includes("Humidity:")) {
-                                const humidityMatch =
-                                  details.match(/Humidity:\s*([\d.]+)/);
-                                if (humidityMatch) {
-                                  const humidity = parseFloat(humidityMatch[1]);
-                                  if (humidity >= 95) {
-                                    warnings.push(
-                                      "💧 Extreme Humidity Warning (>95%)"
-                                    );
-                                  } else if (humidity <= 20) {
-                                    warnings.push(
-                                      "🏜️ Very Dry Conditions (<20%)"
-                                    );
-                                  }
-                                }
-                              }
-
-                              // Air Quality warnings
-                              if (details.includes("Air Quality Index:")) {
-                                const aqiMatch = details.match(
-                                  /Air Quality Index:\s*([\d.]+)/
-                                );
-                                if (aqiMatch) {
-                                  const aqi = parseFloat(aqiMatch[1]);
-                                  if (aqi >= 4) {
-                                    warnings.push("😷 Hazardous Air Quality");
-                                  } else if (aqi >= 3) {
-                                    warnings.push("😷 Poor Air Quality");
-                                  }
-                                }
-                              }
-
-                              // Natural disaster specific warnings
-                              if (disaster.type === "Earthquake") {
-                                const magMatch = details.match(
-                                  /Magnitude:\s*([\d.]+)/
-                                );
-                                if (magMatch) {
-                                  const magnitude = parseFloat(magMatch[1]);
-                                  if (magnitude >= 6.0) {
-                                    warnings.push(
-                                      "🌋 Major Earthquake (M6.0+)"
-                                    );
-                                  } else if (magnitude >= 5.0) {
-                                    warnings.push(
-                                      "🌋 Moderate Earthquake (M5.0+)"
-                                    );
-                                  }
-                                }
-                              }
-
-                              if (disaster.type === "Landslide Warning") {
-                                warnings.push("⛰️ Landslide Risk Alert");
-                              }
-
-                              if (details.includes("Tsunami Risk: Yes")) {
-                                warnings.push("🌊 Tsunami Risk Alert");
-                              }
-
-                              return {
-                                type: disaster.type,
-                                severity: disaster.severity,
-                                warnings: warnings,
-                              };
-                            });
-                          };
+                      const getAllWarnings = (disasterGroup) => {
+                                              return disasterGroup.map((disaster) => {
+                                                const warnings = [];
+                                                const details = disaster.details || "";
+                      
+                                                // Temperature warnings with specific thresholds
+                                                if (details.includes("Temperature:")) {
+                                                  const tempMatch = details.match(
+                                                    /Temperature:\s*([-\d.]+)/
+                                                  );
+                                                  if (tempMatch) {
+                                                    const temp = parseFloat(tempMatch[1]);
+                                                    if (temp >= 45) {
+                                                      warnings.push(
+                                                        "🌡️ Extreme Heat Wave (>45°C)"
+                                                      );
+                                                    } else if (temp >= 40) {
+                                                      warnings.push(
+                                                        "🌡️ Heat Wave Warning (40-45°C)"
+                                                      );
+                                                    } else if (temp <= 5) {
+                                                      warnings.push("❄️ Severe Cold Wave (<5°C)");
+                                                    } else if (temp <= 10) {
+                                                      warnings.push(
+                                                        "❄️ Cold Wave Warning (5-10°C)"
+                                                      );
+                                                    }
+                                                  }
+                                                }
+                      
+                                                // Natural disaster specific warnings
+                                                if (disaster.type === "Earthquake") {
+                                                  const magMatch = details.match(
+                                                        /Magnitude:\s*([\d.]+)/
+                                                      );
+                                                      if (magMatch) {
+                                                        const magnitude = parseFloat(magMatch[1]);
+                                                        if (magnitude >= 6.0) {
+                                                          warnings.push(
+                                                            "🌋 Major Earthquake (M6.0+)"
+                                                          );
+                                                        } else if (magnitude >= 5.0) {
+                                                          warnings.push(
+                                                            "🌋 Moderate Earthquake (M5.0+)"
+                                                          );
+                                                        }
+                                                      }
+                                                }
+                      
+                                                if (disaster.type === "Landslide Warning") {
+                                                  warnings.push("⛰️ Landslide Risk Alert");
+                                                }
+                      
+                                                if (details.includes("Tsunami Risk: Yes")) {
+                                                  warnings.push("🌊 Tsunami Risk Alert");
+                                                }
+                      
+                                                return {
+                                                  type: disaster.type,
+                                                  severity: disaster.severity,
+                                                  warnings: warnings,
+                                                };
+                                              });
+                                            };
 
                           const tooltipContent = `
                             <div class="bg-white p-3 rounded-lg shadow-md text-sm">
@@ -1775,58 +1769,48 @@ function Home() {
                         </div>
                       </Popup>
                     </Polygon>
-                  );
-                })}
+                  );                })}                
                 <Legend />
                 <MapController location={location} />
               </MapContainer>
             </div>
-          </div>
 
-          {/* Update the search bar and results styling */}
-          <div className="col-span-1 bg-gray-700 dark:bg-dark-bg-tertiary p-5 rounded-xl shadow-lg flex flex-col h-[calc(600px+2.5rem)]">
-            <h2 className="text-lg font-semibold mb-3 text-white dark:text-dark-text-primary">
-              <TranslatableText>Search Your Area</TranslatableText>
-            </h2>
-            <div className="relative mb-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search by city name, disaster type..." // This will be handled by browser translation
-                  className="w-full p-3 pl-10 pr-10 rounded-xl bg-gray-600 dark:bg-dark-bg-secondary text-white dark:text-dark-text-primary placeholder-gray-300 dark:placeholder-gray-500
-                    border border-gray-500 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500
-                    focus:ring-opacity-50 transition-all"
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    filterDisasters(e.target.value);
-                  }}
-                />
-                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                  <svg
-                    className="w-5 h-5 text-gray-400 dark:text-gray-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-                {search && (
-                  <button
-                    onClick={() => {
-                      setSearch("");
-                      filterDisasters("");
+            {/* Updates Container Below Map */}
+            <div className={`${darkMode ? "bg-gray-900" : "bg-gray-50"} py-12 animate-fade-in-up`}>
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Section Header */}
+            <div className="text-center mb-12 animate-fade-in">
+              <h2 className={`text-4xl font-bold ${darkMode ? "text-white" : "text-gray-900"} mb-4`}>
+                <TranslatableText>Latest Disaster Updates</TranslatableText>
+              </h2>
+              <p className={`text-lg ${darkMode ? "text-gray-300" : "text-gray-600"} max-w-3xl mx-auto`}>
+                <TranslatableText>
+                  Stay informed with real-time disaster reports and emergency alerts across India
+                </TranslatableText>
+              </p>
+            </div>
+
+            {/* Search and Filter Section */}
+            <div className="mb-8 animate-slide-in-left">
+              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="relative flex-1 max-w-md">
+                  <input
+                    type="text"
+                    placeholder="Search disasters..."
+                    value={search}
+                    className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                        : "bg-white border-gray-300 text-black placeholder-gray-500"
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 focus:scale-105`}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      filterDisasters(e.target.value);
                     }}
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-200 dark:hover:text-gray-300"
-                  >
+                  />
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                     <svg
-                      className="w-4 h-4"
+                      className="w-5 h-5 text-gray-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1835,107 +1819,145 @@ function Home() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                       />
                     </svg>
-                  </button>
-                )}
+                  </div>
+                </div>
+                <div className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                  <TranslatableText>
+                    Showing {filteredDisasters.length} of {disasters.length} reports
+                  </TranslatableText>
+                </div>
               </div>
-              <LocationSuggestions
-                searchTerm={search}
-                onSelect={handleLocationSelect}
-              />
             </div>
 
-            {/* Update the disaster reports list styling */}
-            <div className="flex-1 overflow-hidden flex flex-col">
-              <h2 className="text-lg font-semibold mb-3 text-white dark:text-dark-text-primary">
-                <TranslatableText>
-                  Latest Indian Disaster Reports
-                </TranslatableText>
-              </h2>
-              <div className="overflow-y-auto flex-1 pr-2 custom-scrollbar space-y-3">
-                {loading ? (
-                  <div className="bg-gray-600 dark:bg-dark-bg-secondary p-4 rounded-xl animate-pulse">
-                    <div className="h-4 bg-gray-500 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-500 dark:bg-gray-700 rounded w-1/2"></div>
+            {/* Disaster Updates Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {loading ? (
+                // Loading skeletons
+                Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className={`${
+                      darkMode ? "bg-gray-800" : "bg-white"
+                    } rounded-xl p-6 shadow-lg animate-pulse`}
+                  >
+                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-4"></div>
+                    <div className="h-3 bg-gray-300 rounded w-1/2 mb-2"></div>
+                    <div className="h-3 bg-gray-300 rounded w-full mb-2"></div>
+                    <div className="h-3 bg-gray-300 rounded w-2/3"></div>
                   </div>
-                ) : filteredDisasters.length > 0 ? (
-                  filteredDisasters.map((disaster, index) => {
-                    const typeColors =
-                      disasterTypeColors[disaster.type] ||
-                      disasterTypeColors.default;
-                    return (
-                      <div
-                        key={`${disaster.id}-${index}`}
-                        className={`p-4 rounded-xl transition-all hover:shadow-lg ${typeColors.bg}`}
-                      >
-                        <div>
-                          <h4 className={`font-bold ${typeColors.title}`}>
-                            <TranslatableText>
-                              {disaster.title}
-                            </TranslatableText>
-                          </h4>
-                          <p className={`font-semibold ${typeColors.text}`}>
-                            <TranslatableText>{disaster.type}</TranslatableText>
-                          </p>
-                          <p className={`text-sm ${typeColors.details}`}>
-                            <TranslatableText>
-                              Severity:{" "}
-                              <TranslatableText>
-                                {disaster.severity}
-                              </TranslatableText>
-                            </TranslatableText>
-                          </p>
-                          <div
-                            className={`mt-2 text-sm ${typeColors.details} whitespace-pre-line`}
-                          >
-                            <TranslatableText>
-                              {disaster.details}
-                            </TranslatableText>
+                ))
+              ) : filteredDisasters.length > 0 ? (
+                filteredDisasters.map((disaster, index) => {
+                  const typeColors =
+                    disasterTypeColors[disaster.type] ||
+                    disasterTypeColors.default;
+                  return (
+                    <div
+                      key={`${disaster.id}-${index}`}
+                      className={`${
+                        darkMode ? "bg-gray-800" : "bg-white"
+                      } rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-fade-in-up border-l-4 ${
+                        disaster.severity === "high"
+                          ? "border-red-500"
+                          : disaster.severity === "moderate"
+                          ? "border-yellow-500"
+                          : "border-green-500"
+                      }`}
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h3 className={`font-bold text-lg ${darkMode ? "text-white" : "text-gray-900"} mb-2`}>
+                            <TranslatableText>{disaster.title}</TranslatableText>
+                          </h3>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${typeColors.bg} ${typeColors.text}`}>
+                              <TranslatableText>{disaster.type}</TranslatableText>
+                            </span>
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                disaster.severity === "high"
+                                  ? "bg-red-100 text-red-800"
+                                  : disaster.severity === "moderate"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}
+                            >
+                              <TranslatableText>{disaster.severity}</TranslatableText>
+                            </span>
                           </div>
-                          <p className={`text-sm mt-2 ${typeColors.details}`}>
-                            {new Date(disaster.date).toLocaleDateString(
-                              "en-IN",
-                              {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )}
-                          </p>
-                          <a
-                            href={disaster.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:underline text-sm mt-2 inline-block"
-                          >
-                            <TranslatableText>More Info</TranslatableText>
-                          </a>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <img
+                            src={`https://images.unsplash.com/photo-${
+                              disaster.type === "Earthquake" ? "1547036967-23d11aacaee0" :
+                              disaster.type === "Weather Warning" ? "1504608524841-42fe6f032b4b" :
+                              "1558618666-fcd25c85cd64"
+                            }?w=80&h=80&fit=crop&crop=center`}
+                            alt={disaster.type}
+                            className="w-16 h-16 rounded-lg object-cover"
+                          />
                         </div>
                       </div>
-                    );
-                  })
-                ) : (
-                  <div className="bg-gray-600 dark:bg-dark-bg-secondary p-4 rounded-xl text-gray-300 dark:text-dark-text-secondary text-center">
+
+                      <p className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"} mb-4 line-clamp-3`}>
+                        <TranslatableText>{disaster.details}</TranslatableText>
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <time className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                          {new Date(disaster.date).toLocaleDateString("en-IN", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </time>
+                        <a
+                          href={disaster.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center gap-1 group transition-all duration-300"
+                        >
+                          <TranslatableText>Read More</TranslatableText>
+                          <svg
+                            className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>                  );
+                })
+              ) : (
+                <div className="col-span-full text-center py-12">
+                  <div className={`${darkMode ? "text-gray-400" : "text-gray-500"} text-lg`}>
                     {search.trim() ? (
-                      <TranslatableText>
-                        No disasters found for this location
-                      </TranslatableText>
+                      <TranslatableText>No disasters found for this search</TranslatableText>
                     ) : (
-                      <TranslatableText>
-                        No recent disaster reports found
-                      </TranslatableText>
+                      <TranslatableText>No recent disaster reports found</TranslatableText>
                     )}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </main>
+      
+      {/* Footer */}
       <Footer />
     </div>
   );

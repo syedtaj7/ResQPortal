@@ -1667,34 +1667,40 @@ function Donation() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-dark-bg-primary">
-      <Header />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
+      <Header transparent={true} />
 
-      <main className="flex-grow md:ml-48 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8">
-            <motion.h1
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-3xl font-bold text-gray-900 dark:text-dark-text-primary sm:text-4xl mb-4"
-            >
-              <TranslatableText>
-                Support Disaster Relief Efforts
-              </TranslatableText>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-dark-text-secondary"
-            >
-              <TranslatableText>
-                Your contribution can make a significant difference in the lives
-                of those affected by natural disasters across India.
-              </TranslatableText>
-            </motion.p>
-          </div>
+      {/* Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-yellow-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+
+      <main className="relative z-10 pt-24 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Modern Hero Section */}
+        <div className="text-center mb-16">
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-yellow-400 via-green-400 to-blue-400 bg-clip-text text-transparent"
+          >
+            <TranslatableText>
+              Support Disaster Relief Efforts
+            </TranslatableText>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
+          >
+            <TranslatableText>
+              Your contribution can make a significant difference in the lives of those affected by natural disasters across India.
+            </TranslatableText>
+          </motion.p>
+        </div>
 
           {/* Tabs for Donations and Volunteers */}
           <div className="flex justify-center mb-8">
@@ -1776,7 +1782,6 @@ function Donation() {
               ))}
             </motion.div>
           )}
-        </div>
       </main>
 
       <Footer />
@@ -1835,4 +1840,4 @@ function Donation() {
   );
 }
 
-export default Donation;
+export default Donation

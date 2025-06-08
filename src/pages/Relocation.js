@@ -689,35 +689,48 @@ function Relocation() {
 
   // Update the main layout structure
   return (
-    <div
-      className={`min-h-screen flex flex-col ${
-        darkMode ? "bg-dark-bg-primary" : "bg-white"
-      }`}
-    >
-      <Header />
-      <main className="flex-grow p-2 sm:p-5 pt-16 mb-16 md:ml-48">
-        {/* Change to flex column on mobile, side by side on desktop */}
-        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 h-auto lg:h-[calc(100vh-8rem)]">
-          {/* Map container - full width on mobile */}
-          <div
-            className={`lg:col-span-2 ${
-              darkMode ? "bg-dark-bg-secondary" : "bg-[#F8F8F8]"
-            } p-3 sm:p-6 rounded-xl shadow-xl flex flex-col h-[70vh] lg:h-full border ${
-              darkMode ? "border-gray-700" : "border-gray-200"
-            }`}
-          >
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
+      <Header transparent={true} />
+
+      {/* Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+
+      <main className="relative z-10 pt-24 pb-16">
+        {/* Modern Hero Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-teal-400 bg-clip-text text-transparent">
+              <TranslatableText>Safe Relocation Hub</TranslatableText>
+            </h1>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              <TranslatableText>
+                Find secure locations and plan your evacuation routes with real-time safety data and community support
+              </TranslatableText>
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-auto lg:h-[calc(100vh-16rem)]">
+            {/* Map container - Enhanced Design */}
+            <div className="lg:col-span-2 bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-6 flex flex-col h-[70vh] lg:h-full">
             {/* Search controls - stack on mobile */}
             <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:gap-4">
-              <button
-                onClick={getUserLocation}
-                className={`${
-                  darkMode
-                    ? "bg-yellow-600 text-white hover:bg-yellow-700"
-                    : "bg-yellow-300 text-black hover:bg-gray-400"
-                } px-4 py-2 rounded-lg transition-colors whitespace-nowrap`}
-              >
-                <TranslatableText>Use My Location</TranslatableText>
-              </button>
+                <button
+                  onClick={getUserLocation}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 border border-white/20 whitespace-nowrap"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <TranslatableText>Use My Location</TranslatableText>
+                </button>
               <div className="flex-1 relative">
                 <input
                   type="text"
@@ -727,19 +740,16 @@ function Relocation() {
                     debouncedSearch(e.target.value);
                   }}
                   placeholder="Search location..."
-                  className={`w-full p-2 rounded-lg ${
-                    darkMode
-                      ? "bg-dark-bg-tertiary text-dark-text-primary border-gray-600 focus:ring-yellow-600"
-                      : "bg-[#F8F8F8] text-black border-gray-300 focus:ring-yellow-300"
-                  } border focus:ring-2 focus:outline-none`}
+                  className="w-full p-3 pl-12 pr-12 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 focus:outline-none transition-all duration-300"
                 />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
                 <button
                   onClick={() => handleLocationSearch(locationSearch)}
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${
-                    darkMode
-                      ? "text-gray-400 hover:text-gray-200"
-                      : "text-gray-600 hover:text-gray-800"
-                  } p-2`}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white p-2 transition-colors duration-200"
                 >
                   <svg
                     className="w-5 h-5"
@@ -996,14 +1006,8 @@ function Relocation() {
             </div>
           </div>
 
-          {/* Sidebar - Full width on mobile, side panel on desktop */}
-          <div
-            className={`lg:col-span-1 ${
-              darkMode ? "bg-dark-bg-secondary" : "bg-[#F8F8F8]"
-            } rounded-lg flex flex-col h-[60vh] lg:h-full overflow-hidden shadow-lg border ${
-              darkMode ? "border-gray-700" : "border-gray-200"
-            }`}
-          >
+            {/* Enhanced Sidebar */}
+            <div className="lg:col-span-1 bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl flex flex-col h-[60vh] lg:h-full overflow-hidden">
             {/* ... existing sidebar content ... */}
             {/* Fixed header */}
             <div
@@ -1294,8 +1298,7 @@ function Relocation() {
                       ))}
                     </div>
                   ) : getFilteredSafeZones(safeZoneSearch).length > 0 ? (
-                    getFilteredSafeZones(safeZoneSearch).map((location) => (
-                      <button
+                    getFilteredSafeZones(safeZoneSearch).map((location) => (                      <button
                         key={location.name}
                         className="w-full text-left bg-gray-700 rounded-lg p-3 hover:bg-gray-650 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         onClick={() => {
@@ -1344,15 +1347,9 @@ function Relocation() {
                             🚌
                           </span>
                         </div>
-                        <button
-                          className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-                          onClick={() => {
-                            setSelectedLocation(location);
-                            setShowDetails(true);
-                          }}
-                        >
+                        <span className="text-sm text-blue-400 hover:text-blue-300 transition-colors cursor-pointer block mt-2">
                           <TranslatableText>View Details</TranslatableText> →
-                        </button>
+                        </span>
                       </button>
                     ))
                   ) : (
@@ -1381,11 +1378,10 @@ function Relocation() {
                         )}
                       </p>
                     </div>
-                  )}
-                </div>
+                  )}                </div>
               </div>
-            </div>
-          </div>
+            </div>          </div>
+        </div>
         </div>
       </main>
       <Footer />

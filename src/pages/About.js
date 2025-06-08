@@ -1318,28 +1318,42 @@ function About() {
   }
 
   return (
-    <div
-      className={`min-h-screen overflow-x-hidden ${
-        darkMode ? "bg-dark-bg-primary" : "bg-white"
-      }`}
-    >
-      <Header /> {/* Use imported Header component */}
-      <main className="container mx-auto px-6 pr-8 md:pr-12 py-12 pt-24 md:ml-48 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 overflow-x-hidden">
+      <Header transparent={true} />
+
+      {/* Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-green-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+
+      <main className="relative z-10 pt-24 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {" "}
         {/* Added pt-24 */}
-        <div className="mb-16">
+        {/* Modern Hero Section */}
+        <div className="text-center mb-16">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`text-4xl font-bold ${
-              darkMode ? "text-white" : "text-black"
-            } text-center mb-8`}
+            className="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-red-400 via-blue-400 to-green-400 bg-clip-text text-transparent"
           >
             <TranslatableText>Emergency Services Directory</TranslatableText>
           </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
+          >
+            <TranslatableText>
+              Quick access to emergency contacts and helplines across India for immediate assistance during disasters
+            </TranslatableText>
+          </motion.p>
+        </div>
 
           <SearchBar onSearch={setSearchTerm} />
-        </div>
+      
         {/* State Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16 max-w-full">
           {filteredStates.map((state, index) => {

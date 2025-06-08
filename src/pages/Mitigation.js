@@ -823,36 +823,41 @@ function Mitigation() {
   const { darkMode } = useTheme();
 
   return (
-    <div
-      className={`min-h-screen flex flex-col overflow-x-hidden ${
-        darkMode ? "bg-dark-bg-primary" : "bg-white"
-      }`}
-    >
-      <Header /> {/* Use imported Header component */}
-      <main className="flex-grow container mx-auto px-6 pr-8 md:pr-12 py-8 md:ml-48 overflow-x-hidden">
-        <div className="mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 overflow-x-hidden">
+      <Header transparent={true} />
+
+      {/* Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+
+      <main className="relative z-10 pt-24 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Modern Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <TranslatableText>Disaster Mitigation Hub</TranslatableText>
+          </h1>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            <TranslatableText>
+              Comprehensive guides and strategies to prepare for, respond to, and recover from natural disasters
+            </TranslatableText>
+          </p>
+        </div>
+        {/* Enhanced Search Section */}
+        <div className="mb-12">
           <div className="max-w-2xl mx-auto relative">
             <input
               type="text"
-              placeholder="Search for disasters, guides, or keywords..." // We can't use JSX in placeholder, but this will be handled by browser translation
+              placeholder="Search for disasters, guides, or keywords..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className={`w-full px-4 py-3 pl-12 pr-10
-                ${
-                  darkMode
-                    ? "bg-dark-bg-tertiary text-dark-text-primary placeholder-gray-500 border-gray-600"
-                    : "bg-[#F8F8F8] text-black placeholder-gray-400 border-gray-700"
-                }
-                border
-                rounded-xl
-                focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20
-                transition-all duration-300`}
+              className="w-full px-6 py-4 pl-14 pr-14 bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl text-white placeholder-white/60 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 focus:outline-none shadow-2xl transition-all duration-300 text-lg"
             />
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <svg
-                className={`w-5 h-5 ${
-                  darkMode ? "text-gray-500" : "text-gray-400"
-                }`}
+                className="w-6 h-6 text-white/60"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
