@@ -315,46 +315,90 @@ const fetchOpenWeatherData = async (locations) => {
 
             const { warnings, severity } = analyzeWeatherData(conditions);
 
-            // Check forecast for severe weather
+            // Enhanced forecast analysis for flash floods and severe weather
             const forecastWarnings = forecast.list
-              .slice(0, 8) // Next 24 hours
+              .slice(0, 16) // Next 48 hours for better flood prediction
               .filter((item) => {
                 const forecastConditions = {
                   temp: item.main.temp,
                   windSpeed: (item.wind?.speed || 0) * 3.6,
                   rain: (item.rain?.["3h"] || 0) / 3, // Convert 3h to 1h
                   pressure: item.main.pressure,
+                  humidity: item.main.humidity,
                   description: item.weather[0].main.toLowerCase(),
+                  clouds: item.clouds?.all || 0,
                 };
 
-                return (
-                  forecastConditions.temp > 40 ||
-                  forecastConditions.temp < 10 ||
-                  forecastConditions.windSpeed > 62 ||
-                  forecastConditions.rain > 50 ||
-                  forecastConditions.pressure < 950 ||
-                  forecastConditions.description.includes("extreme") ||
-                  forecastConditions.description.includes("tornado") ||
-                  forecastConditions.description.includes("hurricane") ||
-                  forecastConditions.description.includes("storm")
-                );
+                // Enhanced flash flood detection criteria
+                const isFlashFloodRisk = forecastConditions.rain > 20 ||
+                                       (forecastConditions.rain > 10 && forecastConditions.humidity > 90) ||
+                                       (forecastConditions.rain > 15 && forecastConditions.pressure < 1000);
+
+                // Enhanced severe weather detection
+                const isSevereWeather = forecastConditions.temp > 40 ||
+                                      forecastConditions.temp < 10 ||
+                                      forecastConditions.windSpeed > 62 ||
+                                      forecastConditions.rain > 25 ||
+                                      forecastConditions.pressure < 980 ||
+                                      forecastConditions.description.includes("extreme") ||
+                                      forecastConditions.description.includes("tornado") ||
+                                      forecastConditions.description.includes("hurricane") ||
+                                      forecastConditions.description.includes("storm") ||
+                                      forecastConditions.description.includes("thunderstorm");
+
+                return isFlashFloodRisk || isSevereWeather;
               })
-              .map((item) => ({
-                time: new Date(item.dt * 1000),
-                conditions: item.weather[0].description,
-                temp: item.main.temp,
-                windSpeed: (item.wind?.speed || 0) * 3.6,
-                rain: (item.rain?.["3h"] || 0) / 3,
-              }));
+              .map((item) => {
+                const rain3h = (item.rain?.["3h"] || 0);
+                const rainPerHour = rain3h / 3;
+                const time = new Date(item.dt * 1000);
+
+                // Determine warning type and severity
+                let warningType = "Weather Alert";
+                let severity = "moderate";
+
+                if (rainPerHour > 50) {
+                  warningType = "🌊 FLASH FLOOD EMERGENCY";
+                  severity = "high";
+                } else if (rainPerHour > 25) {
+                  warningType = "🌊 Flash Flood Warning";
+                  severity = "high";
+                } else if (rainPerHour > 15) {
+                  warningType = "🌧️ Heavy Rain Alert";
+                  severity = "moderate";
+                } else if (item.weather[0].main.toLowerCase().includes("storm")) {
+                  warningType = "⛈️ Severe Storm Warning";
+                  severity = "high";
+                }
+
+                return {
+                  time,
+                  conditions: item.weather[0].description,
+                  temp: item.main.temp,
+                  windSpeed: (item.wind?.speed || 0) * 3.6,
+                  rain: rainPerHour,
+                  rain3h: rain3h,
+                  pressure: item.main.pressure,
+                  humidity: item.main.humidity,
+                  warningType,
+                  severity,
+                  floodRisk: rainPerHour > 15 ? "HIGH" : rainPerHour > 10 ? "MODERATE" : "LOW"
+                };
+              });
             // Get local predictions
             const predictions = predictLocalDisasters(conditions);
             localPredictions.push(...predictions);
 
+            // Create specific flash flood alerts
+            const floodAlerts = createFlashFloodAlerts(conditions, forecastWarnings, location);
+
             if (
               warnings.length > 0 ||
               forecastWarnings.length > 0 ||
-              predictions.length > 0
+              predictions.length > 0 ||
+              floodAlerts.length > 0
             ) {
+              // Add main weather alert
               weatherData.push({
                 id: `weather-${location}-${Date.now()}`,
                 title: `Weather Alert: ${location}`,
@@ -363,38 +407,62 @@ const fetchOpenWeatherData = async (locations) => {
                 type: "Weather Warning",
                 date: new Date().toISOString(),
                 details:
-                  `Current Conditions:\n` +
+                  `🌦️ CURRENT CONDITIONS:\n` +
                   `${conditions.description}\n` +
                   `Temperature: ${conditions.temp.toFixed(1)}°C\n` +
-                  `Rainfall: ${conditions.rain.toFixed(1)} mm/h\n` +
-                  `Wind Speed: ${conditions.windSpeed.toFixed(1)} km/h\n` +
-                  `Pressure: ${conditions.pressure} hPa\n` +
-                  `Humidity: ${conditions.humidity}%\n` +
-                  `Visibility: ${(conditions.visibility / 1000).toFixed(
-                    1
-                  )} km\n\n` +
-                  `Active Warnings:\n${warnings.join("\n")}\n\n` +
+                  `💧 Rainfall: ${conditions.rain.toFixed(1)} mm/h\n` +
+                  `💨 Wind Speed: ${conditions.windSpeed.toFixed(1)} km/h\n` +
+                  `📊 Pressure: ${conditions.pressure} hPa\n` +
+                  `💦 Humidity: ${conditions.humidity}%\n` +
+                  `👁️ Visibility: ${(conditions.visibility / 1000).toFixed(1)} km\n\n` +
+
+                  `🚨 ACTIVE WARNINGS:\n${warnings.join("\n")}\n\n` +
+
+                  (conditions.rain > 10 ?
+                    `🌊 FLOOD RISK ASSESSMENT:\n` +
+                    `Risk Level: ${conditions.rain > 50 ? "🔴 EXTREME" : conditions.rain > 25 ? "🟠 HIGH" : "🟡 MODERATE"}\n` +
+                    `Flood Potential: ${conditions.rain > 50 ? "Flash flooding imminent" : conditions.rain > 25 ? "Flash flooding likely" : "Localized flooding possible"}\n` +
+                    `Action Required: ${conditions.rain > 50 ? "IMMEDIATE EVACUATION" : conditions.rain > 25 ? "PREPARE TO EVACUATE" : "MONITOR CONDITIONS"}\n\n`
+                    : "") +
+
                   (forecastWarnings.length > 0
-                    ? `Forecast Warnings:\n${forecastWarnings
-                        .map(
-                          (w) =>
-                            `${w.time.toLocaleTimeString()}: ${
-                              w.conditions
-                            } (${w.temp.toFixed(1)}°C, ${w.windSpeed.toFixed(
-                              1
-                            )} km/h)`
-                        )
+                    ? `📅 FORECAST WARNINGS (Next 48 Hours):\n${forecastWarnings
+                        .map((w) => {
+                          const timeStr = w.time.toLocaleDateString() + " " + w.time.toLocaleTimeString();
+                          const floodInfo = w.rain > 15 ? ` | 🌊 ${w.floodRisk} FLOOD RISK` : "";
+                          return `${timeStr}: ${w.warningType}\n` +
+                                 `   ${w.conditions} | ${w.temp.toFixed(1)}°C | ${w.windSpeed.toFixed(1)} km/h | ${w.rain.toFixed(1)}mm/h${floodInfo}`;
+                        })
                         .join("\n")}`
                     : ""),
                 source: "OpenWeather",
                 url: `https://openweathermap.org/city/${current.id}`,
               });
+
+              // Add specific flash flood alerts as separate entries
+              floodAlerts.forEach(alert => {
+                weatherData.push(alert);
+              });
             }
-            console.log("Weather conditions for", location, {
+            // Enhanced logging for flash flood monitoring
+            console.log(`🌦️ Weather Analysis for ${location}:`, {
               conditions,
-              warnings,
+              warnings: warnings.length,
               severity,
+              floodAlerts: floodAlerts.length,
+              forecastWarnings: forecastWarnings.length
             });
+
+            // Special logging for flash flood conditions
+            if (conditions.rain > 10) {
+              console.log(`🌊 FLOOD MONITORING - ${location}:`, {
+                currentRainfall: `${conditions.rain}mm/h`,
+                floodRisk: conditions.rain > 50 ? "EXTREME" : conditions.rain > 25 ? "HIGH" : "MODERATE",
+                alertsGenerated: floodAlerts.length,
+                forecastRisk: forecastWarnings.filter(w => w.rain > 15).length > 0 ? "YES" : "NO",
+                emergencyLevel: conditions.rain > 75 ? "CRITICAL" : conditions.rain > 50 ? "HIGH" : "MODERATE"
+              });
+            }
           }
         } catch (error) {
           console.error(`Error fetching weather for ${location}:`, error);
@@ -410,55 +478,103 @@ const fetchOpenWeatherData = async (locations) => {
   return weatherData;
 };
 
-// Update the analyzeWeatherData function
+// Enhanced analyzeWeatherData function with flash flood and heavy rain detection
 const analyzeWeatherData = (conditions) => {
   const warnings = [];
   let severity = "low";
 
+  // Enhanced Flash Flood Detection
+  if (conditions.rain > 75) {
+    severity = "high";
+    warnings.push("🌊 FLASH FLOOD EMERGENCY - Extremely Heavy Rainfall (>75mm/h)");
+    warnings.push("⚠️ Immediate Evacuation Required - Life-threatening flooding");
+  } else if (conditions.rain > 50) {
+    severity = "high";
+    warnings.push("🌊 Flash Flood Warning - Very Heavy Rainfall (50-75mm/h)");
+    warnings.push("🚨 Avoid low-lying areas and underpasses");
+  } else if (conditions.rain > 25) {
+    severity = "moderate";
+    warnings.push("🌧️ Heavy Rain Alert - Potential Flash Flooding (25-50mm/h)");
+    warnings.push("⚠️ Monitor water levels and avoid flood-prone areas");
+  } else if (conditions.rain > 10) {
+    severity = "moderate";
+    warnings.push("🌦️ Moderate to Heavy Rain - Flash Flood Watch (10-25mm/h)");
+  }
+
+  // Enhanced Rainfall Pattern Analysis
+  if (conditions.rain > 20 && conditions.humidity > 85) {
+    severity = severity === "low" ? "moderate" : severity;
+    warnings.push("💧 Sustained Heavy Rainfall - Increased flood risk due to high humidity");
+  }
+
+  // Pressure-based flood prediction
+  if (conditions.rain > 15 && conditions.pressure < 1000) {
+    severity = severity === "low" ? "moderate" : severity;
+    warnings.push("🌀 Low Pressure System - Enhanced rainfall and flood potential");
+  }
+
+  // Wind + Rain = Severe Storm Conditions
+  if (conditions.rain > 20 && conditions.windSpeed > 50) {
+    severity = "high";
+    warnings.push("⛈️ Severe Thunderstorm - Heavy rain with strong winds");
+    warnings.push("🌪️ Potential for flash flooding and wind damage");
+  }
+
   // Temperature Warnings
   if (conditions.temp >= 45) {
     severity = "high";
-    warnings.push("Extreme Heat Warning - Heat Wave Conditions"); // These will be translated in the UI
+    warnings.push("🌡️ Extreme Heat Warning - Heat Wave Conditions (>45°C)");
   } else if (conditions.temp >= 40) {
-    severity = "moderate";
-    warnings.push("Heat Advisory - High Temperature Alert");
+    severity = severity === "low" ? "moderate" : severity;
+    warnings.push("🔥 Heat Advisory - High Temperature Alert (40-45°C)");
   }
 
   // Cold Temperature Warnings
   if (conditions.temp <= 5) {
     severity = "high";
-    warnings.push("Extreme Cold Warning - Cold Wave Conditions");
+    warnings.push("❄️ Extreme Cold Warning - Cold Wave Conditions (<5°C)");
   } else if (conditions.temp <= 10) {
-    severity = "moderate";
-    warnings.push("Cold Weather Advisory");
+    severity = severity === "low" ? "moderate" : severity;
+    warnings.push("🧊 Cold Weather Advisory (5-10°C)");
   }
 
-  // Existing weather checks
+  // Enhanced Visibility and Storm Detection
   if (conditions.visibility < 1000 && conditions.windSpeed > 30) {
     severity = "high";
-    warnings.push("Dust Storm Warning - Low Visibility");
+    warnings.push("🌪️ Dust Storm Warning - Extremely Low Visibility");
+  }
+
+  // Fog with potential for flash flooding
+  if (conditions.visibility < 500 && conditions.humidity > 95 && conditions.rain > 5) {
+    severity = severity === "low" ? "moderate" : severity;
+    warnings.push("🌫️ Dense Fog with Rain - Reduced visibility during flooding");
   }
 
   // Heat Index Check
   const heatIndex = calculateHeatIndex(conditions.temp, conditions.humidity);
   if (heatIndex > 54) {
     severity = "high";
-    warnings.push("Extreme Heat Danger - Heat Stroke Risk");
+    warnings.push("🔥 Extreme Heat Danger - Heat Stroke Risk (Heat Index >54°C)");
   } else if (heatIndex > 41) {
-    severity = "high";
-    warnings.push("Heat Advisory - Heat Exhaustion Risk");
+    severity = severity === "low" ? "moderate" : severity;
+    warnings.push("🌡️ Heat Advisory - Heat Exhaustion Risk (Heat Index >41°C)");
   }
 
   // Wind Chill Check
   const windChill = calculateWindChill(conditions.temp, conditions.windSpeed);
   if (windChill < -27) {
     severity = "high";
-    warnings.push("Extreme Wind Chill - Frostbite Risk");
+    warnings.push("🧊 Extreme Wind Chill - Frostbite Risk (<-27°C)");
   }
 
-  // Make sure warnings are being added to weather data
-  if (warnings.length > 0) {
-    console.log("Temperature warnings:", warnings);
+  // Enhanced logging for flash flood detection
+  if (conditions.rain > 10) {
+    console.log(`🌊 FLOOD DETECTION for ${conditions.location}:`, {
+      rainfall: `${conditions.rain}mm/h`,
+      severity,
+      floodRisk: conditions.rain > 50 ? "EXTREME" : conditions.rain > 25 ? "HIGH" : "MODERATE",
+      warnings: warnings.filter(w => w.includes("🌊") || w.includes("🌧️") || w.includes("🌦️"))
+    });
   }
 
   return { warnings, severity };
@@ -751,92 +867,292 @@ const fetchAirQualityData = async (locations) => {
   }
 };
 
-// Add this function for local disaster prediction
+// Enhanced local disaster prediction with advanced flash flood detection
 const predictLocalDisasters = (weatherData) => {
   const predictions = [];
+  const location = weatherData.location?.toLowerCase() || "";
 
-  // Enhanced weather thresholds
+  // 🌊 ADVANCED FLASH FLOOD PREDICTION SYSTEM
+  const floodRiskFactors = calculateFloodRisk(weatherData, location);
+
+  if (floodRiskFactors.riskLevel === "EXTREME") {
+    predictions.push({
+      type: "Flash Flood",
+      severity: "high",
+      probability: 0.95,
+      details: `🚨 EXTREME FLASH FLOOD RISK: ${floodRiskFactors.details}`,
+      emergencyLevel: "CRITICAL",
+      icon: "🌊",
+      actionRequired: "IMMEDIATE EVACUATION"
+    });
+  } else if (floodRiskFactors.riskLevel === "HIGH") {
+    predictions.push({
+      type: "Flash Flood",
+      severity: "high",
+      probability: 0.85,
+      details: `⚠️ HIGH FLASH FLOOD RISK: ${floodRiskFactors.details}`,
+      emergencyLevel: "HIGH",
+      icon: "🌊",
+      actionRequired: "PREPARE FOR EVACUATION"
+    });
+  } else if (floodRiskFactors.riskLevel === "MODERATE") {
+    predictions.push({
+      type: "Flash Flood",
+      severity: "moderate",
+      probability: 0.65,
+      details: `🌧️ MODERATE FLOOD RISK: ${floodRiskFactors.details}`,
+      emergencyLevel: "MODERATE",
+      icon: "🌦️",
+      actionRequired: "MONITOR CONDITIONS"
+    });
+  }
+
+  // 🌀 Enhanced Cyclone Detection
   if (weatherData.rain > 30 && weatherData.windSpeed > 25) {
+    const cycloneIntensity = weatherData.rain > 75 && weatherData.windSpeed > 100 ? "SUPER CYCLONE" :
+                           weatherData.rain > 50 && weatherData.windSpeed > 75 ? "VERY SEVERE" :
+                           weatherData.rain > 35 && weatherData.windSpeed > 50 ? "SEVERE" : "CYCLONIC STORM";
+
     predictions.push({
       type: "Cyclone",
       severity: weatherData.rain > 50 ? "high" : "moderate",
       probability: 0.8,
-      details: "Heavy rain and strong winds indicate cyclonic conditions",
+      details: `🌀 ${cycloneIntensity}: Rain ${weatherData.rain}mm/h, Wind ${weatherData.windSpeed}km/h`,
+      icon: "🌀",
+      emergencyLevel: weatherData.rain > 50 ? "HIGH" : "MODERATE"
     });
   }
 
-  // Heat Wave
+  // 🔥 Heat Wave Detection
   if (weatherData.temp > 40) {
     predictions.push({
       type: "Heat Wave",
       severity: weatherData.temp > 45 ? "high" : "moderate",
       probability: 0.9,
-      details: `Extreme temperature of ${weatherData.temp}°C poses health risks`,
+      details: `🌡️ Extreme temperature ${weatherData.temp}°C - Heat stroke risk`,
+      icon: "🔥",
+      emergencyLevel: weatherData.temp > 45 ? "HIGH" : "MODERATE"
     });
   }
 
-  // Cold Wave
+  // ❄️ Cold Wave Detection
   if (weatherData.temp < 5) {
     predictions.push({
       type: "Cold Wave",
       severity: weatherData.temp < 0 ? "high" : "moderate",
       probability: 0.9,
-      details: `Severe cold temperature of ${weatherData.temp}°C`,
+      details: `🧊 Severe cold ${weatherData.temp}°C - Hypothermia risk`,
+      icon: "❄️",
+      emergencyLevel: weatherData.temp < 0 ? "HIGH" : "MODERATE"
     });
   }
 
-  // Flash Floods
-  if (weatherData.rain > 40) {
-    predictions.push({
-      type: "Flash Flood",
-      severity: weatherData.rain > 60 ? "high" : "moderate",
-      probability: 0.85,
-      details: `Heavy rainfall of ${weatherData.rain}mm/h indicates flood risk`,
-    });
-  }
+  // 🏔️ Enhanced Landslide Risk (for hilly areas)
+  if (weatherData.rain > 25 && hillStations.includes(location)) {
+    const landslideRisk = weatherData.rain > 60 ? "EXTREME" :
+                         weatherData.rain > 40 ? "HIGH" : "MODERATE";
 
-  // Drought Conditions
-  if (weatherData.humidity < 30 && weatherData.temp > 35) {
-    predictions.push({
-      type: "Drought",
-      severity: "moderate",
-      probability: 0.7,
-      details: "Low humidity and high temperature indicate drought conditions",
-    });
-  }
-
-  // Landslide Risk (for hilly areas)
-  if (weatherData.rain > 25 && hillStations.includes(weatherData.location)) {
     predictions.push({
       type: "Landslide",
       severity: weatherData.rain > 40 ? "high" : "moderate",
       probability: 0.75,
-      details: "Continuous rainfall in hilly terrain increases landslide risk",
+      details: `⛰️ ${landslideRisk} LANDSLIDE RISK: ${weatherData.rain}mm/h rainfall in hilly terrain`,
+      icon: "🏔️",
+      emergencyLevel: weatherData.rain > 40 ? "HIGH" : "MODERATE"
     });
   }
 
-  // Thunderstorm
+  // ⛈️ Severe Thunderstorm Detection
   if (weatherData.clouds > 75 && weatherData.windSpeed > 20) {
     predictions.push({
       type: "Thunderstorm",
       severity: weatherData.windSpeed > 30 ? "high" : "moderate",
       probability: 0.8,
-      details:
-        "Cloud coverage and wind conditions indicate thunderstorm possibility",
+      details: `⛈️ Severe thunderstorm: ${weatherData.clouds}% cloud cover, ${weatherData.windSpeed}km/h winds`,
+      icon: "⛈️",
+      emergencyLevel: weatherData.windSpeed > 30 ? "HIGH" : "MODERATE"
     });
   }
 
-  // Fog Warning
+  // 🌫️ Dense Fog Warning
   if (weatherData.visibility < 1000 && weatherData.humidity > 90) {
     predictions.push({
       type: "Dense Fog",
       severity: weatherData.visibility < 500 ? "high" : "moderate",
       probability: 0.9,
-      details: "Low visibility and high humidity indicate dense fog conditions",
+      details: `🌫️ Dense fog: ${weatherData.visibility}m visibility, ${weatherData.humidity}% humidity`,
+      icon: "🌫️",
+      emergencyLevel: weatherData.visibility < 500 ? "HIGH" : "MODERATE"
+    });
+  }
+
+  // 🌵 Drought Conditions
+  if (weatherData.humidity < 30 && weatherData.temp > 35) {
+    predictions.push({
+      type: "Drought",
+      severity: "moderate",
+      probability: 0.7,
+      details: `🌵 Drought conditions: ${weatherData.humidity}% humidity, ${weatherData.temp}°C temperature`,
+      icon: "🌵",
+      emergencyLevel: "MODERATE"
     });
   }
 
   return predictions;
+};
+
+// 🌊 Advanced Flood Risk Calculation System
+const calculateFloodRisk = (weatherData, location) => {
+  let riskScore = 0;
+  let riskFactors = [];
+
+  // Primary rainfall factor
+  if (weatherData.rain > 75) {
+    riskScore += 50;
+    riskFactors.push(`Extreme rainfall ${weatherData.rain}mm/h`);
+  } else if (weatherData.rain > 50) {
+    riskScore += 35;
+    riskFactors.push(`Very heavy rainfall ${weatherData.rain}mm/h`);
+  } else if (weatherData.rain > 25) {
+    riskScore += 20;
+    riskFactors.push(`Heavy rainfall ${weatherData.rain}mm/h`);
+  } else if (weatherData.rain > 10) {
+    riskScore += 10;
+    riskFactors.push(`Moderate rainfall ${weatherData.rain}mm/h`);
+  }
+
+  // Humidity factor (saturated ground)
+  if (weatherData.humidity > 95) {
+    riskScore += 15;
+    riskFactors.push("Saturated atmospheric conditions");
+  } else if (weatherData.humidity > 85) {
+    riskScore += 10;
+    riskFactors.push("High humidity levels");
+  }
+
+  // Pressure factor (storm systems)
+  if (weatherData.pressure < 980) {
+    riskScore += 20;
+    riskFactors.push("Very low pressure system");
+  } else if (weatherData.pressure < 1000) {
+    riskScore += 10;
+    riskFactors.push("Low pressure system");
+  }
+
+  // Wind factor (storm intensity)
+  if (weatherData.windSpeed > 60) {
+    riskScore += 15;
+    riskFactors.push("Strong winds enhancing storm");
+  } else if (weatherData.windSpeed > 30) {
+    riskScore += 8;
+    riskFactors.push("Moderate winds");
+  }
+
+  // Location-specific factors
+  const floodProneAreas = [
+    "mumbai", "chennai", "kolkata", "guwahati", "patna", "varanasi",
+    "jammu", "srinagar", "kochi", "mangalore", "puducherry", "puri",
+    "digha", "chilika", "haldia", "daman", "alibag"
+  ];
+
+  if (floodProneAreas.includes(location)) {
+    riskScore += 15;
+    riskFactors.push("Flood-prone geographical area");
+  }
+
+  // Coastal areas (storm surge risk)
+  const coastalAreas = [
+    "mumbai", "chennai", "kochi", "visakhapatnam", "mangalore",
+    "puducherry", "puri", "digha", "porbandar", "diu", "karwar"
+  ];
+
+  if (coastalAreas.includes(location) && weatherData.windSpeed > 40) {
+    riskScore += 12;
+    riskFactors.push("Coastal storm surge potential");
+  }
+
+  // Determine risk level
+  let riskLevel, details;
+  if (riskScore >= 70) {
+    riskLevel = "EXTREME";
+    details = `Score: ${riskScore}/100. ${riskFactors.join(", ")}`;
+  } else if (riskScore >= 45) {
+    riskLevel = "HIGH";
+    details = `Score: ${riskScore}/100. ${riskFactors.join(", ")}`;
+  } else if (riskScore >= 25) {
+    riskLevel = "MODERATE";
+    details = `Score: ${riskScore}/100. ${riskFactors.join(", ")}`;
+  } else {
+    riskLevel = "LOW";
+    details = `Score: ${riskScore}/100. Current conditions stable`;
+  }
+
+  return { riskLevel, riskScore, details, factors: riskFactors };
+};
+
+// 🌊 Create specific flash flood alerts for locations
+const createFlashFloodAlerts = (conditions, forecastWarnings, location) => {
+  const alerts = [];
+  const locationName = location.charAt(0).toUpperCase() + location.slice(1);
+
+  // Current conditions flash flood alert
+  if (conditions.rain > 25) {
+    const alertLevel = conditions.rain > 75 ? "EMERGENCY" :
+                      conditions.rain > 50 ? "WARNING" :
+                      conditions.rain > 25 ? "WATCH" : "ADVISORY";
+
+    alerts.push({
+      id: `flood-current-${location}-${Date.now()}`,
+      title: `🌊 Flash Flood ${alertLevel}: ${locationName}`,
+      coordinates: [conditions.lat || 0, conditions.lon || 0],
+      severity: conditions.rain > 50 ? "high" : "moderate",
+      type: "Flash Flood",
+      date: new Date().toISOString(),
+      details: `🚨 CURRENT FLASH FLOOD ${alertLevel}\n` +
+               `Location: ${locationName}\n` +
+               `Rainfall Rate: ${conditions.rain.toFixed(1)} mm/h\n` +
+               `Risk Level: ${conditions.rain > 75 ? "EXTREME" : conditions.rain > 50 ? "HIGH" : "MODERATE"}\n` +
+               `Action: ${conditions.rain > 75 ? "EVACUATE IMMEDIATELY" : conditions.rain > 50 ? "PREPARE TO EVACUATE" : "AVOID LOW AREAS"}\n` +
+               `Conditions: ${conditions.description}\n` +
+               `Pressure: ${conditions.pressure} hPa\n` +
+               `Humidity: ${conditions.humidity}%`,
+      source: "OpenWeather Flash Flood Detection",
+      url: "https://openweathermap.org/",
+      emergencyLevel: alertLevel,
+      icon: "🌊"
+    });
+  }
+
+  // Forecast-based flash flood alerts
+  const severeFloodForecasts = forecastWarnings.filter(w => w.rain > 20);
+  if (severeFloodForecasts.length > 0) {
+    const maxRainForecast = severeFloodForecasts.reduce((max, current) =>
+      current.rain > max.rain ? current : max
+    );
+
+    alerts.push({
+      id: `flood-forecast-${location}-${Date.now()}`,
+      title: `🌊 Flash Flood Forecast: ${locationName}`,
+      coordinates: [conditions.lat || 0, conditions.lon || 0],
+      severity: maxRainForecast.rain > 50 ? "high" : "moderate",
+      type: "Flash Flood",
+      date: maxRainForecast.time.toISOString(),
+      details: `📅 UPCOMING FLASH FLOOD RISK\n` +
+               `Location: ${locationName}\n` +
+               `Expected Time: ${maxRainForecast.time.toLocaleString()}\n` +
+               `Forecast Rainfall: ${maxRainForecast.rain.toFixed(1)} mm/h\n` +
+               `Risk Level: ${maxRainForecast.floodRisk}\n` +
+               `Warning Type: ${maxRainForecast.warningType}\n` +
+               `Preparation Time: ${Math.round((maxRainForecast.time - new Date()) / (1000 * 60 * 60))} hours\n` +
+               `Action Required: PREPARE EMERGENCY SUPPLIES AND EVACUATION PLAN`,
+      source: "OpenWeather Flood Forecast",
+      url: "https://openweathermap.org/",
+      emergencyLevel: maxRainForecast.severity === "high" ? "WARNING" : "WATCH",
+      icon: "🌊"
+    });
+  }
+
+  return alerts;
 };
 
 // Add this array for hill stations
