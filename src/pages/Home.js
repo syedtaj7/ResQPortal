@@ -2,13 +2,12 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   MapContainer,
   TileLayer,
-  Popup,
   Polygon,
   useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import React from "react";
-import { Link } from "react-router-dom";
+
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import TranslatableText from "../components/TranslatableText";
@@ -579,6 +578,274 @@ const analyzeWeatherData = (conditions) => {
 
   return { warnings, severity };
 };
+
+// Enhanced function to extract comprehensive weather warning information with forecast details
+const getComprehensiveWeatherWarning = (disaster) => {
+  if (disaster.type !== "Weather Warning") {
+    return {
+      title: disaster.type,
+      icon: "⚠️",
+      severity: disaster.severity || "moderate",
+      color: "gray",
+      warnings: [],
+      forecast: [],
+      description: "",
+      hasRealWarnings: false
+    };
+  }
+
+  const details = disaster.details.toLowerCase();
+
+  // Extract actual weather values from details for accurate analysis
+  const extractWeatherValues = (text) => {
+    const rainfallMatch = text.match(/rainfall:\s*(\d+\.?\d*)\s*mm\/h/i);
+    const tempMatch = text.match(/temperature:\s*(\d+\.?\d*)\s*°c/i);
+    const windMatch = text.match(/wind speed:\s*(\d+\.?\d*)\s*km\/h/i);
+    const visibilityMatch = text.match(/visibility:\s*(\d+\.?\d*)\s*km/i);
+    const humidityMatch = text.match(/humidity:\s*(\d+)\s*%/i);
+    const pressureMatch = text.match(/pressure:\s*(\d+)\s*hpa/i);
+
+    return {
+      rainfall: rainfallMatch ? parseFloat(rainfallMatch[1]) : 0,
+      temperature: tempMatch ? parseFloat(tempMatch[1]) : null,
+      windSpeed: windMatch ? parseFloat(windMatch[1]) : 0,
+      visibility: visibilityMatch ? parseFloat(visibilityMatch[1]) : 10,
+      humidity: humidityMatch ? parseInt(humidityMatch[1]) : 50,
+      pressure: pressureMatch ? parseInt(pressureMatch[1]) : 1013
+    };
+  };
+
+  // Extract forecast information from details
+  const extractForecastData = (text) => {
+    const forecastSection = text.match(/📅 forecast warnings \(next 48 hours\):(.*?)(?=\n\n|$)/is);
+    if (!forecastSection) return [];
+
+    const forecastLines = forecastSection[1].split('\n').filter(line => line.trim());
+    const forecasts = [];
+
+    for (let i = 0; i < forecastLines.length; i += 2) {
+      const timeLine = forecastLines[i];
+      const detailLine = forecastLines[i + 1];
+
+      if (timeLine && detailLine) {
+        const timeMatch = timeLine.match(/(\d{1,2}\/\d{1,2}\/\d{4}.*?\d{1,2}:\d{2}:\d{2}.*?):/);
+        const conditionMatch = detailLine.match(/(.+?)\s*\|\s*(\d+\.?\d*)°c\s*\|\s*(\d+\.?\d*)\s*km\/h\s*\|\s*(\d+\.?\d*)mm\/h/i);
+
+        if (timeMatch && conditionMatch) {
+          forecasts.push({
+            time: timeMatch[1].trim(),
+            condition: conditionMatch[1].trim(),
+            temperature: parseFloat(conditionMatch[2]),
+            windSpeed: parseFloat(conditionMatch[3]),
+            rainfall: parseFloat(conditionMatch[4])
+          });
+        }
+      }
+    }
+
+    return forecasts;
+  };
+
+  const weatherData = extractWeatherValues(details);
+  const forecastData = extractForecastData(disaster.details);
+  let activeWarnings = [];
+  let primaryWarning = "";
+  let warningIcon = "🌦️";
+  let severityLevel = "low";
+  let warningColor = "blue";
+  let hasRealWarnings = false;
+
+  // REAL-TIME WARNING ANALYSIS - Only show warnings when actual conditions warrant them
+
+  // CRITICAL FLOOD WARNINGS (Only if actual rainfall is significant)
+  if (weatherData.rainfall > 75 || details.includes('flash flood emergency')) {
+    primaryWarning = "🚨 FLASH FLOOD EMERGENCY";
+    activeWarnings.push(`🌊 EXTREME RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`);
+    activeWarnings.push("⚠️ IMMEDIATE EVACUATION REQUIRED");
+    activeWarnings.push("🚨 LIFE-THREATENING FLOODING");
+    warningIcon = "🌊";
+    severityLevel = "high";
+    warningColor = "red";
+    hasRealWarnings = true;
+  } else if (weatherData.rainfall > 50 || details.includes('flash flood warning')) {
+    primaryWarning = "🌊 FLASH FLOOD WARNING";
+    activeWarnings.push(`🌧️ VERY HEAVY RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`);
+    activeWarnings.push("⚠️ AVOID LOW-LYING AREAS");
+    activeWarnings.push("🚨 PREPARE FOR EVACUATION");
+    warningIcon = "🌊";
+    severityLevel = "high";
+    warningColor = "orange";
+    hasRealWarnings = true;
+  } else if (weatherData.rainfall > 25) {
+    primaryWarning = "🌧️ HEAVY RAIN WARNING";
+    activeWarnings.push(`💧 HEAVY RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`);
+    activeWarnings.push("⚠️ FLOOD RISK - MONITOR CONDITIONS");
+    warningIcon = "🌧️";
+    severityLevel = "moderate";
+    warningColor = "yellow";
+    hasRealWarnings = true;
+  } else if (weatherData.rainfall > 10) {
+    primaryWarning = "🌦️ MODERATE RAIN ALERT";
+    activeWarnings.push(`💧 MODERATE RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`);
+    activeWarnings.push("⚠️ WATCH FOR LOCALIZED FLOODING");
+    warningIcon = "🌦️";
+    severityLevel = "moderate";
+    warningColor = "blue";
+    hasRealWarnings = true;
+  }
+
+  // EXTREME TEMPERATURE WARNINGS (Only if actual temperature data supports it)
+  if (weatherData.temperature !== null && weatherData.temperature >= 45) {
+    if (!primaryWarning) {
+      primaryWarning = "🔥 EXTREME HEAT EMERGENCY";
+      warningIcon = "🔥";
+      severityLevel = "high";
+      warningColor = "red";
+    }
+    activeWarnings.push(`🌡️ EXTREME TEMPERATURE: ${weatherData.temperature.toFixed(1)}°C`);
+    activeWarnings.push("🚨 HEAT STROKE RISK - STAY INDOORS");
+    activeWarnings.push("💧 DRINK WATER FREQUENTLY");
+    hasRealWarnings = true;
+  } else if (weatherData.temperature !== null && weatherData.temperature >= 40) {
+    if (!primaryWarning) {
+      primaryWarning = "🔥 HEAT WAVE WARNING";
+      warningIcon = "🔥";
+      severityLevel = "high";
+      warningColor = "orange";
+    }
+    activeWarnings.push(`🌡️ HIGH TEMPERATURE: ${weatherData.temperature.toFixed(1)}°C`);
+    activeWarnings.push("⚠️ HEAT EXHAUSTION RISK");
+    activeWarnings.push("🏠 LIMIT OUTDOOR ACTIVITIES");
+    hasRealWarnings = true;
+  } else if (weatherData.temperature !== null && weatherData.temperature <= 5) {
+    if (!primaryWarning) {
+      primaryWarning = "❄️ EXTREME COLD WARNING";
+      warningIcon = "❄️";
+      severityLevel = "high";
+      warningColor = "blue";
+    }
+    activeWarnings.push(`🧊 EXTREME COLD: ${weatherData.temperature.toFixed(1)}°C`);
+    activeWarnings.push("🚨 FROSTBITE RISK - STAY WARM");
+    activeWarnings.push("🏠 AVOID PROLONGED EXPOSURE");
+    hasRealWarnings = true;
+  } else if (weatherData.temperature !== null && weatherData.temperature <= 10) {
+    if (!primaryWarning) {
+      primaryWarning = "🧊 COLD WAVE ALERT";
+      warningIcon = "❄️";
+      severityLevel = "moderate";
+      warningColor = "blue";
+    }
+    activeWarnings.push(`❄️ COLD TEMPERATURE: ${weatherData.temperature.toFixed(1)}°C`);
+    activeWarnings.push("⚠️ DRESS WARMLY");
+    hasRealWarnings = true;
+  }
+
+  // DANGEROUS WIND WARNINGS (Only if actual wind speed is high)
+  if (weatherData.windSpeed > 62) {
+    if (!primaryWarning) {
+      primaryWarning = "💨 SEVERE WIND WARNING";
+      warningIcon = "💨";
+      severityLevel = "high";
+      warningColor = "red";
+    }
+    activeWarnings.push(`🌪️ SEVERE WINDS: ${weatherData.windSpeed.toFixed(1)} km/h`);
+    activeWarnings.push("🚨 STRUCTURAL DAMAGE POSSIBLE");
+    activeWarnings.push("🏠 STAY INDOORS - AVOID TRAVEL");
+    hasRealWarnings = true;
+  } else if (weatherData.windSpeed > 50) {
+    if (!primaryWarning) {
+      primaryWarning = "💨 HIGH WIND ALERT";
+      warningIcon = "💨";
+      severityLevel = "moderate";
+      warningColor = "orange";
+    }
+    activeWarnings.push(`💨 HIGH WINDS: ${weatherData.windSpeed.toFixed(1)} km/h`);
+    activeWarnings.push("⚠️ SECURE LOOSE OBJECTS");
+    hasRealWarnings = true;
+  }
+
+  // SEVERE STORM WARNINGS (Multi-factor - only if both conditions are met)
+  if (weatherData.rainfall > 15 && weatherData.windSpeed > 40) {
+    if (!primaryWarning) {
+      primaryWarning = "⛈️ SEVERE THUNDERSTORM";
+      warningIcon = "⛈️";
+      severityLevel = "high";
+      warningColor = "purple";
+    }
+    activeWarnings.push("🌩️ SEVERE STORM CONDITIONS");
+    activeWarnings.push("⚡ LIGHTNING RISK - STAY INDOORS");
+    hasRealWarnings = true;
+  }
+
+  // VISIBILITY WARNINGS (Only if actual visibility is impaired)
+  if (weatherData.visibility < 1 && weatherData.windSpeed > 30) {
+    if (!primaryWarning) {
+      primaryWarning = "🌪️ DUST STORM WARNING";
+      warningIcon = "🌪️";
+      severityLevel = "high";
+      warningColor = "brown";
+    }
+    activeWarnings.push(`👁️ EXTREMELY LOW VISIBILITY: ${weatherData.visibility.toFixed(1)} km`);
+    activeWarnings.push("🚨 AVOID TRAVEL - STAY INDOORS");
+    hasRealWarnings = true;
+  } else if (weatherData.visibility < 0.5 && weatherData.humidity > 95) {
+    if (!primaryWarning) {
+      primaryWarning = "🌫️ DENSE FOG WARNING";
+      warningIcon = "🌫️";
+      severityLevel = "moderate";
+      warningColor = "gray";
+    }
+    activeWarnings.push(`👁️ DENSE FOG: ${weatherData.visibility.toFixed(1)} km visibility`);
+    activeWarnings.push("🚗 DRIVE CAREFULLY - USE FOG LIGHTS");
+    hasRealWarnings = true;
+  }
+
+  // ATMOSPHERIC PRESSURE WARNINGS (Only if pressure is significantly low)
+  if (weatherData.pressure < 980) {
+    activeWarnings.push(`LOW PRESSURE SYSTEM: ${weatherData.pressure} hPa`);
+    activeWarnings.push("SEVERE WEATHER DEVELOPING");
+    hasRealWarnings = true;
+  }
+
+  // Only show warnings if there are actual real weather conditions that warrant them
+  if (!hasRealWarnings) {
+    // Check if there are any text-based warnings for specific events
+    if (details.includes('cyclone') || details.includes('hurricane')) {
+      primaryWarning = "🌀 CYCLONE WARNING";
+      warningIcon = "🌀";
+      severityLevel = "high";
+      warningColor = "red";
+      activeWarnings.push("CYCLONIC CONDITIONS");
+      activeWarnings.push("EXTREME WEATHER SYSTEM");
+      hasRealWarnings = true;
+    } else if (details.includes('flash flood emergency') || details.includes('flood warning')) {
+      // These are handled above, but ensure we catch text-based flood warnings
+      hasRealWarnings = true;
+    } else {
+      // No real warnings - return minimal advisory
+      primaryWarning = "🌦️ WEATHER MONITORING";
+      warningIcon = "🌦️";
+      severityLevel = "low";
+      warningColor = "blue";
+      activeWarnings = ["LIVE WEATHER MONITORING"];
+    }
+  }
+
+  return {
+    title: primaryWarning,
+    icon: warningIcon,
+    severity: severityLevel,
+    color: warningColor,
+    warnings: activeWarnings,
+    forecast: forecastData,
+    description: hasRealWarnings ?
+      `${activeWarnings.length} active warning${activeWarnings.length !== 1 ? 's' : ''}` :
+      "Live monitoring - No active warnings",
+    hasRealWarnings: hasRealWarnings
+  };
+};
+
+
 
 // Add these helper functions
 const calculateHeatIndex = (temp, humidity) => {
@@ -1264,6 +1531,8 @@ function Home() {
   const [filteredDisasters, setFilteredDisasters] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
   const [locationPermission, setLocationPermission] = useState(null);
+  const [showDetailedPopup, setShowDetailedPopup] = useState(false);
+  const [selectedDisasterGroup, setSelectedDisasterGroup] = useState(null);
 
   // Remove the notification comment and related code
 
@@ -1726,122 +1995,74 @@ function Home() {
                         fillOpacity: 0.4,
                       });
 
-                      const getAllWarnings = (disasterGroup) => {
-                                              return disasterGroup.map((disaster) => {
-                                                const warnings = [];
-                                                const details = disaster.details || "";
-                      
-                                                // Temperature warnings with specific thresholds
-                                                if (details.includes("Temperature:")) {
-                                                  const tempMatch = details.match(
-                                                    /Temperature:\s*([-\d.]+)/
-                                                  );
-                                                  if (tempMatch) {
-                                                    const temp = parseFloat(tempMatch[1]);
-                                                    if (temp >= 45) {
-                                                      warnings.push(
-                                                        "🌡️ Extreme Heat Wave (>45°C)"
-                                                      );
-                                                    } else if (temp >= 40) {
-                                                      warnings.push(
-                                                        "🌡️ Heat Wave Warning (40-45°C)"
-                                                      );
-                                                    } else if (temp <= 5) {
-                                                      warnings.push("❄️ Severe Cold Wave (<5°C)");
-                                                    } else if (temp <= 10) {
-                                                      warnings.push(
-                                                        "❄️ Cold Wave Warning (5-10°C)"
-                                                      );
-                                                    }
-                                                  }
-                                                }
-                      
-                                                // Natural disaster specific warnings
-                                                if (disaster.type === "Earthquake") {
-                                                  const magMatch = details.match(
-                                                        /Magnitude:\s*([\d.]+)/
-                                                      );
-                                                      if (magMatch) {
-                                                        const magnitude = parseFloat(magMatch[1]);
-                                                        if (magnitude >= 6.0) {
-                                                          warnings.push(
-                                                            "🌋 Major Earthquake (M6.0+)"
-                                                          );
-                                                        } else if (magnitude >= 5.0) {
-                                                          warnings.push(
-                                                            "🌋 Moderate Earthquake (M5.0+)"
-                                                          );
-                                                        }
-                                                      }
-                                                }
-                      
-                                                if (disaster.type === "Landslide Warning") {
-                                                  warnings.push("⛰️ Landslide Risk Alert");
-                                                }
-                      
-                                                if (details.includes("Tsunami Risk: Yes")) {
-                                                  warnings.push("🌊 Tsunami Risk Alert");
-                                                }
-                      
-                                                return {
-                                                  type: disaster.type,
-                                                  severity: disaster.severity,
-                                                  warnings: warnings,
-                                                };
-                                              });
-                                            };
+                      // Removed unused getAllWarnings function
+
+
+
+
+
+                          // Get comprehensive warning information
+                          const warningInfo = getComprehensiveWeatherWarning(mainDisaster);
+                          const warningColorMap = {
+                            'red': { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-300', dot: 'bg-red-500' },
+                            'orange': { bg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-300', dot: 'bg-orange-500' },
+                            'yellow': { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-300', dot: 'bg-yellow-500' },
+                            'blue': { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-300', dot: 'bg-blue-500' },
+                            'purple': { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-300', dot: 'bg-purple-500' },
+                            'gray': { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-300', dot: 'bg-gray-500' },
+                            'brown': { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-300', dot: 'bg-amber-600' }
+                          };
+                          const colorScheme = warningColorMap[warningInfo.color] || warningColorMap['blue'];
 
                           const tooltipContent = `
-                            <div class="bg-white p-3 rounded-lg shadow-md text-sm">
-                              <p class="font-bold text-gray-900">${
-                                mainDisaster.title
-                              }</p>
-                              <p class="text-${
-                                maxSeverity === "high"
-                                  ? "red"
-                                  : maxSeverity === "moderate"
-                                  ? "yellow"
-                                  : "green"
-                              }-600">
-                                <TranslatableText>
-                                ${
-                                  maxSeverity.charAt(0).toUpperCase() +
-                                  maxSeverity.slice(1)
-                                } Severity
-                                </TranslatableText>
-                              </p>
-                              <div class="mt-2">
-                                <p class="font-medium text-gray-700"><TranslatableText>Active Warnings:</TranslatableText></p>
-                                <ul class="mt-1 space-y-1">
-                                  ${getAllWarnings(disasterGroup)
-                                    .map((item) =>
-                                      item.warnings
-                                        .map(
-                                          (warning) => `
-                                      <li class="text-gray-600 flex items-center">
-                                        <span class="w-2 h-2 rounded-full bg-${
-                                          item.severity === "high"
-                                            ? "red"
-                                            : item.severity === "moderate"
-                                            ? "amber"
-                                            : "emerald"
-                                        }-500 mr-2"></span>
-                                        ${warning}
-                                      </li>
-                                    `
-                                        )
-                                        .join("")
-                                    )
-                                    .join("")}
-                                </ul>
+                            <div class="bg-white backdrop-blur-xl border border-gray-300 rounded-2xl shadow-2xl p-4 min-w-[300px] max-w-[380px]">
+                              <!-- Enhanced Header with Warning Icon -->
+                              <div class="flex items-center gap-3 mb-3">
+                                <div class="w-12 h-12 ${colorScheme.bg} rounded-full flex items-center justify-center border ${colorScheme.border} shadow-lg">
+                                  <span class="text-2xl">${warningInfo.icon}</span>
+                                </div>
+                                <div class="flex-1">
+                                  <h3 class="font-bold text-gray-900 text-sm leading-tight mb-1">
+                                    ${warningInfo.title}
+                                  </h3>
+                                  <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-bold ${colorScheme.bg} ${colorScheme.text} border ${colorScheme.border}">
+                                      ${warningInfo.severity.toUpperCase()} ALERT
+                                    </span>
+                                    <span class="text-xs text-gray-600">
+                                      ${disasterGroup.length} Active
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-                              <p class="text-gray-600 mt-2">
-                                <TranslatableText>
-                                ${disasterGroup.length} active warning${
-                            disasterGroup.length > 1 ? "s" : ""
-                          }
-                                </TranslatableText>
-                              </p>
+
+                              <!-- Prominent Warning Display -->
+                              <div class="bg-gradient-to-r ${colorScheme.bg} rounded-xl p-4 border ${colorScheme.border} mb-3 shadow-sm">
+                                <div class="flex items-center gap-2 mb-2">
+                                  <span class="w-2 h-2 ${colorScheme.dot} rounded-full animate-pulse"></span>
+                                  <p class="font-bold ${colorScheme.text} text-sm">ACTIVE WARNINGS</p>
+                                </div>
+                                <div class="space-y-1.5 max-h-32 overflow-y-auto">
+                                  ${warningInfo.warnings.map(warning => `
+                                    <div class="flex items-start gap-2">
+                                      <span class="text-lg mt-0.5">${warning.includes('EMERGENCY') || warning.includes('EXTREME') ? '🚨' : warning.includes('WARNING') || warning.includes('ALERT') ? '⚠️' : warning.includes('FLOOD') || warning.includes('RAINFALL') ? '🌊' : warning.includes('HEAT') || warning.includes('TEMPERATURE') ? '🔥' : warning.includes('COLD') || warning.includes('FROST') ? '❄️' : warning.includes('WIND') ? '💨' : '⚡'}</span>
+                                      <span class="text-sm ${colorScheme.text} font-medium leading-relaxed">${warning.replace(/^[🚨⚠️🌊🔥❄️💨⚡🌡️💧🏠🚗👁️📊🌀🌩️🌪️🌫️🧊\s]*/, '').trim()}</span>
+                                    </div>
+                                  `).join('')}
+                                </div>
+                              </div>
+
+                              <!-- Emergency Status -->
+                              <div class="flex items-center justify-between pt-2 border-t border-gray-200">
+                                <div class="flex items-center gap-2">
+                                  <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                                  <span class="text-xs font-medium text-gray-700">LIVE MONITORING</span>
+                                </div>
+                                <div class="text-right">
+                                  <p class="text-xs text-gray-500">Click for emergency details</p>
+                                  <p class="text-xs font-medium ${colorScheme.text}">${warningInfo.description}</p>
+                                </div>
+                              </div>
                             </div>
                           `;
 
@@ -1849,8 +2070,10 @@ function Home() {
                             .bindTooltip(tooltipContent, {
                               permanent: false,
                               direction: "top",
-                              className: "custom-tooltip",
-                              offset: [0, -10],
+                              className: "modern-disaster-tooltip",
+                              offset: [0, -15],
+                              opacity: 1,
+                              interactive: false,
                             })
                             .openTooltip();
                         },
@@ -1868,227 +2091,272 @@ function Home() {
                           if (center) {
                             handleZoom([center.lat, center.lng], 10);
                           }
+                          // Show detailed popup in bottom left
+                          setSelectedDisasterGroup(disasterGroup);
+                          setShowDetailedPopup(true);
                         },
                       }}
                     >
-                      <Popup
-                        className="custom-popup"
-                        autoPan={true}
-                        autoPanPadding={[150, 150]}
-                        keepInView={true}
-                        maxWidth={350} // Increased from 300
-                      >
-                        <div
-                          className="rounded-xl shadow-lg bg-gray-800"
-                          style={{ maxHeight: "500px" }}
-                        >
-                          {/* Header section with custom gradient */}
-                          <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 border-b border-gray-700 rounded-t-xl">
-                            <h3 className="font-bold text-xl text-white flex items-center gap-2">
-                              <svg
-                                className="w-5 h-5 text-red-500 flex-shrink-0"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                              <span className="truncate text-white">
-                                {mainDisaster.title.split(":")[1]?.trim() ||
-                                  "this Location"}
-                              </span>
-                            </h3>
-                          </div>
 
-                          {/* Updated Content section with severity reasons */}
-                          <div
-                            className="overflow-y-auto"
-                            style={{ maxHeight: "400px" }}
-                          >
-                            <div className="p-4 space-y-4">
-                              {disasterGroup.map((disaster, index) => {
-                                // Extract severity reasons from details
-                                const severityReasons = disaster.details
-                                  .split("\n")
-                                  .filter(
-                                    (line) =>
-                                      line.includes("Warning") ||
-                                      line.includes("Alert") ||
-                                      line.includes("Risk") ||
-                                      line.includes("Danger")
-                                  );
-
-                                return (
-                                  <div
-                                    key={disaster.id || index}
-                                    className={`rounded-lg overflow-hidden transition-all hover:shadow-md border ${
-                                      disaster.severity === "high"
-                                        ? "border-red-500/30 bg-red-900/20"
-                                        : disaster.severity === "moderate"
-                                        ? "border-amber-500/30 bg-amber-900/20"
-                                        : "border-emerald-500/30 bg-emerald-900/20"
-                                    }`}
-                                  >
-                                    {/* Alert Header with Severity Reasons */}
-                                    <div
-                                      className={`p-3 border-b ${
-                                        disaster.severity === "high"
-                                          ? "border-red-500/30 bg-gradient-to-r from-red-900/40 to-red-800/40"
-                                          : disaster.severity === "moderate"
-                                          ? "border-amber-500/30 bg-gradient-to-r from-amber-900/40 to-amber-800/40"
-                                          : "border-emerald-500/30 bg-gradient-to-r from-emerald-900/40 to-emerald-800/40"
-                                      }`}
-                                    >
-                                      <div className="flex items-center justify-between">
-                                        <h4 className="font-semibold text-white">
-                                          <TranslatableText>
-                                            {disaster.type}
-                                          </TranslatableText>
-                                        </h4>
-                                        <span
-                                          className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                                            disaster.severity === "high"
-                                              ? "bg-red-500/20 text-red-100 border border-red-500/30"
-                                              : disaster.severity === "moderate"
-                                              ? "bg-amber-500/20 text-amber-100 border border-amber-500/30"
-                                              : "bg-emerald-500/20 text-emerald-100 border border-emerald-500/30"
-                                          }`}
-                                        >
-                                          <TranslatableText>
-                                            {disaster.severity}
-                                          </TranslatableText>
-                                        </span>
-                                      </div>
-                                      {/* Add Severity Reasons */}
-                                      {severityReasons.length > 0 && (
-                                        <div className="mt-2 text-sm text-gray-300">
-                                          <p className="font-medium mb-1">
-                                            <TranslatableText>
-                                              Reasons for{" "}
-                                              <TranslatableText>
-                                                {disaster.severity}
-                                              </TranslatableText>{" "}
-                                              <TranslatableText>
-                                                severity
-                                              </TranslatableText>
-                                              :
-                                            </TranslatableText>
-                                          </p>
-                                          <ul className="list-disc list-inside space-y-1 text-gray-400">
-                                            {severityReasons.map(
-                                              (reason, i) => (
-                                                <li key={i}>
-                                                  <TranslatableText>
-                                                    {reason}
-                                                  </TranslatableText>
-                                                </li>
-                                              )
-                                            )}
-                                          </ul>
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    {/* Rest of the content remains the same */}
-                                    <div className="p-4 bg-gray-800/50">
-                                      <p className="text-sm text-gray-200 leading-relaxed">
-                                        <TranslatableText>
-                                          {disaster.details}
-                                        </TranslatableText>
-                                      </p>
-
-                                      {/* Add this new button section */}
-                                      <div className="mt-4 mb-2">
-                                        <Link
-                                          to={`/mitigation?type=${encodeURIComponent(
-                                            disaster.type
-                                          )}`}
-                                          className="w-full inline-flex items-center justify-center px-4 py-2.5
-                                            bg-gradient-to-r from-blue-600 to-blue-700
-                                            hover:from-blue-500 hover:to-blue-600
-                                            text-white font-medium rounded-lg
-                                            shadow-lg shadow-blue-500/20
-                                            transition-all duration-200
-                                            border border-blue-600/20
-                                            hover:scale-[1.02]
-                                            focus:outline-none focus:ring-2 focus:ring-blue-500/50
-                                            gap-2"
-                                        >
-                                          <svg
-                                            className="w-5 h-5 text-blue-100"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                          >
-                                            <path
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              strokeWidth={2}
-                                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                            />
-                                          </svg>
-                                          <span className="text-blue-50">
-                                            <TranslatableText>
-                                              View Precautions
-                                            </TranslatableText>
-                                          </span>
-                                        </Link>
-                                      </div>
-
-                                      {/* Existing footer section */}
-                                      <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-700">
-                                        <time className="text-xs text-gray-400">
-                                          {new Date(
-                                            disaster.date
-                                          ).toLocaleDateString("en-IN", {
-                                            day: "numeric",
-                                            month: "short",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                          })}
-                                        </time>
-                                        <a
-                                          href={disaster.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 group"
-                                        >
-                                          <TranslatableText>
-                                            More Info
-                                          </TranslatableText>
-                                          <svg
-                                            className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                          >
-                                            <path
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              strokeWidth={2}
-                                              d="M9 5l7 7-7 7"
-                                            />
-                                          </svg>
-                                        </a>
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      </Popup>
                     </Polygon>
                   );                })}                
                 <Legend />
                 <MapController location={location} />
               </MapContainer>
+
+              {/* Enhanced Bottom Left Detailed Popup */}
+              {showDetailedPopup && selectedDisasterGroup && (
+                <div className="absolute bottom-4 left-4 z-[1000] w-[480px] max-h-[85vh] overflow-y-auto animate-fade-in-up">
+                  <div className="bg-white backdrop-blur-xl border border-gray-300 rounded-2xl shadow-2xl ring-1 ring-gray-200 overflow-hidden">
+                    {(() => {
+                      const mainWarningInfo = getComprehensiveWeatherWarning(selectedDisasterGroup[0]);
+                      const warningColorMap = {
+                        'red': { bg: 'bg-red-50', headerBg: 'bg-red-100', text: 'text-red-800', border: 'border-red-300', dot: 'bg-red-500', icon: 'bg-red-200' },
+                        'orange': { bg: 'bg-orange-50', headerBg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-300', dot: 'bg-orange-500', icon: 'bg-orange-200' },
+                        'yellow': { bg: 'bg-yellow-50', headerBg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-300', dot: 'bg-yellow-500', icon: 'bg-yellow-200' },
+                        'blue': { bg: 'bg-blue-50', headerBg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-300', dot: 'bg-blue-500', icon: 'bg-blue-200' },
+                        'purple': { bg: 'bg-purple-50', headerBg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-300', dot: 'bg-purple-500', icon: 'bg-purple-200' },
+                        'gray': { bg: 'bg-gray-50', headerBg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-300', dot: 'bg-gray-500', icon: 'bg-gray-200' },
+                        'brown': { bg: 'bg-amber-50', headerBg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-300', dot: 'bg-amber-600', icon: 'bg-amber-200' }
+                      };
+                      const colorScheme = warningColorMap[mainWarningInfo.color] || warningColorMap['blue'];
+
+                      return (
+                        <>
+                          {/* Enhanced Header with Warning Colors */}
+                          <div className={`bg-gradient-to-r ${colorScheme.headerBg} to-white p-5 border-b ${colorScheme.border}`}>
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-14 h-14 ${colorScheme.icon} rounded-2xl flex items-center justify-center border ${colorScheme.border} shadow-lg`}>
+                                  <span className="text-3xl">{mainWarningInfo.icon}</span>
+                                </div>
+                                <div>
+                                  <h3 className="font-bold text-xl text-gray-900 mb-1">
+                                    {mainWarningInfo.title}
+                                  </h3>
+                                  <div className="flex items-center gap-3">
+                                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${colorScheme.bg} ${colorScheme.text} border ${colorScheme.border}`}>
+                                      {mainWarningInfo.severity.toUpperCase()} ALERT
+                                    </span>
+                                    <span className="text-sm text-gray-600">
+                                      {selectedDisasterGroup.length} Active Alert{selectedDisasterGroup.length !== 1 ? 's' : ''}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => setShowDetailedPopup(false)}
+                                className="w-10 h-10 bg-white hover:bg-gray-100 text-gray-600 hover:text-gray-800 transition-colors rounded-full flex items-center justify-center shadow-md border border-gray-300"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+
+                            {/* Critical Warning Banner */}
+                            {mainWarningInfo.severity === 'high' && (
+                              <div className="bg-red-100 border border-red-300 rounded-lg p-3 mb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-red-600 text-lg">🚨</span>
+                                  <p className="font-bold text-red-800 text-sm">CRITICAL WEATHER EMERGENCY</p>
+                                </div>
+                                <p className="text-red-700 text-xs mt-1">Immediate action required - Follow emergency protocols</p>
+                              </div>
+                            )}
+
+                            <div className="flex items-center justify-between text-sm">
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 ${colorScheme.dot} rounded-full animate-pulse`}></span>
+                                <span className="font-medium text-gray-700">LIVE MONITORING</span>
+                              </div>
+                              <div className="flex items-center text-gray-500">
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Updated: {new Date().toLocaleTimeString()}
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
+
+                    {/* Enhanced Content Section */}
+                    <div className="p-5 space-y-5 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                      {selectedDisasterGroup.map((disaster, index) => {
+                        const warningInfo = getComprehensiveWeatherWarning(disaster);
+                        const warningColorMap = {
+                          'red': { bg: 'bg-red-50', text: 'text-red-800', border: 'border-red-300', dot: 'bg-red-500', icon: 'bg-red-100', button: 'bg-red-600 hover:bg-red-700' },
+                          'orange': { bg: 'bg-orange-50', text: 'text-orange-800', border: 'border-orange-300', dot: 'bg-orange-500', icon: 'bg-orange-100', button: 'bg-orange-600 hover:bg-orange-700' },
+                          'yellow': { bg: 'bg-yellow-50', text: 'text-yellow-800', border: 'border-yellow-300', dot: 'bg-yellow-500', icon: 'bg-yellow-100', button: 'bg-yellow-600 hover:bg-yellow-700' },
+                          'blue': { bg: 'bg-blue-50', text: 'text-blue-800', border: 'border-blue-300', dot: 'bg-blue-500', icon: 'bg-blue-100', button: 'bg-blue-600 hover:bg-blue-700' },
+                          'purple': { bg: 'bg-purple-50', text: 'text-purple-800', border: 'border-purple-300', dot: 'bg-purple-500', icon: 'bg-purple-100', button: 'bg-purple-600 hover:bg-purple-700' },
+                          'gray': { bg: 'bg-gray-50', text: 'text-gray-800', border: 'border-gray-300', dot: 'bg-gray-500', icon: 'bg-gray-100', button: 'bg-gray-600 hover:bg-gray-700' },
+                          'brown': { bg: 'bg-amber-50', text: 'text-amber-800', border: 'border-amber-300', dot: 'bg-amber-600', icon: 'bg-amber-100', button: 'bg-amber-600 hover:bg-amber-700' }
+                        };
+                        const colorScheme = warningColorMap[warningInfo.color] || warningColorMap['blue'];
+
+                        return (
+                          <div
+                            key={disaster.id || index}
+                            className={`${colorScheme.bg} rounded-2xl p-5 border ${colorScheme.border} shadow-lg`}
+                          >
+                            {/* Enhanced Disaster Header */}
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-12 h-12 ${colorScheme.icon} rounded-xl flex items-center justify-center border ${colorScheme.border} shadow-md`}>
+                                  <span className="text-2xl">{warningInfo.icon}</span>
+                                </div>
+                                <div>
+                                  <h4 className="font-bold text-gray-900 text-lg mb-1">
+                                    <TranslatableText>{warningInfo.title}</TranslatableText>
+                                  </h4>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`w-2 h-2 ${colorScheme.dot} rounded-full animate-pulse`}></span>
+                                    <span className="text-sm text-gray-600">{warningInfo.description}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <span className={`px-4 py-2 rounded-full text-sm font-bold ${colorScheme.bg} ${colorScheme.text} border ${colorScheme.border} shadow-sm`}>
+                                <TranslatableText>{warningInfo.severity.toUpperCase()}</TranslatableText>
+                              </span>
+                            </div>
+
+                            {/* Prominent Warning List */}
+                            {warningInfo.warnings.length > 0 && (
+                              <div className="bg-white rounded-xl p-4 border border-gray-200 mb-4 shadow-sm">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <span className="text-lg">🚨</span>
+                                  <h5 className="font-bold text-gray-900 text-sm">ACTIVE WARNINGS</h5>
+                                </div>
+                                <div className="space-y-2">
+                                  {warningInfo.warnings.map((warning, wIndex) => (
+                                    <div key={wIndex} className="flex items-start gap-3 p-2 bg-gray-50 rounded-lg">
+                                      <span className="text-lg mt-0.5">
+                                        {warning.includes('EMERGENCY') || warning.includes('EXTREME') ? '🚨' :
+                                         warning.includes('WARNING') || warning.includes('ALERT') ? '⚠️' :
+                                         warning.includes('FLOOD') || warning.includes('RAINFALL') ? '🌊' :
+                                         warning.includes('HEAT') || warning.includes('TEMPERATURE') ? '🔥' :
+                                         warning.includes('COLD') || warning.includes('FROST') ? '❄️' :
+                                         warning.includes('WIND') ? '💨' : '⚡'}
+                                      </span>
+                                      <span className="text-sm text-gray-800 font-medium leading-relaxed">
+                                        <TranslatableText>
+                                          {warning.replace(/^[🚨⚠️🌊🔥❄️💨⚡🌡️💧🏠🚗👁️📊🌀🌩️🌪️🌫️🧊\s]*/, '').trim()}
+                                        </TranslatableText>
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Forecast Details Section */}
+                            {warningInfo.forecast && warningInfo.forecast.length > 0 && (
+                              <div className="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200 shadow-sm">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <span className="text-lg">📅</span>
+                                  <h6 className="font-bold text-blue-900 text-sm">48-HOUR FORECAST</h6>
+                                </div>
+                                <div className="space-y-3 max-h-32 overflow-y-auto">
+                                  {warningInfo.forecast.slice(0, 6).map((forecast, fIndex) => (
+                                    <div key={fIndex} className="bg-white rounded-lg p-3 border border-blue-200">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className="font-medium text-blue-900 text-xs">{forecast.time}</span>
+                                        <div className="flex items-center gap-2">
+                                          {forecast.rainfall > 10 && <span className="text-blue-600">🌧️</span>}
+                                          {forecast.temperature > 35 && <span className="text-red-600">🔥</span>}
+                                          {forecast.windSpeed > 40 && <span className="text-gray-600">💨</span>}
+                                        </div>
+                                      </div>
+                                      <div className="grid grid-cols-3 gap-2 text-xs">
+                                        <div className="text-center">
+                                          <p className="text-gray-500">Temp</p>
+                                          <p className="font-medium text-gray-800">{forecast.temperature.toFixed(1)}°C</p>
+                                        </div>
+                                        <div className="text-center">
+                                          <p className="text-gray-500">Rain</p>
+                                          <p className="font-medium text-blue-600">{forecast.rainfall.toFixed(1)}mm/h</p>
+                                        </div>
+                                        <div className="text-center">
+                                          <p className="text-gray-500">Wind</p>
+                                          <p className="font-medium text-gray-600">{forecast.windSpeed.toFixed(1)}km/h</p>
+                                        </div>
+                                      </div>
+                                      <p className="text-xs text-gray-600 mt-2 italic">
+                                        <TranslatableText>{forecast.condition}</TranslatableText>
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Disaster Details */}
+                            <div className="mb-4 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-sm">📋</span>
+                                <h6 className="font-semibold text-gray-900 text-sm">DETAILED INFORMATION</h6>
+                              </div>
+                              <p className="text-gray-700 text-sm leading-relaxed">
+                                <TranslatableText>{disaster.details}</TranslatableText>
+                              </p>
+                            </div>
+
+                            {/* Enhanced Action Buttons */}
+                            <div className="grid grid-cols-2 gap-4">
+                              <a
+                                href={`/mitigation?type=${encodeURIComponent(disaster.type)}`}
+                                className={`${colorScheme.button} text-white py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105`}
+                              >
+                                <span className="text-lg">🛡️</span>
+                                <div className="text-center">
+                                  <p><TranslatableText>Safety Guide</TranslatableText></p>
+                                  <p className="text-xs opacity-90"><TranslatableText>View Precautions</TranslatableText></p>
+                                </div>
+                              </a>
+                              <button
+                                onClick={() => window.open('tel:112', '_self')}
+                                className="bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 animate-pulse"
+                              >
+                                <span className="text-lg">🚨</span>
+                                <div className="text-center">
+                                  <p><TranslatableText>Emergency Call</TranslatableText></p>
+                                  <p className="text-xs opacity-90"><TranslatableText>Call 112 Now</TranslatableText></p>
+                                </div>
+                              </button>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                              <time className="text-xs text-gray-500">
+                                {new Date(disaster.date).toLocaleDateString("en-IN", {
+                                  day: "numeric",
+                                  month: "short",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </time>
+                              <a
+                                href={disaster.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-700 text-xs font-medium flex items-center gap-1"
+                              >
+                                <TranslatableText>Full Report</TranslatableText>
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                              </a>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Updates Container Below Map */}

@@ -1641,99 +1641,149 @@ function Relocation() {
                     },
                   }}
                 >
-                  <Popup maxWidth={350} className="custom-popup">
-                    <div className="bg-white rounded-lg p-4">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        {zone.name.toUpperCase()}
-                      </h3>
+                  <Popup maxWidth={400} className="custom-popup">
+                    <div className="bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 rounded-xl p-5 shadow-2xl border border-gray-600/50 backdrop-blur-xl">
+                      {/* Header with gradient background */}
+                      <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg p-3 mb-4 border border-blue-400/30">
+                        <h3 className="text-xl font-bold text-white mb-1 flex items-center">
+                          <span className="w-3 h-3 bg-green-400 rounded-full mr-3 animate-pulse"></span>
+                          {zone.name.toUpperCase()}
+                        </h3>
+                        <p className="text-blue-300 text-sm">
+                          <TranslatableText>{zone.state}</TranslatableText>
+                        </p>
+                      </div>
 
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center">
-                          <div
-                            className={`w-3 h-3 rounded-full mr-2 ${
-                              zone.score >= 90
-                                ? "bg-green-500"
-                                : zone.score >= 80
-                                ? "bg-yellow-500"
-                                : "bg-red-500"
-                            }`}
-                          ></div>
-                          <span className="font-medium text-gray-700">
-                            Safety Score: {zone.score}%
+                      {/* Enhanced Safety Score */}
+                      <div className="bg-gradient-to-r from-green-800/40 to-emerald-800/40 rounded-lg p-3 mb-4 border border-green-400/30">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-green-300 font-medium flex items-center">
+                            <span className="text-lg mr-2">🛡️</span>
+                            <TranslatableText>Safety Rating</TranslatableText>
                           </span>
+                          <div className="flex items-center">
+                            <div
+                              className={`w-4 h-4 rounded-full mr-2 ${
+                                zone.score >= 90
+                                  ? "bg-green-400 shadow-lg shadow-green-400/50"
+                                  : zone.score >= 80
+                                  ? "bg-yellow-400 shadow-lg shadow-yellow-400/50"
+                                  : "bg-red-400 shadow-lg shadow-red-400/50"
+                              }`}
+                            ></div>
+                            <span className="text-white font-bold text-lg">{zone.score}%</span>
+                          </div>
                         </div>
-                        <div className="flex items-center text-sm">
-                          <div className={`w-2 h-2 rounded-full mr-1 ${Math.random() > 0.3 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                          <span className="text-gray-600">
-                            {Math.random() > 0.3 ? 'Available' : 'Full'}
-                          </span>
+                        <div className="w-full bg-gray-700 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-500 ${
+                              zone.score >= 90
+                                ? "bg-gradient-to-r from-green-400 to-emerald-400"
+                                : zone.score >= 80
+                                ? "bg-gradient-to-r from-yellow-400 to-orange-400"
+                                : "bg-gradient-to-r from-red-400 to-pink-400"
+                            }`}
+                            style={{width: `${zone.score}%`}}
+                          ></div>
                         </div>
                       </div>
 
-                      {/* Capacity Information */}
-                      <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                      {/* Enhanced Capacity Information */}
+                      <div className="bg-gradient-to-r from-purple-800/40 to-pink-800/40 rounded-lg p-3 mb-4 border border-purple-400/30">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">
+                          <span className="text-purple-300 font-medium flex items-center">
+                            <span className="text-lg mr-2">👥</span>
                             <TranslatableText>Current Occupancy</TranslatableText>
                           </span>
-                          <span className="text-sm text-gray-600">
-                            {Math.floor(Math.random() * 80 + 10)}% Full
-                          </span>
+                          <div className="flex items-center">
+                            <div className={`w-3 h-3 rounded-full mr-2 ${Math.random() > 0.3 ? 'bg-green-400 animate-pulse' : 'bg-red-400 animate-pulse'}`}></div>
+                            <span className="text-white font-medium">
+                              {Math.random() > 0.3 ? 'Available' : 'Full'}
+                            </span>
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-gray-700 rounded-full h-2 mb-1">
                           <div
-                            className={`h-2 rounded-full ${Math.random() > 0.5 ? 'bg-green-500' : 'bg-yellow-500'}`}
+                            className={`h-2 rounded-full transition-all duration-500 ${Math.random() > 0.5 ? 'bg-gradient-to-r from-green-400 to-teal-400' : 'bg-gradient-to-r from-yellow-400 to-orange-400'}`}
                             style={{width: `${Math.floor(Math.random() * 80 + 10)}%`}}
                           ></div>
                         </div>
+                        <span className="text-gray-300 text-xs">
+                          {Math.floor(Math.random() * 80 + 10)}% Capacity Used
+                        </span>
                       </div>
 
-                      {/* Resource Availability */}
-                      <div className="grid grid-cols-3 gap-2 mb-3">
-                        <div className="text-center p-2 bg-green-50 rounded">
-                          <div className="text-lg">🍽️</div>
-                          <div className="text-xs text-green-700">Food</div>
-                          <div className="text-xs font-medium">Available</div>
+                      {/* Enhanced Resource Availability */}
+                      <div className="grid grid-cols-3 gap-2 mb-4">
+                        <div className="text-center p-3 bg-gradient-to-b from-green-800/60 to-green-900/60 rounded-lg border border-green-400/30 hover:scale-105 transition-transform duration-200">
+                          <div className="text-2xl mb-1">🍽️</div>
+                          <div className="text-xs text-green-300 font-medium">Food</div>
+                          <div className="text-xs text-green-400 font-bold">Available</div>
                         </div>
-                        <div className="text-center p-2 bg-blue-50 rounded">
-                          <div className="text-lg">💧</div>
-                          <div className="text-xs text-blue-700">Water</div>
-                          <div className="text-xs font-medium">Available</div>
+                        <div className="text-center p-3 bg-gradient-to-b from-blue-800/60 to-blue-900/60 rounded-lg border border-blue-400/30 hover:scale-105 transition-transform duration-200">
+                          <div className="text-2xl mb-1">💧</div>
+                          <div className="text-xs text-blue-300 font-medium">Water</div>
+                          <div className="text-xs text-blue-400 font-bold">Available</div>
                         </div>
-                        <div className="text-center p-2 bg-red-50 rounded">
-                          <div className="text-lg">🏥</div>
-                          <div className="text-xs text-red-700">Medical</div>
-                          <div className="text-xs font-medium">Limited</div>
+                        <div className="text-center p-3 bg-gradient-to-b from-red-800/60 to-red-900/60 rounded-lg border border-red-400/30 hover:scale-105 transition-transform duration-200">
+                          <div className="text-2xl mb-1">🏥</div>
+                          <div className="text-xs text-red-300 font-medium">Medical</div>
+                          <div className="text-xs text-red-400 font-bold">Limited</div>
                         </div>
                       </div>
 
-                      <div className="text-gray-600 mb-3 text-sm">
-                        <p className="mb-1">
-                          <span className="font-medium">
-                            <TranslatableText>State:</TranslatableText>
-                          </span>{" "}
-                          <TranslatableText>{zone.state}</TranslatableText>
-                        </p>
-                        <p className="mb-1">
-                          <span className="font-medium">
-                            <TranslatableText>Distance:</TranslatableText>
-                          </span>{" "}
-                          {userLocation ? Math.round(Math.random() * 50 + 5) : '--'} km
-                        </p>
+                      {/* Enhanced Location Information */}
+                      <div className="bg-gradient-to-r from-gray-800/60 to-slate-800/60 rounded-lg p-3 mb-4 border border-gray-500/30">
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div className="flex items-center">
+                            <span className="text-lg mr-2">📍</span>
+                            <div>
+                              <span className="text-gray-400">Distance:</span>
+                              <span className="text-white ml-1 font-medium">
+                                {userLocation ? Math.round(Math.random() * 50 + 5) : '--'} km
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-lg mr-2">⏱️</span>
+                            <div>
+                              <span className="text-gray-400">ETA:</span>
+                              <span className="text-white ml-1 font-medium">
+                                {userLocation ? Math.round(Math.random() * 60 + 15) : '--'} min
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                      {/* Enhanced Action Buttons */}
+                      <div className="grid grid-cols-2 gap-3">
                         <button
-                          onClick={() => setSelectedLocation(zone)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-lg transition-colors text-sm"
+                          onClick={() => {
+                            setSelectedLocation(zone);
+                            setShowDetails(true);
+                          }}
+                          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 px-4 rounded-lg transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-blue-500/25 hover:scale-105 flex items-center justify-center"
                         >
+                          <span className="mr-2">📋</span>
                           <TranslatableText>Full Details</TranslatableText>
                         </button>
                         <button
                           onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${zone.coordinates[0]},${zone.coordinates[1]}`, '_blank')}
-                          className="bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded-lg transition-colors text-sm"
+                          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-lg transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-green-500/25 hover:scale-105 flex items-center justify-center"
                         >
+                          <span className="mr-2">🗺️</span>
                           <TranslatableText>Get Directions</TranslatableText>
+                        </button>
+                      </div>
+
+                      {/* Emergency Contact */}
+                      <div className="mt-3 text-center">
+                        <button
+                          onClick={() => window.open('tel:112', '_self')}
+                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 px-6 rounded-full text-xs font-medium transition-all duration-300 shadow-lg hover:shadow-red-500/25 hover:scale-105 animate-pulse"
+                        >
+                          🚨 Emergency: 112
                         </button>
                       </div>
                     </div>
@@ -1768,24 +1818,102 @@ function Relocation() {
                   weight: 2
                 }}
               >
-                <Popup>
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">{facility.icon}</div>
-                    <h4 className="font-bold text-gray-900">{facility.name}</h4>
-                    <p className="text-sm text-gray-600">{facility.type}</p>
-                    <p className="text-sm text-gray-600">{facility.distance} km away</p>
-                    <p className="text-sm">
-                      <span className={`inline-block w-2 h-2 rounded-full mr-1 ${
-                        facility.isOpen ? 'bg-green-500' : 'bg-red-500'
-                      }`}></span>
-                      {facility.isOpen ? 'Open' : 'Closed'}
+                <Popup maxWidth={300} className="custom-facility-popup">
+                  <div className="bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 rounded-xl p-4 shadow-2xl border border-gray-600/50 backdrop-blur-xl text-center">
+                    {/* Facility Icon with Glow Effect */}
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg ${
+                      facility.color === 'red' ? 'bg-gradient-to-r from-red-600 to-red-700 shadow-red-500/50' :
+                      facility.color === 'green' ? 'bg-gradient-to-r from-green-600 to-green-700 shadow-green-500/50' :
+                      facility.color === 'blue' ? 'bg-gradient-to-r from-blue-600 to-blue-700 shadow-blue-500/50' :
+                      facility.color === 'orange' ? 'bg-gradient-to-r from-orange-600 to-orange-700 shadow-orange-500/50' :
+                      'bg-gradient-to-r from-purple-600 to-purple-700 shadow-purple-500/50'
+                    }`}>
+                      <span className="text-3xl">{facility.icon}</span>
+                    </div>
+
+                    {/* Facility Name and Type */}
+                    <h4 className="font-bold text-white text-lg mb-1">{facility.name}</h4>
+                    <p className={`text-sm font-medium mb-2 ${
+                      facility.color === 'red' ? 'text-red-300' :
+                      facility.color === 'green' ? 'text-green-300' :
+                      facility.color === 'blue' ? 'text-blue-300' :
+                      facility.color === 'orange' ? 'text-orange-300' :
+                      'text-purple-300'
+                    }`}>
+                      {facility.type.toUpperCase()}
                     </p>
-                    <button
-                      onClick={() => window.open(`tel:${facility.contact}`, '_self')}
-                      className="mt-2 bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm"
-                    >
-                      Call Now
-                    </button>
+
+                    {/* Distance and Status */}
+                    <div className="bg-gray-800/60 rounded-lg p-3 mb-3 border border-gray-600/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center">
+                          <span className="text-lg mr-2">📍</span>
+                          <span className="text-gray-300 text-sm">Distance:</span>
+                        </div>
+                        <span className="text-white font-medium">{facility.distance} km</span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <span className={`inline-block w-3 h-3 rounded-full mr-2 animate-pulse ${
+                            facility.isOpen ? 'bg-green-400 shadow-lg shadow-green-400/50' : 'bg-red-400 shadow-lg shadow-red-400/50'
+                          }`}></span>
+                          <span className="text-gray-300 text-sm">Status:</span>
+                        </div>
+                        <span className={`font-medium ${facility.isOpen ? 'text-green-400' : 'text-red-400'}`}>
+                          {facility.isOpen ? 'Open 24/7' : 'Closed'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Services Available */}
+                    <div className="bg-gradient-to-r from-gray-800/40 to-slate-800/40 rounded-lg p-3 mb-3 border border-gray-500/30">
+                      <h5 className="text-white font-medium text-sm mb-2 flex items-center justify-center">
+                        <span className="mr-2">🏥</span>
+                        Services Available
+                      </h5>
+                      <div className="grid grid-cols-2 gap-1 text-xs">
+                        {(facility.services || ['Emergency Care', 'First Aid', '24/7 Service', 'Ambulance']).slice(0, 4).map((service, index) => (
+                          <div key={index} className="flex items-center text-gray-300">
+                            <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-2"></span>
+                            {service}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => window.open(`tel:${facility.contact}`, '_self')}
+                        className={`py-2 px-3 rounded-lg text-white text-sm font-medium transition-all duration-300 shadow-lg hover:scale-105 ${
+                          facility.color === 'red' ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 hover:shadow-red-500/25' :
+                          facility.color === 'green' ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:shadow-green-500/25' :
+                          facility.color === 'blue' ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 hover:shadow-blue-500/25' :
+                          facility.color === 'orange' ? 'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 hover:shadow-orange-500/25' :
+                          'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 hover:shadow-purple-500/25'
+                        }`}
+                      >
+                        <span className="mr-1">📞</span>
+                        Call Now
+                      </button>
+                      <button
+                        onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${facility.coordinates[0]},${facility.coordinates[1]}`, '_blank')}
+                        className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-gray-500/25 hover:scale-105"
+                      >
+                        <span className="mr-1">🗺️</span>
+                        Directions
+                      </button>
+                    </div>
+
+                    {/* Emergency Priority Badge */}
+                    {facility.type === 'hospital' && (
+                      <div className="mt-3">
+                        <span className="bg-red-600/20 text-red-300 px-3 py-1 rounded-full text-xs font-medium border border-red-400/30 animate-pulse">
+                          🚨 Emergency Priority
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </Popup>
               </Circle>
@@ -1804,57 +1932,92 @@ function Relocation() {
         />
       )}
 
-      {/* Emergency Zone Details Popup - Bottom Left */}
+      {/* Enhanced Emergency Zone Details Popup - Bottom Left */}
       {showBottomPopup && selectedZoneDetails && (
-        <div className="absolute bottom-4 left-4 z-[1000] w-96 max-h-[80vh] overflow-y-auto animate-fade-in-up">
-          <div className="bg-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-2xl p-6 shadow-2xl ring-1 ring-white/10">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-bold text-white">
-                  <TranslatableText>{selectedZoneDetails.name}</TranslatableText>
-                </h3>
-                <p className="text-sm text-gray-300">
+        <div className="absolute bottom-4 left-4 z-[1000] w-[420px] max-h-[85vh] overflow-y-auto animate-fade-in-up">
+          <div className="bg-gradient-to-br from-slate-900/98 via-gray-900/98 to-slate-800/98 backdrop-blur-2xl border border-gray-500/50 rounded-2xl shadow-2xl ring-2 ring-white/10">
+            {/* Enhanced Header with Gradient */}
+            <div className="bg-gradient-to-r from-blue-600/30 to-purple-600/30 rounded-t-2xl p-5 border-b border-gray-600/50">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-green-400 rounded-full mr-3 animate-pulse shadow-lg shadow-green-400/50"></div>
+                  <h3 className="text-xl font-bold text-white">
+                    <TranslatableText>{selectedZoneDetails.name}</TranslatableText>
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShowBottomPopup(false)}
+                  className="w-10 h-10 bg-gray-700/80 hover:bg-gray-600 text-gray-300 hover:text-white transition-all duration-300 rounded-full flex items-center justify-center hover:scale-110 shadow-lg"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-blue-300 font-medium">
                   <TranslatableText>{selectedZoneDetails.state}</TranslatableText>
                 </p>
+                <div className="flex items-center bg-black/30 rounded-full px-3 py-1">
+                  <span className="text-xs text-gray-400 mr-2">Safety Score:</span>
+                  <span className="text-white font-bold">{selectedZoneDetails.score || '95'}%</span>
+                </div>
               </div>
-              <button
-                onClick={() => setShowBottomPopup(false)}
-                className="w-8 h-8 bg-gray-700/80 hover:bg-gray-600 text-gray-300 hover:text-white transition-colors rounded-full flex items-center justify-center"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
 
-            {/* Emergency Status */}
-            <div className="mb-4 p-4 bg-gradient-to-r from-red-800/80 to-orange-800/80 border border-red-400/60 rounded-xl shadow-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-red-300 font-medium">
-                  <TranslatableText>Emergency Status</TranslatableText>
-                </span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  selectedZoneDetails.emergencyLevel === 'Low' ? 'bg-green-500/20 text-green-300' :
-                  selectedZoneDetails.emergencyLevel === 'Medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                  'bg-red-500/20 text-red-300'
-                }`}>
-                  <TranslatableText>{selectedZoneDetails.emergencyLevel} Priority</TranslatableText>
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-gray-400">Distance:</span>
-                  <span className="text-white ml-1">{selectedZoneDetails.distance} km</span>
-                </div>
-                <div>
-                  <span className="text-gray-400">Weather:</span>
-                  <span className="text-white ml-1">
-                    <TranslatableText>{selectedZoneDetails.weatherCondition}</TranslatableText>
+            {/* Scrollable Content */}
+            <div className="p-5 space-y-4">
+
+              {/* Enhanced Emergency Status */}
+              <div className="bg-gradient-to-r from-red-800/60 to-orange-800/60 border border-red-400/50 rounded-xl p-4 shadow-xl">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">🚨</span>
+                    <span className="text-red-300 font-bold text-lg">
+                      <TranslatableText>Emergency Status</TranslatableText>
+                    </span>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-sm font-bold shadow-lg ${
+                    selectedZoneDetails.emergencyLevel === 'Low' ? 'bg-green-500/30 text-green-300 border border-green-400/50' :
+                    selectedZoneDetails.emergencyLevel === 'Medium' ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-400/50' :
+                    'bg-red-500/30 text-red-300 border border-red-400/50'
+                  }`}>
+                    <TranslatableText>{selectedZoneDetails.emergencyLevel} Priority</TranslatableText>
                   </span>
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-black/30 rounded-lg p-3 border border-gray-600/50">
+                    <div className="flex items-center mb-1">
+                      <span className="text-lg mr-2">📍</span>
+                      <span className="text-gray-400 text-sm">Distance</span>
+                    </div>
+                    <span className="text-white font-bold text-lg">{selectedZoneDetails.distance} km</span>
+                  </div>
+
+                  <div className="bg-black/30 rounded-lg p-3 border border-gray-600/50">
+                    <div className="flex items-center mb-1">
+                      <span className="text-lg mr-2">🌤️</span>
+                      <span className="text-gray-400 text-sm">Weather</span>
+                    </div>
+                    <span className="text-white font-bold text-sm">
+                      <TranslatableText>{selectedZoneDetails.weatherCondition}</TranslatableText>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-3 bg-black/30 rounded-lg p-3 border border-gray-600/50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">⏱️</span>
+                      <span className="text-gray-400 text-sm">Estimated Arrival</span>
+                    </div>
+                    <span className="text-white font-bold">
+                      {selectedZoneDetails.estimatedArrival ? selectedZoneDetails.estimatedArrival.toLocaleTimeString() : 'Calculating...'}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
 
             {/* Fastest Transport Mode */}
             <div className="mb-4 p-4 bg-gradient-to-r from-blue-800/80 to-purple-800/80 border border-blue-400/60 rounded-xl shadow-lg">
@@ -1976,11 +2139,12 @@ function Relocation() {
               </button>
             </div>
 
-            {/* Last Updated */}
-            <div className="mt-3 text-xs text-gray-400 text-center">
-              <TranslatableText>
-                Last updated: {selectedZoneDetails.lastUpdated.toLocaleTimeString()}
-              </TranslatableText>
+              {/* Last Updated */}
+              <div className="mt-3 text-xs text-gray-400 text-center">
+                <TranslatableText>
+                  Last updated: {selectedZoneDetails.lastUpdated.toLocaleTimeString()}
+                </TranslatableText>
+              </div>
             </div>
           </div>
         </div>

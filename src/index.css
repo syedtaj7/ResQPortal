@@ -1655,3 +1655,90 @@ select option:hover {
     display: none !important;
   }
 }
+
+/* Modern disaster tooltip styles */
+.modern-disaster-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  z-index: 1002 !important;
+}
+
+.modern-disaster-tooltip .leaflet-tooltip-content {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  white-space: normal !important;
+  max-width: 320px !important;
+}
+
+.modern-disaster-tooltip::before {
+  display: none !important;
+}
+
+/* Modern disaster popup styles */
+.modern-disaster-popup .leaflet-popup-content-wrapper {
+  background: transparent !important;
+  border-radius: 24px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  max-width: 480px !important;
+  width: 420px !important;
+}
+
+.modern-disaster-popup .leaflet-popup-content {
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 24px !important;
+  overflow: hidden !important;
+  max-height: 85vh !important;
+  width: 100% !important;
+}
+
+.modern-disaster-popup .leaflet-popup-close-button {
+  background: rgba(0, 0, 0, 0.6) !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 20px !important;
+  font-weight: bold !important;
+  line-height: 34px !important;
+  text-align: center !important;
+  top: 16px !important;
+  right: 16px !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s ease !important;
+  z-index: 1003 !important;
+}
+
+.modern-disaster-popup .leaflet-popup-close-button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: scale(1.1) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.modern-disaster-popup .leaflet-popup-tip {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(71, 85, 105, 0.3) !important;
+  box-shadow: none !important;
+}
+
+/* Responsive adjustments for modern popups */
+@media (max-width: 640px) {
+  .modern-disaster-popup .leaflet-popup-content-wrapper {
+    max-width: 95vw !important;
+    width: 95vw !important;
+  }
+
+  .modern-disaster-tooltip .leaflet-tooltip-content {
+    max-width: 280px !important;
+  }
+}
