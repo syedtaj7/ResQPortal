@@ -1533,64 +1533,69 @@ function Home() {
   const [locationPermission, setLocationPermission] = useState(null);
   const [showDetailedPopup, setShowDetailedPopup] = useState(false);
   const [selectedDisasterGroup, setSelectedDisasterGroup] = useState(null);
+  const [severityFilter, setSeverityFilter] = useState('high'); // Default to show only critical warnings
 
   // Remove the notification comment and related code
 
   const filterDisasters = useCallback(
-    (searchTerm) => {
-      console.log("Filtering disasters with term:", searchTerm);
+    (searchTerm, severity = severityFilter) => {
+      console.log("Filtering disasters with term:", searchTerm, "severity:", severity);
 
-      if (!searchTerm.trim()) {
-        console.log("Empty search, showing all disasters");
-        setFilteredDisasters(disasters);
-        return;
+      let filtered = disasters;
+
+      // First filter by severity
+      if (severity !== 'all') {
+        filtered = filtered.filter(disaster => disaster.severity === severity);
       }
 
-      const searchLower = searchTerm.toLowerCase();
+      // Then filter by search term if provided
+      if (searchTerm && searchTerm.trim()) {
+        const searchLower = searchTerm.toLowerCase();
 
-      // First, check if the search term matches any location
-      const matchingLocations = Object.keys(locations).filter((location) =>
-        location.toLowerCase().includes(searchLower)
-      );
+        // First, check if the search term matches any location
+        const matchingLocations = Object.keys(locations).filter((location) =>
+          location.toLowerCase().includes(searchLower)
+        );
 
-      console.log("Matching locations:", matchingLocations);
+        console.log("Matching locations:", matchingLocations);
 
-      const filtered = disasters.filter((disaster) => {
-        // Check if disaster is in any of the matching locations
-        const locationMatch = matchingLocations.some((location) => {
-          const [lat, lon] = locations[location];
+        filtered = filtered.filter((disaster) => {
+          // Check if disaster is in any of the matching locations
+          const locationMatch = matchingLocations.some((location) => {
+            const [lat, lon] = locations[location];
+            return (
+              disaster.coordinates[0] === lat && disaster.coordinates[1] === lon
+            );
+          });
+
+          // Check all other fields
+          const titleMatch = disaster.title?.toLowerCase().includes(searchLower);
+          const typeMatch = disaster.type?.toLowerCase().includes(searchLower);
+          const severityMatch = disaster.severity
+            ?.toLowerCase()
+            .includes(searchLower);
+          const detailsMatch = disaster.details
+            ?.toLowerCase()
+            .includes(searchLower);
+          const sourceMatch = disaster.source
+            ?.toLowerCase()
+            .includes(searchLower);
+
           return (
-            disaster.coordinates[0] === lat && disaster.coordinates[1] === lon
+            locationMatch ||
+            titleMatch ||
+            typeMatch ||
+            severityMatch ||
+            detailsMatch ||
+            sourceMatch
           );
         });
-
-        // Check all other fields
-        const titleMatch = disaster.title?.toLowerCase().includes(searchLower);
-        const typeMatch = disaster.type?.toLowerCase().includes(searchLower);
-        const severityMatch = disaster.severity
-          ?.toLowerCase()
-          .includes(searchLower);
-        const detailsMatch = disaster.details
-          ?.toLowerCase()
-          .includes(searchLower);
-        const sourceMatch = disaster.source
-          ?.toLowerCase()
-          .includes(searchLower);
-
-        return (
-          locationMatch ||
-          titleMatch ||
-          typeMatch ||
-          severityMatch ||
-          detailsMatch ||
-          sourceMatch
-        );
-      });
+      }
 
       console.log(`Found ${filtered.length} matching disasters`);
       setFilteredDisasters(filtered);
     },
-    [disasters]
+    [disasters, severityFilter]
   );
 
   // Add this new component above LocationSuggestions
@@ -1746,7 +1751,9 @@ function Home() {
 
       setMapDisasters(allDisasters);
       setDisasters(allDisasters);
-      setFilteredDisasters(allDisasters);
+      // Apply default severity filter (high) when data loads
+      const highSeverityDisasters = allDisasters.filter(disaster => disaster.severity === 'high');
+      setFilteredDisasters(highSeverityDisasters);
     } catch (error) {
       console.error("Error fetching disaster data:", error);
     } finally {
@@ -1768,12 +1775,13 @@ function Home() {
   }, []); // Empty dependency array
 
   useEffect(() => {
-    filterDisasters(search);
-  }, [search, filterDisasters]);
+    filterDisasters(search, severityFilter);
+  }, [search, severityFilter, filterDisasters]);
 
   useEffect(() => {
-    setFilteredDisasters(disasters);
-  }, [disasters]);
+    // Apply default severity filter when disasters change
+    filterDisasters(search, severityFilter);
+  }, [disasters, search, severityFilter, filterDisasters]);
 
   // Geolocation function
   const requestUserLocation = useCallback(() => {
@@ -1816,6 +1824,160 @@ function Home() {
   useEffect(() => {
     requestUserLocation();
   }, [requestUserLocation]);
+
+  // Function to extract alert reason from disaster details
+  const getAlertReason = (disaster) => {
+    const details = disaster.details?.toLowerCase() || '';
+    const title = disaster.title?.toLowerCase() || '';
+
+    // Extract actual weather values to determine accurate reasons
+    const rainfallMatch = details.match(/rainfall:\s*(\d+\.?\d*)\s*mm\/h/i);
+    const tempMatch = details.match(/temperature:\s*(\d+\.?\d*)\s*°c/i);
+    const windMatch = details.match(/wind speed:\s*(\d+\.?\d*)\s*km\/h/i);
+    const pressureMatch = details.match(/pressure:\s*(\d+)\s*hpa/i);
+    const humidityMatch = details.match(/humidity:\s*(\d+)\s*%/i);
+    const visibilityMatch = details.match(/visibility:\s*(\d+\.?\d*)\s*km/i);
+
+    const rainfall = rainfallMatch ? parseFloat(rainfallMatch[1]) : 0;
+    const temperature = tempMatch ? parseFloat(tempMatch[1]) : null;
+    const windSpeed = windMatch ? parseFloat(windMatch[1]) : 0;
+    const pressure = pressureMatch ? parseInt(pressureMatch[1]) : 1013;
+    const humidity = humidityMatch ? parseInt(humidityMatch[1]) : 50;
+    const visibility = visibilityMatch ? parseFloat(visibilityMatch[1]) : 10;
+
+    // PRIORITY 1: Flash Flood Emergencies (only if actual heavy rainfall)
+    if (rainfall > 75 || (details.includes('flash flood emergency') && rainfall > 25)) {
+      return `Flash Flood Emergency - ${rainfall.toFixed(1)}mm/h`;
+    }
+    if (rainfall > 50 || (details.includes('flash flood warning') && rainfall > 15)) {
+      return `Flash Flood Warning - ${rainfall.toFixed(1)}mm/h`;
+    }
+    if (rainfall > 25) {
+      return `Heavy Rainfall Alert - ${rainfall.toFixed(1)}mm/h`;
+    }
+    if (rainfall > 10) {
+      return `Moderate Rainfall - ${rainfall.toFixed(1)}mm/h`;
+    }
+    // PRIORITY 2: Temperature Warnings (only if actual extreme temperatures)
+    if (temperature !== null && temperature >= 45) {
+      return `Extreme Heat Emergency - ${temperature.toFixed(1)}°C`;
+    }
+    if (temperature !== null && temperature >= 40) {
+      return `Heat Wave Warning - ${temperature.toFixed(1)}°C`;
+    }
+    if (temperature !== null && temperature <= 5) {
+      return `Extreme Cold Warning - ${temperature.toFixed(1)}°C`;
+    }
+    if (temperature !== null && temperature <= 10) {
+      return `Cold Wave Alert - ${temperature.toFixed(1)}°C`;
+    }
+
+    // PRIORITY 3: Wind Warnings (only if actual high winds)
+    if (windSpeed > 62) {
+      return `Severe Wind Warning - ${windSpeed.toFixed(1)}km/h`;
+    }
+    if (windSpeed > 50) {
+      return `High Wind Alert - ${windSpeed.toFixed(1)}km/h`;
+    }
+
+    // PRIORITY 4: Visibility Warnings (only if actual poor visibility)
+    if (visibility < 1 && windSpeed > 30) {
+      return `Dust Storm Warning - ${visibility.toFixed(1)}km visibility`;
+    }
+    if (visibility < 0.5 && humidity > 95) {
+      return `Dense Fog Alert - ${visibility.toFixed(1)}km visibility`;
+    }
+
+    // PRIORITY 5: Pressure Warnings (only if actual low pressure)
+    if (pressure < 980) {
+      return `Severe Weather System - ${pressure}hPa`;
+    }
+
+    // PRIORITY 6: Multi-factor Storm Warnings
+    if (rainfall > 15 && windSpeed > 40) {
+      return `Severe Thunderstorm - Rain: ${rainfall.toFixed(1)}mm/h, Wind: ${windSpeed.toFixed(1)}km/h`;
+    }
+
+    // PRIORITY 7: Text-based specific warnings (when no numerical data)
+    if (details.includes('cyclone') || title.includes('cyclone')) {
+      return 'Cyclone Warning';
+    }
+    if (details.includes('thunderstorm') || details.includes('severe storm')) {
+      return 'Severe Thunderstorm';
+    }
+
+    // Earthquake reasons
+    if (disaster.type === 'Earthquake') {
+      const magMatch = details.match(/magnitude:\s*(\d+\.?\d*)/i) || title.match(/m(\d+\.?\d*)/i);
+      if (magMatch) {
+        const magnitude = magMatch[1];
+        if (parseFloat(magnitude) >= 6.0) {
+          return `Major Earthquake - M${magnitude}`;
+        } else if (parseFloat(magnitude) >= 5.0) {
+          return `Strong Earthquake - M${magnitude}`;
+        }
+        return `Earthquake - M${magnitude}`;
+      }
+      return 'Earthquake Alert';
+    }
+
+    // Landslide reasons
+    if (disaster.type === 'Landslide Warning') {
+      return 'Landslide Risk';
+    }
+
+    // Air quality reasons
+    if (disaster.type === 'Air Quality Warning') {
+      if (details.includes('very poor') || details.includes('severe')) {
+        return 'Severe Air Pollution';
+      }
+      return 'Poor Air Quality';
+    }
+
+    // Flood reasons
+    if (disaster.type === 'Flash Flood' || details.includes('flood')) {
+      return 'Flood Warning';
+    }
+
+    // PRIORITY 8: No significant weather data - check for general conditions
+    if (disaster.type === 'Weather Warning') {
+      // If it's a weather warning but no significant conditions, check for general weather
+      if (temperature !== null && temperature > 35) {
+        return `High Temperature - ${temperature.toFixed(1)}°C`;
+      }
+      if (temperature !== null && temperature < 15) {
+        return `Cool Weather - ${temperature.toFixed(1)}°C`;
+      }
+      if (windSpeed > 25) {
+        return `Moderate Winds - ${windSpeed.toFixed(1)}km/h`;
+      }
+      if (rainfall > 0) {
+        return `Light Rain - ${rainfall.toFixed(1)}mm/h`;
+      }
+      if (humidity > 90) {
+        return `High Humidity - ${humidity}%`;
+      }
+      if (pressure < 1000) {
+        return `Low Pressure - ${pressure}hPa`;
+      }
+      // If no significant weather conditions at all
+      return 'Weather Monitoring';
+    }
+
+    // Default based on disaster type for non-weather disasters
+    switch (disaster.type) {
+      case 'Earthquake':
+        return 'Seismic Activity';
+      case 'Landslide Warning':
+        return 'Landslide Risk';
+      case 'Air Quality Warning':
+        return 'Air Pollution Alert';
+      case 'Flash Flood':
+        return 'Flooding Emergency';
+      default:
+        return 'Emergency Alert';
+    }
+  };
 
   const { darkMode } = useTheme();
   return (
@@ -1869,8 +2031,8 @@ function Home() {
           </div>
         )}
 
-        {/* Search Bar */}
-        <div className="absolute top-20 left-4 z-[1000] w-80 animate-fade-in-down">
+        {/* Search Bar - Moved Lower */}
+        <div className="absolute top-32 left-4 z-[1000] w-80 animate-fade-in-down">
           <div className="relative transform transition-all duration-300 hover:scale-105">
             <input
               type="text"
@@ -1929,6 +2091,160 @@ function Home() {
             searchTerm={search}
             onSelect={handleLocationSelect}
           />
+        </div>
+
+        {/* Statistics Container - Bottom Left */}
+        <div className="absolute bottom-4 left-4 z-[1000] w-80 animate-fade-in-up">
+          <div className={`${darkMode ? "bg-gray-800/95" : "bg-white/95"} backdrop-blur-md rounded-2xl shadow-2xl border ${darkMode ? "border-gray-700" : "border-gray-200"} overflow-hidden`}>
+            {/* Header */}
+            <div className={`${darkMode ? "bg-gray-700/50" : "bg-gray-50/50"} px-4 py-3 border-b ${darkMode ? "border-gray-600" : "border-gray-200"}`}>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-lg">📊</span>
+                </div>
+                <div>
+                  <h3 className={`font-bold text-sm ${darkMode ? "text-white" : "text-gray-900"}`}>
+                    <TranslatableText>Disaster Statistics</TranslatableText>
+                  </h3>
+                  <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                    <TranslatableText>Live monitoring data</TranslatableText>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Statistics Grid */}
+            <div className="p-4 space-y-4">
+              {/* Total Disasters */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className={`${darkMode ? "bg-gray-700/50" : "bg-blue-50"} rounded-xl p-3 border ${darkMode ? "border-gray-600" : "border-blue-200"}`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-blue-500 text-lg">🌍</span>
+                    <span className={`text-xs font-medium ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                      <TranslatableText>Total Disasters</TranslatableText>
+                    </span>
+                  </div>
+                  <p className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
+                    {disasters.length}
+                  </p>
+                </div>
+
+                <div className={`${darkMode ? "bg-gray-700/50" : "bg-green-50"} rounded-xl p-3 border ${darkMode ? "border-gray-600" : "border-green-200"}`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-green-500 text-lg">📋</span>
+                    <span className={`text-xs font-medium ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                      <TranslatableText>Filtered Results</TranslatableText>
+                    </span>
+                  </div>
+                  <p className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
+                    {filteredDisasters.length}
+                  </p>
+                </div>
+              </div>
+
+              {/* Severity Breakdown */}
+              <div className="space-y-2">
+                <h4 className={`text-xs font-semibold ${darkMode ? "text-gray-300" : "text-gray-700"} mb-2`}>
+                  <TranslatableText>Severity Breakdown</TranslatableText>
+                </h4>
+
+                {/* High Severity */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span className={`text-xs ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                      <TranslatableText>Critical</TranslatableText>
+                    </span>
+                  </div>
+                  <span className={`text-sm font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
+                    {disasters.filter(d => d.severity === 'high').length}
+                  </span>
+                </div>
+
+                {/* Moderate Severity */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <span className={`text-xs ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                      <TranslatableText>Moderate</TranslatableText>
+                    </span>
+                  </div>
+                  <span className={`text-sm font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
+                    {disasters.filter(d => d.severity === 'moderate').length}
+                  </span>
+                </div>
+
+                {/* Low Severity */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className={`text-xs ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                      <TranslatableText>Low</TranslatableText>
+                    </span>
+                  </div>
+                  <span className={`text-sm font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
+                    {disasters.filter(d => d.severity === 'low').length}
+                  </span>
+                </div>
+              </div>
+
+              {/* Disaster Types */}
+              <div className="space-y-2">
+                <h4 className={`text-xs font-semibold ${darkMode ? "text-gray-300" : "text-gray-700"} mb-2`}>
+                  <TranslatableText>Active Types</TranslatableText>
+                </h4>
+
+                {Object.entries(
+                  disasters.reduce((acc, disaster) => {
+                    acc[disaster.type] = (acc[disaster.type] || 0) + 1;
+                    return acc;
+                  }, {})
+                ).slice(0, 4).map(([type, count]) => (
+                  <div key={type} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs">
+                        {type === 'Weather Warning' ? '🌦️' :
+                         type === 'Earthquake' ? '🏔️' :
+                         type === 'Flash Flood' ? '🌊' :
+                         type === 'Landslide Warning' ? '⛰️' :
+                         type === 'Air Quality Warning' ? '💨' : '⚠️'}
+                      </span>
+                      <span className={`text-xs ${darkMode ? "text-gray-300" : "text-gray-600"} truncate`}>
+                        <TranslatableText>{type}</TranslatableText>
+                      </span>
+                    </div>
+                    <span className={`text-sm font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
+                      {count}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Current Filter Status */}
+              {severityFilter !== 'all' && (
+                <div className={`${darkMode ? "bg-blue-900/30" : "bg-blue-50"} rounded-lg p-3 border ${darkMode ? "border-blue-700" : "border-blue-200"}`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-blue-500 text-sm">🔍</span>
+                    <span className={`text-xs font-medium ${darkMode ? "text-blue-300" : "text-blue-700"}`}>
+                      <TranslatableText>Active Filter</TranslatableText>
+                    </span>
+                  </div>
+                  <p className={`text-xs ${darkMode ? "text-blue-200" : "text-blue-600"}`}>
+                    <TranslatableText>
+                      Showing {severityFilter === 'high' ? 'Critical' : severityFilter === 'moderate' ? 'Moderate' : 'Low'} severity only
+                    </TranslatableText>
+                  </p>
+                </div>
+              )}
+
+              {/* Last Updated */}
+              <div className={`text-center pt-2 border-t ${darkMode ? "border-gray-600" : "border-gray-200"}`}>
+                <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                  <TranslatableText>Last updated:</TranslatableText> {new Date().toLocaleTimeString()}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Full Screen Map Container */}
@@ -2365,18 +2681,35 @@ function Home() {
             {/* Section Header */}
             <div className="text-center mb-12 animate-fade-in">
               <h2 className={`text-4xl font-bold ${darkMode ? "text-white" : "text-gray-900"} mb-4`}>
-                <TranslatableText>Latest Disaster Updates</TranslatableText>
+                <TranslatableText>
+                  {severityFilter === 'high' ? 'Critical Disaster Alerts' :
+                   severityFilter === 'moderate' ? 'Moderate Disaster Updates' :
+                   severityFilter === 'low' ? 'Low Priority Updates' :
+                   'Latest Disaster Updates'}
+                </TranslatableText>
               </h2>
               <p className={`text-lg ${darkMode ? "text-gray-300" : "text-gray-600"} max-w-3xl mx-auto`}>
                 <TranslatableText>
-                  Stay informed with real-time disaster reports and emergency alerts across India
+                  {severityFilter === 'high' ? 'Immediate attention required - Critical emergency alerts and high-severity disasters' :
+                   severityFilter === 'moderate' ? 'Important updates requiring monitoring and preparation' :
+                   severityFilter === 'low' ? 'General advisories and low-priority weather updates' :
+                   'Stay informed with real-time disaster reports and emergency alerts across India'}
                 </TranslatableText>
               </p>
+              {severityFilter === 'high' && (
+                <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-red-100 border border-red-300 rounded-lg">
+                  <span className="text-red-600 text-lg">🚨</span>
+                  <span className="text-red-800 font-medium text-sm">
+                    <TranslatableText>Showing only critical warnings requiring immediate action</TranslatableText>
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Search and Filter Section */}
             <div className="mb-8 animate-slide-in-left">
-              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+              <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+                {/* Search Input */}
                 <div className="relative flex-1 max-w-md">
                   <input
                     type="text"
@@ -2389,7 +2722,7 @@ function Home() {
                     } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 focus:scale-105`}
                     onChange={(e) => {
                       setSearch(e.target.value);
-                      filterDisasters(e.target.value);
+                      filterDisasters(e.target.value, severityFilter);
                     }}
                   />
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -2408,10 +2741,58 @@ function Home() {
                     </svg>
                   </div>
                 </div>
-                <div className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
-                  <TranslatableText>
-                    Showing {filteredDisasters.length} of {disasters.length} reports
-                  </TranslatableText>
+
+                {/* Severity Filter */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                      <TranslatableText>Filter by Severity:</TranslatableText>
+                    </span>
+                    <div className="flex gap-2">
+                      {[
+                        { value: 'high', label: 'Critical', color: 'bg-red-500 hover:bg-red-600', textColor: 'text-white', icon: '🚨' },
+                        { value: 'moderate', label: 'Moderate', color: 'bg-yellow-500 hover:bg-yellow-600', textColor: 'text-white', icon: '⚠️' },
+                        { value: 'low', label: 'Low', color: 'bg-green-500 hover:bg-green-600', textColor: 'text-white', icon: '📊' },
+                        { value: 'all', label: 'All', color: 'bg-gray-500 hover:bg-gray-600', textColor: 'text-white', icon: '📋' }
+                      ].map((filter) => (
+                        <button
+                          key={filter.value}
+                          onClick={() => {
+                            setSeverityFilter(filter.value);
+                            filterDisasters(search, filter.value);
+                          }}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2 ${
+                            severityFilter === filter.value
+                              ? `${filter.color} ${filter.textColor} shadow-lg`
+                              : darkMode
+                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                          }`}
+                        >
+                          <span className="text-xs">{filter.icon}</span>
+                          <TranslatableText>{filter.label}</TranslatableText>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Results Count */}
+                <div className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"} text-center lg:text-right`}>
+                  <div className="flex flex-col gap-1">
+                    <span className="font-medium">
+                      <TranslatableText>
+                        Showing {filteredDisasters.length} of {disasters.length} reports
+                      </TranslatableText>
+                    </span>
+                    {severityFilter !== 'all' && (
+                      <span className="text-xs opacity-75">
+                        <TranslatableText>
+                          Filtered by: {severityFilter === 'high' ? 'Critical' : severityFilter === 'moderate' ? 'Moderate' : 'Low'} severity
+                        </TranslatableText>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -2438,6 +2819,7 @@ function Home() {
                   const typeColors =
                     disasterTypeColors[disaster.type] ||
                     disasterTypeColors.default;
+                  const alertReason = getAlertReason(disaster);
                   return (
                     <div
                       key={`${disaster.id}-${index}`}
@@ -2457,6 +2839,22 @@ function Home() {
                           <h3 className={`font-bold text-lg ${darkMode ? "text-white" : "text-gray-900"} mb-2`}>
                             <TranslatableText>{disaster.title}</TranslatableText>
                           </h3>
+
+                          {/* Alert Reason - Bold and Prominent for Critical Disasters */}
+                          {disaster.severity === 'high' && (
+                            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <span className="text-red-600 text-lg">🚨</span>
+                                <span className="font-bold text-red-800 text-sm">
+                                  <TranslatableText>ALERT REASON:</TranslatableText>
+                                </span>
+                              </div>
+                              <p className="font-bold text-red-900 text-base mt-1">
+                                <TranslatableText>{alertReason}</TranslatableText>
+                              </p>
+                            </div>
+                          )}
+
                           <div className="flex items-center gap-2 mb-2">
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${typeColors.bg} ${typeColors.text}`}>
                               <TranslatableText>{disaster.type}</TranslatableText>
