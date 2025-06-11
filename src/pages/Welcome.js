@@ -3,6 +3,7 @@ import WelcomeHeader from "../components/WelcomeHeader";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import TranslatableText from "../components/TranslatableText";
+import GoogleVoiceAssistant from "../components/GoogleVoiceAssistant";
 
 function Welcome() {
   const navigate = useNavigate();
@@ -283,6 +284,9 @@ function Welcome() {
           </motion.div>
         </div>
       </div>
+
+      {/* Google Voice Emergency Assistant */}
+      <GoogleVoiceAssistant />
     </div>
   );
 }
