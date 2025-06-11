@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import TranslatableText from './TranslatableText';
+import emailService from '../services/emailService';
 
 const EmergencyContactsSetup = ({ isOpen, onClose }) => {
   const [contacts, setContacts] = useState([]);
   const [newContact, setNewContact] = useState({
     name: '',
-    phone: '',
     email: '',
-    relationship: ''
+    relationship: '',
+    address: '',
+    notes: ''
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editingIndex, setEditingIndex] = useState(-1);
@@ -38,14 +40,21 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
 
   // Add new contact
   const addContact = () => {
-    if (!newContact.name || !newContact.phone) {
-      alert('Please fill in at least name and phone number.');
+    if (!newContact.name || !newContact.email) {
+      alert('Please fill in at least name and email address.');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newContact.email)) {
+      alert('Please enter a valid email address.');
       return;
     }
 
     const updatedContacts = [...contacts, { ...newContact, id: Date.now() }];
     saveContacts(updatedContacts);
-    setNewContact({ name: '', phone: '', email: '', relationship: '' });
+    setNewContact({ name: '', email: '', relationship: '', address: '', notes: '' });
   };
 
   // Edit contact
@@ -57,15 +66,22 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
 
   // Update contact
   const updateContact = () => {
-    if (!newContact.name || !newContact.phone) {
-      alert('Please fill in at least name and phone number.');
+    if (!newContact.name || !newContact.email) {
+      alert('Please fill in at least name and email address.');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newContact.email)) {
+      alert('Please enter a valid email address.');
       return;
     }
 
     const updatedContacts = [...contacts];
     updatedContacts[editingIndex] = newContact;
     saveContacts(updatedContacts);
-    setNewContact({ name: '', phone: '', email: '', relationship: '' });
+    setNewContact({ name: '', email: '', relationship: '', address: '', notes: '' });
     setIsEditing(false);
     setEditingIndex(-1);
   };
@@ -80,22 +96,42 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
 
   // Cancel editing
   const cancelEdit = () => {
-    setNewContact({ name: '', phone: '', email: '', relationship: '' });
+    setNewContact({ name: '', email: '', relationship: '', address: '', notes: '' });
     setIsEditing(false);
     setEditingIndex(-1);
   };
 
-  // Test emergency system
-  const testEmergencySystem = async () => {
+
+
+  // Send test alert to specific contact
+  const testEmailForContact = async (contact) => {
+    if (!contact.email) {
+      alert('No email address available for this contact.');
+      return;
+    }
+
     try {
-      const { default: emergencyServices } = await import('../services/emergencyServices');
-      await emergencyServices.testEmergencySystem();
-      alert('✅ Emergency system test completed! Check console for details.');
+      // Get real location for the alert
+      const realLocation = await emailService.getRealUserLocation();
+
+      const result = await emailService.sendEmergencyEmail(contact, {
+        location: realLocation
+      });
+
+      if (result.status === 'success') {
+        alert(`✅ Emergency alert sent to ${contact.name}!\n\nThey will receive the alert at ${contact.email}.`);
+      } else if (result.status === 'simulated') {
+        alert(`📧 Alert simulated for ${contact.name}.\n\nEmailJS service not configured.`);
+      } else {
+        alert(`❌ Failed to send alert to ${contact.name}.\n\nError: ${result.error || 'Unknown error'}`);
+      }
     } catch (error) {
-      console.error('Test failed:', error);
-      alert('❌ Emergency system test failed. Check console for details.');
+      console.error('Alert sending error:', error);
+      alert(`❌ Failed to send alert: ${error.message}`);
     }
   };
+
+
 
   if (!isOpen) return null;
 
@@ -120,7 +156,7 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
             <TranslatableText>Emergency Contacts Setup</TranslatableText>
           </h2>
           <p className="text-red-100">
-            <TranslatableText>Configure emergency contacts for voice emergency alerts</TranslatableText>
+            <TranslatableText>Configure emergency contacts for instant email alerts during voice emergencies</TranslatableText>
           </p>
         </div>
 
@@ -150,23 +186,10 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
                   placeholder="Enter contact name"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  <TranslatableText>Phone Number *</TranslatableText>
-                </label>
-                <input
-                  type="tel"
-                  value={newContact.phone}
-                  onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  placeholder="+91 9876543210"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  <TranslatableText>Email</TranslatableText>
+                  <TranslatableText>Email Address *</TranslatableText>
                 </label>
                 <input
                   type="email"
@@ -176,7 +199,7 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
                   placeholder="contact@example.com"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   <TranslatableText>Relationship</TranslatableText>
@@ -187,14 +210,41 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 >
                   <option value="">Select relationship</option>
-                  <option value="family">Family Member</option>
-                  <option value="friend">Friend</option>
-                  <option value="colleague">Colleague</option>
-                  <option value="neighbor">Neighbor</option>
-                  <option value="doctor">Doctor</option>
-                  <option value="other">Other</option>
+                  <option value="Family Member">Family Member</option>
+                  <option value="Friend">Friend</option>
+                  <option value="Colleague">Colleague</option>
+                  <option value="Neighbor">Neighbor</option>
+                  <option value="Doctor">Doctor</option>
+                  <option value="Emergency Contact">Emergency Contact</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <TranslatableText>Address</TranslatableText>
+                </label>
+                <input
+                  type="text"
+                  value={newContact.address}
+                  onChange={(e) => setNewContact({ ...newContact, address: e.target.value })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Home/office address"
+                />
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                <TranslatableText>Notes</TranslatableText>
+              </label>
+              <textarea
+                value={newContact.notes}
+                onChange={(e) => setNewContact({ ...newContact, notes: e.target.value })}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="Additional information (medical conditions, special instructions, etc.)"
+                rows="3"
+              />
             </div>
             
             <div className="flex gap-3">
@@ -234,7 +284,7 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
               <div className="text-center py-8 text-gray-400">
                 <div className="text-4xl mb-2">👥</div>
                 <p><TranslatableText>No emergency contacts added yet</TranslatableText></p>
-                <p className="text-sm"><TranslatableText>Add contacts above to enable emergency notifications</TranslatableText></p>
+                <p className="text-sm"><TranslatableText>Add contacts above to enable emergency email notifications</TranslatableText></p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -254,13 +304,21 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
                           </span>
                         )}
                       </div>
-                      <div className="text-sm text-gray-300">
-                        <div>📞 {contact.phone}</div>
-                        {contact.email && <div>📧 {contact.email}</div>}
+                      <div className="text-sm text-gray-300 space-y-1">
+                        <div>📧 {contact.email}</div>
+                        {contact.address && <div>🏠 {contact.address}</div>}
+                        {contact.notes && <div>📝 {contact.notes}</div>}
                       </div>
                     </div>
                     
                     <div className="flex gap-2">
+                      <button
+                        onClick={() => testEmailForContact(contact)}
+                        className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
+                        title="Send Test Alert"
+                      >
+                        📧
+                      </button>
                       <button
                         onClick={() => editContact(index)}
                         className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
@@ -280,21 +338,9 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
             )}
           </div>
 
-          {/* Test Emergency System */}
-          <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-yellow-300 mb-2">
-              <TranslatableText>Test Emergency System</TranslatableText>
-            </h3>
-            <p className="text-yellow-200 text-sm mb-4">
-              <TranslatableText>Test the emergency alert system to ensure it's working properly. This will not send real alerts.</TranslatableText>
-            </p>
-            <button
-              onClick={testEmergencySystem}
-              className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors"
-            >
-              <TranslatableText>🧪 Test System</TranslatableText>
-            </button>
-          </div>
+
+
+
         </div>
 
         {/* Close button */}

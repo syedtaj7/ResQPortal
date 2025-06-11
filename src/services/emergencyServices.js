@@ -1,6 +1,8 @@
 // Emergency Services Integration
 // This service handles emergency alerts and notifications
 
+import emailService from './emailService';
+
 class EmergencyServices {
   constructor() {
     // Configuration for different emergency services
@@ -36,8 +38,6 @@ class EmergencyServices {
 
   // Main emergency alert function
   async triggerEmergencyAlert(alertData) {
-    console.log('🚨 EMERGENCY ALERT TRIGGERED 🚨');
-    console.log('Alert Data:', alertData);
 
     const results = {
       location: null,
@@ -124,27 +124,46 @@ class EmergencyServices {
 
   // Reverse geocoding to get address
   async reverseGeocode(lat, lng) {
-    if (!this.config.apiKeys.maps) {
-      // Fallback to basic coordinates
-      return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    }
-
     try {
-      // Using Google Maps Geocoding API (when API key is provided)
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${this.config.apiKeys.maps}`
+      // First try OpenStreetMap Nominatim (free service)
+      const osmResponse = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
+        {
+          headers: {
+            'User-Agent': 'ResQTech Emergency System'
+          }
+        }
       );
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.results && data.results[0]) {
-          return data.results[0].formatted_address;
+
+      if (osmResponse.ok) {
+        const osmData = await osmResponse.json();
+        if (osmData.display_name) {
+          return osmData.display_name;
         }
       }
     } catch (error) {
-      console.error('Geocoding error:', error);
+      // Continue to fallback
     }
 
+    try {
+      // Fallback to Google Maps if API key is available
+      if (this.config.apiKeys.maps) {
+        const googleResponse = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${this.config.apiKeys.maps}`
+        );
+
+        if (googleResponse.ok) {
+          const googleData = await googleResponse.json();
+          if (googleData.results && googleData.results[0]) {
+            return googleData.results[0].formatted_address;
+          }
+        }
+      }
+    } catch (error) {
+      // Continue to fallback
+    }
+
+    // Final fallback to coordinates
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
   }
 
@@ -184,9 +203,6 @@ class EmergencyServices {
         }
       } else {
         // Simulation mode
-        console.log('📞 Simulating emergency services notification...');
-        console.log('Emergency Numbers:', this.config.emergencyNumbers);
-        
         notifications.push({
           service: 'simulation',
           status: 'success',
@@ -214,27 +230,28 @@ class EmergencyServices {
     const emergencyContacts = this.getEmergencyContacts();
     
     if (emergencyContacts.length === 0) {
-      console.warn('No emergency contacts configured');
       return notifications;
     }
 
     for (const contact of emergencyContacts) {
       try {
-        // Send SMS if SMS service is configured
-        if (contact.phone && this.config.apiKeys.sms) {
-          const smsResult = await this.sendEmergencySMS(contact, alertData);
-          notifications.push(smsResult);
-        }
-
-        // Send email if email service is configured
-        if (contact.email && this.config.apiKeys.email) {
+        // Send email notification
+        if (contact.email) {
           const emailResult = await this.sendEmergencyEmail(contact, alertData);
           notifications.push(emailResult);
+        } else {
+          notifications.push({
+            contact: contact.name,
+            type: 'email',
+            status: 'skipped',
+            reason: 'No email address provided'
+          });
         }
       } catch (error) {
         console.error(`Error notifying contact ${contact.name}:`, error);
         notifications.push({
           contact: contact.name,
+          type: 'email',
           status: 'error',
           error: error.message
         });
@@ -244,122 +261,21 @@ class EmergencyServices {
     return notifications;
   }
 
-  // Send emergency SMS
-  async sendEmergencySMS(contact, alertData) {
-    if (!this.config.apiEndpoints.smsGateway) {
-      return {
-        contact: contact.name,
-        type: 'sms',
-        status: 'skipped',
-        reason: 'SMS service not configured'
-      };
-    }
-
-    const message = `🚨 EMERGENCY ALERT 🚨\n\n${contact.name}, this is an automated emergency notification.\n\nLocation: ${alertData.location?.address || 'Location unavailable'}\nTime: ${new Date().toLocaleString()}\n\nPlease check on the person immediately or contact emergency services.`;
-
-    try {
-      const response = await fetch(this.config.apiEndpoints.smsGateway, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.apiKeys.sms}`
-        },
-        body: JSON.stringify({
-          to: contact.phone,
-          message: message
-        })
-      });
-
-      if (response.ok) {
-        return {
-          contact: contact.name,
-          type: 'sms',
-          status: 'success',
-          phone: contact.phone
-        };
-      } else {
-        throw new Error(`SMS API error: ${response.status}`);
-      }
-    } catch (error) {
-      return {
-        contact: contact.name,
-        type: 'sms',
-        status: 'error',
-        error: error.message
-      };
-    }
-  }
-
-  // Send emergency email
+  // Send emergency email using dedicated email service
   async sendEmergencyEmail(contact, alertData) {
-    if (!this.config.apiEndpoints.emailService) {
+    try {
+      const result = await emailService.sendEmergencyEmail(contact, alertData);
       return {
         contact: contact.name,
         type: 'email',
-        status: 'skipped',
-        reason: 'Email service not configured'
+        status: result.status,
+        email: result.email,
+        provider: result.provider,
+        messageId: result.messageId,
+        timestamp: result.timestamp
       };
-    }
-
-    const emailData = {
-      to: contact.email,
-      subject: '🚨 EMERGENCY ALERT - Immediate Attention Required',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: #dc2626; color: white; padding: 20px; text-align: center;">
-            <h1>🚨 EMERGENCY ALERT 🚨</h1>
-          </div>
-          <div style="padding: 20px; background: #f9f9f9;">
-            <p><strong>Dear ${contact.name},</strong></p>
-            <p>This is an automated emergency notification from ResQTech.</p>
-            
-            <div style="background: white; padding: 15px; border-left: 4px solid #dc2626; margin: 20px 0;">
-              <h3>Emergency Details:</h3>
-              <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-              <p><strong>Location:</strong> ${alertData.location?.address || 'Location unavailable'}</p>
-              ${alertData.location?.latitude ? `<p><strong>Coordinates:</strong> ${alertData.location.latitude}, ${alertData.location.longitude}</p>` : ''}
-              <p><strong>Alert Type:</strong> Voice Emergency Detection</p>
-            </div>
-            
-            <p style="color: #dc2626; font-weight: bold;">
-              Please check on the person immediately or contact emergency services if you cannot reach them.
-            </p>
-            
-            <div style="background: #fef2f2; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <h4>Emergency Numbers (India):</h4>
-              <ul>
-                <li>Police: 100</li>
-                <li>Fire: 101</li>
-                <li>Ambulance: 108</li>
-                <li>National Emergency: 112</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      `
-    };
-
-    try {
-      const response = await fetch(this.config.apiEndpoints.emailService, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.apiKeys.email}`
-        },
-        body: JSON.stringify(emailData)
-      });
-
-      if (response.ok) {
-        return {
-          contact: contact.name,
-          type: 'email',
-          status: 'success',
-          email: contact.email
-        };
-      } else {
-        throw new Error(`Email API error: ${response.status}`);
-      }
     } catch (error) {
+      console.error(`Email error for ${contact.name}:`, error);
       return {
         contact: contact.name,
         type: 'email',
@@ -368,6 +284,8 @@ class EmergencyServices {
       };
     }
   }
+
+
 
   // Get emergency contacts from localStorage
   getEmergencyContacts() {
@@ -400,8 +318,6 @@ class EmergencyServices {
       }
       
       localStorage.setItem('emergencyLogs', JSON.stringify(existingLogs));
-      
-      console.log('Emergency event logged:', logEntry);
     } catch (error) {
       console.error('Error logging emergency event:', error);
     }
@@ -409,8 +325,6 @@ class EmergencyServices {
 
   // Test emergency system
   async testEmergencySystem() {
-    console.log('🧪 Testing Emergency System...');
-    
     const testData = {
       type: 'test',
       transcript: 'help help help',
@@ -420,7 +334,6 @@ class EmergencyServices {
 
     try {
       const results = await this.triggerEmergencyAlert(testData);
-      console.log('Test results:', results);
       return results;
     } catch (error) {
       console.error('Test failed:', error);
