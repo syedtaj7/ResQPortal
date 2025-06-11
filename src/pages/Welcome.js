@@ -39,7 +39,7 @@ function Welcome() {
   ];
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black relative">
+    <div className="min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black relative">
       <WelcomeHeader />
 
       {/* Animated Background Elements */}
@@ -98,12 +98,12 @@ function Welcome() {
       </div>
 
       {/* Main Content Container */}
-      <div className="relative z-10 h-full flex items-center justify-center px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center h-full">
+      <div className="relative z-10 min-h-screen flex items-center justify-center px-4 md:px-8 pt-24 md:pt-28 lg:pt-20">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center py-8 lg:py-0">
 
           {/* Left Side - Content */}
           <motion.div
-            className="space-y-8"
+            className="space-y-6 md:space-y-8 text-center lg:text-left"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -114,10 +114,10 @@ function Welcome() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <h1 className="text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 mb-4">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 mb-4">
                 ResQTech
               </h1>
-              <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></div>
+              <div className="w-16 md:w-24 h-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mx-auto lg:mx-0"></div>
             </motion.div>
 
             {/* Main Headline */}
@@ -126,13 +126,13 @@ function Welcome() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
-              <h2 className="text-4xl lg:text-5xl font-bold text-white leading-tight mb-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4 md:mb-6">
                 <span className="text-gray-300">Disaster Management</span><br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                   Reimagined
                 </span>
               </h2>
-              <p className="text-xl text-gray-300 leading-relaxed">
+              <p className="text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
                 Advanced AI-powered platform for real-time disaster monitoring,
                 community coordination, and emergency response management.
               </p>
@@ -140,7 +140,7 @@ function Welcome() {
 
             {/* Feature Pills */}
             <motion.div
-              className="flex flex-wrap gap-3"
+              className="flex flex-wrap gap-2 md:gap-3 justify-center lg:justify-start"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
@@ -148,27 +148,27 @@ function Welcome() {
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
-                  className={`px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r ${feature.color} text-white shadow-lg`}
+                  className={`px-3 md:px-4 py-2 rounded-full text-xs md:text-sm font-medium bg-gradient-to-r ${feature.color} text-white shadow-lg`}
                   whileHover={{ scale: 1.05, y: -2 }}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 1 + index * 0.1 }}
                 >
-                  {feature.icon} {feature.title}
+                  <span className="hidden sm:inline">{feature.icon} </span>{feature.title}
                 </motion.div>
               ))}
             </motion.div>
 
             {/* Action Buttons */}
             <motion.div
-              className="flex flex-col sm:flex-row gap-4"
+              className="flex flex-col sm:flex-row gap-3 md:gap-4 max-w-md mx-auto lg:mx-0"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.2 }}
             >
               <motion.button
                 onClick={() => navigate("/login")}
-                className="px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold rounded-xl shadow-2xl relative overflow-hidden group"
+                className="px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold rounded-xl shadow-2xl relative overflow-hidden group text-sm md:text-base"
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -176,14 +176,14 @@ function Welcome() {
                   className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 opacity-0 group-hover:opacity-100"
                   transition={{ duration: 0.3 }}
                 />
-                <span className="relative z-10 flex items-center gap-2">
-                  🚀 Get Started
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  🚀 <span>Get Started</span>
                 </span>
               </motion.button>
 
               <motion.button
                 onClick={() => navigate("/login")}
-                className="px-8 py-4 border-2 border-gray-600 text-white font-bold rounded-xl hover:border-white transition-all duration-300 relative overflow-hidden group"
+                className="px-6 md:px-8 py-3 md:py-4 border-2 border-gray-600 text-white font-bold rounded-xl hover:border-white transition-all duration-300 relative overflow-hidden group text-sm md:text-base"
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -191,8 +191,8 @@ function Welcome() {
                   className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10"
                   transition={{ duration: 0.3 }}
                 />
-                <span className="relative z-10 flex items-center gap-2">
-                  👤 Sign In
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  👤 <span>Sign In</span>
                 </span>
               </motion.button>
             </motion.div>
@@ -200,27 +200,27 @@ function Welcome() {
 
           {/* Right Side - Interactive Dashboard Preview */}
           <motion.div
-            className="relative"
+            className="relative mt-8 lg:mt-0"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
             {/* Main Dashboard Card */}
             <motion.div
-              className="bg-gray-800/50 backdrop-blur-xl rounded-3xl p-8 border border-gray-700 shadow-2xl relative overflow-hidden"
+              className="bg-gray-800/50 backdrop-blur-xl rounded-2xl md:rounded-3xl p-4 md:p-6 lg:p-8 border border-gray-700 shadow-2xl relative overflow-hidden"
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
             >
               {/* Dashboard Header */}
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">Live Dashboard</h3>
+              <div className="flex items-center justify-between mb-4 md:mb-6">
+                <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-white">Live Dashboard</h3>
                 <div className="flex items-center gap-2">
                   <motion.div
-                    className="w-3 h-3 bg-green-500 rounded-full"
+                    className="w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full"
                     animate={{ opacity: [1, 0.3, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   />
-                  <span className="text-green-400 text-sm font-medium">Live</span>
+                  <span className="text-green-400 text-xs md:text-sm font-medium">Live</span>
                 </div>
               </div>
 
@@ -234,22 +234,22 @@ function Welcome() {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div className={`p-4 rounded-xl bg-gradient-to-r ${features[currentFeature].color} bg-opacity-20 border border-opacity-30`}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-3xl">{features[currentFeature].icon}</span>
-                      <h4 className="text-lg font-bold text-white">{features[currentFeature].title}</h4>
+                  <div className={`p-3 md:p-4 rounded-lg md:rounded-xl bg-gradient-to-r ${features[currentFeature].color} bg-opacity-20 border border-opacity-30`}>
+                    <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                      <span className="text-xl md:text-2xl lg:text-3xl">{features[currentFeature].icon}</span>
+                      <h4 className="text-sm md:text-base lg:text-lg font-bold text-white">{features[currentFeature].title}</h4>
                     </div>
-                    <p className="text-gray-300 text-sm">{features[currentFeature].description}</p>
+                    <p className="text-gray-300 text-xs md:text-sm">{features[currentFeature].description}</p>
                   </div>
 
                   {/* Mock Data Visualization */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-700/50 rounded-lg p-4">
-                      <div className="text-2xl font-bold text-yellow-400">24</div>
+                  <div className="grid grid-cols-2 gap-2 md:gap-4">
+                    <div className="bg-gray-700/50 rounded-lg p-3 md:p-4">
+                      <div className="text-lg md:text-xl lg:text-2xl font-bold text-yellow-400">24</div>
                       <div className="text-xs text-gray-400">Active Alerts</div>
                     </div>
-                    <div className="bg-gray-700/50 rounded-lg p-4">
-                      <div className="text-2xl font-bold text-green-400">1.2K</div>
+                    <div className="bg-gray-700/50 rounded-lg p-3 md:p-4">
+                      <div className="text-lg md:text-xl lg:text-2xl font-bold text-green-400">1.2K</div>
                       <div className="text-xs text-gray-400">Volunteers</div>
                     </div>
                   </div>
@@ -264,9 +264,9 @@ function Welcome() {
               />
             </motion.div>
 
-            {/* Floating Cards */}
+            {/* Floating Cards - Hidden on mobile to prevent overlap */}
             <motion.div
-              className="absolute -top-8 -left-8 bg-blue-500/20 backdrop-blur-xl rounded-2xl p-4 border border-blue-400/30"
+              className="hidden lg:block absolute -top-8 -left-8 bg-blue-500/20 backdrop-blur-xl rounded-2xl p-4 border border-blue-400/30"
               animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             >
@@ -274,7 +274,7 @@ function Welcome() {
             </motion.div>
 
             <motion.div
-              className="absolute -bottom-8 -right-8 bg-purple-500/20 backdrop-blur-xl rounded-2xl p-4 border border-purple-400/30"
+              className="hidden lg:block absolute -bottom-8 -right-8 bg-purple-500/20 backdrop-blur-xl rounded-2xl p-4 border border-purple-400/30"
               animate={{ y: [0, 15, 0], rotate: [0, -5, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             >

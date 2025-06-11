@@ -1354,6 +1354,7 @@ select option:hover {
   .modal-content {
     width: 90%;
     margin: 1rem;
+    max-width: calc(100vw - 2rem);
   }
 
   .grid-cols-3 {
@@ -1362,6 +1363,57 @@ select option:hover {
 
   .md\:pl-64 {
     padding-left: 1rem;
+  }
+
+  /* Mobile-specific popup adjustments */
+  .leaflet-popup-content-wrapper {
+    max-width: 90vw !important;
+    width: 90vw !important;
+  }
+
+  .leaflet-popup-content {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 8px 12px !important;
+  }
+
+  /* Mobile tooltip adjustments */
+  .leaflet-tooltip {
+    max-width: 85vw !important;
+    width: 85vw !important;
+  }
+
+  /* Adjust grid layouts for mobile */
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  /* Mobile-specific text sizing */
+  .text-2xl {
+    font-size: 1.25rem;
+  }
+
+  .text-xl {
+    font-size: 1.125rem;
+  }
+
+  /* Adjust padding for mobile */
+  .p-6 {
+    padding: 1rem;
+  }
+
+  .p-5 {
+    padding: 0.875rem;
+  }
+
+  .p-4 {
+    padding: 0.75rem;
   }
 }
 
@@ -1741,4 +1793,219 @@ select option:hover {
   .modern-disaster-tooltip .leaflet-tooltip-content {
     max-width: 280px !important;
   }
+
+  /* Additional mobile adjustments for disaster popups */
+  .modern-disaster-popup .leaflet-popup-content {
+    margin: 8px !important;
+    max-width: none !important;
+  }
+
+  /* Adjust emergency controls for mobile */
+  .emergency-controls-mobile {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    border-radius: 1rem 1rem 0 0 !important;
+    max-height: 50vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Mobile-specific button adjustments */
+  .mobile-button-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Adjust statistics container for mobile */
+  .statistics-mobile {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    border-radius: 1rem 1rem 0 0 !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Welcome page mobile optimizations */
+  .welcome-mobile-spacing {
+    padding-top: 6rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* Header spacing adjustments */
+  .header-safe-area {
+    padding-top: 5rem !important;
+  }
+
+  @media (min-width: 768px) {
+    .header-safe-area {
+      padding-top: 6rem !important;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .header-safe-area {
+      padding-top: 4rem !important;
+    }
+  }
+
+  /* Prevent horizontal scroll on mobile */
+  .overflow-x-hidden {
+    overflow-x: hidden !important;
+  }
+
+  /* Mobile-friendly touch targets */
+  .touch-target {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  /* Enhanced Critical Disaster Alerts - Maximum Readability */
+  .critical-alert-card {
+    background: #ffffff;
+    border-left: 4px solid #dc2626;
+    border: 1px solid #fecaca;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #111827;
+  }
+
+  .critical-alert-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(220, 38, 38, 0.15);
+    border-color: #fca5a5;
+  }
+
+  .moderate-alert-card {
+    background: #ffffff;
+    border-left: 4px solid #d97706;
+    border: 1px solid #fde68a;
+    box-shadow: 0 4px 20px rgba(217, 119, 6, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #111827;
+  }
+
+  .moderate-alert-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(217, 119, 6, 0.15);
+    border-color: #fcd34d;
+  }
+
+  .low-alert-card {
+    background: #ffffff;
+    border-left: 4px solid #2563eb;
+    border: 1px solid #bfdbfe;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #111827;
+  }
+
+  .low-alert-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.15);
+    border-color: #93c5fd;
+  }
+
+  /* Smooth category headers - Maximum Contrast */
+  .category-header-critical {
+    background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+    color: white;
+    border: 2px solid #7f1d1d;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .category-header-moderate {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    color: white;
+    border: 2px solid #b45309;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .category-header-low {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    color: white;
+    border: 2px solid #1e40af;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .category-header:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Enhanced pulse animation for critical alerts */
+  .critical-pulse {
+    animation: criticalPulse 2s infinite;
+  }
+
+  @keyframes criticalPulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  /* Smooth stagger animation */
+  .stagger-animation {
+    animation: staggerFadeIn 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  @keyframes staggerFadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Custom facility markers */
+  .custom-facility-marker {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .custom-facility-marker:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+  }
+
+  /* Compact popup styles */
+  .custom-facility-popup .leaflet-popup-content-wrapper {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border: 2px solid #e5e7eb;
+    padding: 0;
+  }
+
+  .custom-facility-popup .leaflet-popup-content {
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+  }
+
+  .custom-facility-popup .leaflet-popup-tip {
+    background: white;
+    border: 2px solid #e5e7eb;
+  }
+
+  /* Hide default close button since we have custom one */
+  .custom-facility-popup .leaflet-popup-close-button {
+    display: none;
+  }
+
+  /* Custom close button styling is handled inline in the component */
 }

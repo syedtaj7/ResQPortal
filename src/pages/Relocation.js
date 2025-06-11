@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
   Popup,
   Circle,
   Polyline,
+  Marker,
 } from "react-leaflet";
+import L from "leaflet";
 
 import "leaflet/dist/leaflet.css";
 import { safeLocations as safeLocationsData } from "../data/safeLocations";
@@ -83,8 +85,126 @@ function Relocation() {
   const [showBottomPopup, setShowBottomPopup] = useState(false);
   const [nearbyFacilities, setNearbyFacilities] = useState([]);
   const [facilityLines, setFacilityLines] = useState([]);
+  const mapRef = useRef(null);
 
   const { darkMode } = useTheme();
+
+  // Custom marker icons for different facility types
+  const createCustomIcon = (type, color) => {
+    const iconMap = {
+      hospital: '🏥',
+      petrol: '⛽',
+      police: '🚔',
+      fire: '🚒',
+      pharmacy: '💊',
+      bank: '🏦',
+      atm: '💳',
+      restaurant: '🍽️',
+      hotel: '🏨',
+      school: '🏫',
+      default: '📍'
+    };
+
+    return L.divIcon({
+      html: `
+        <div style="
+          background: ${color};
+          border: 3px solid white;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          cursor: pointer;
+        ">
+          ${iconMap[type] || iconMap.default}
+        </div>
+      `,
+      className: 'custom-facility-marker',
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+      popupAnchor: [0, -20]
+    });
+  };
+
+  // Enhanced facility fetching function
+  const fetchNearbyFacilitiesForLocation = async (coordinates, radius = 5000) => {
+    try {
+      setLoading(true);
+      const [lat, lon] = coordinates;
+
+      const facilityQueries = [
+        {
+          type: 'hospital',
+          query: `[out:json][timeout:25];(node["amenity"="hospital"](around:${radius},${lat},${lon});way["amenity"="hospital"](around:${radius},${lat},${lon}););out body;`,
+          color: '#ef4444'
+        },
+        {
+          type: 'petrol',
+          query: `[out:json][timeout:25];(node["amenity"="fuel"](around:${radius},${lat},${lon});way["amenity"="fuel"](around:${radius},${lat},${lon}););out body;`,
+          color: '#f59e0b'
+        },
+        {
+          type: 'police',
+          query: `[out:json][timeout:25];(node["amenity"="police"](around:${radius},${lat},${lon});way["amenity"="police"](around:${radius},${lat},${lon}););out body;`,
+          color: '#3b82f6'
+        },
+        {
+          type: 'pharmacy',
+          query: `[out:json][timeout:25];(node["amenity"="pharmacy"](around:${radius},${lat},${lon});way["amenity"="pharmacy"](around:${radius},${lat},${lon}););out body;`,
+          color: '#10b981'
+        },
+        {
+          type: 'bank',
+          query: `[out:json][timeout:25];(node["amenity"="bank"](around:${radius},${lat},${lon});way["amenity"="bank"](around:${radius},${lat},${lon}););out body;`,
+          color: '#8b5cf6'
+        }
+      ];
+
+      const allFacilities = [];
+
+      for (const facilityType of facilityQueries) {
+        try {
+          const response = await fetch("https://overpass-api.de/api/interpreter", {
+            method: "POST",
+            body: facilityType.query,
+          });
+
+          const data = await response.json();
+
+          const facilities = data.elements
+            .filter(element => element.lat && element.lon && element.tags?.name)
+            .map(facility => ({
+              id: `${facilityType.type}-${facility.id}`,
+              name: facility.tags.name,
+              type: facilityType.type,
+              coordinates: [facility.lat, facility.lon],
+              color: facilityType.color,
+              phone: facility.tags.phone || facility.tags['contact:phone'] || 'N/A',
+              address: facility.tags['addr:full'] || facility.tags['addr:street'] || 'Address not available',
+              opening_hours: facility.tags.opening_hours || 'Hours not available',
+              website: facility.tags.website || facility.tags['contact:website'] || null,
+              distance: calculateDistance(lat, lon, facility.lat, facility.lon).toFixed(1)
+            }))
+            .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance))
+            .slice(0, 10); // Limit to 10 per type
+
+          allFacilities.push(...facilities);
+        } catch (error) {
+          console.error(`Error fetching ${facilityType.type} facilities:`, error);
+        }
+      }
+
+      setNearbyFacilities(allFacilities);
+    } catch (error) {
+      console.error("Error fetching nearby facilities:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // OpenWeatherMap API configuration (from disaster service)
   const OPENWEATHER_API_KEY = '80df7ef9d51c1d3f6322bb375bbb62b9';
@@ -780,12 +900,23 @@ function Relocation() {
     setShowBottomPopup(true);
   }, [calculateEmergencyZoneDetails, generateNearbyFacilities, userLocation]);
 
-  // Handle map click to minimize popup
-  const handleMapClick = useCallback(() => {
+  // Enhanced map click handler to close all popups
+  const handleMapClick = useCallback((e) => {
+    // Close bottom popup if open
     if (showBottomPopup) {
       setShowBottomPopup(false);
       setNearbyFacilities([]);
       setFacilityLines([]);
+    }
+
+    // Close all facility popups by accessing the map instance
+    if (mapRef.current) {
+      mapRef.current.closePopup();
+    }
+
+    // Prevent event from bubbling to markers
+    if (e && e.originalEvent) {
+      e.originalEvent.stopPropagation();
     }
   }, [showBottomPopup]);
 
@@ -857,7 +988,7 @@ function Relocation() {
     return R * c;
   }, []);
 
-  // Get user's location
+  // Enhanced getUserLocation with better zooming and facility fetching
   const getUserLocation = () => {
     if (navigator.geolocation) {
       setLoading(true);
@@ -869,12 +1000,23 @@ function Relocation() {
           ];
           setUserLocation(userCoords);
 
+          // Set map view to user location with appropriate zoom
+          if (mapRef.current) {
+            mapRef.current.setView(userCoords, 12, {
+              animate: true,
+              duration: 1.5
+            });
+          }
+
           // Get location name using reverse geocoding
           try {
             const response = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userCoords[0]}&lon=${userCoords[1]}&addressdetails=1`
             );
             const data = await response.json();
+
+            // Fetch nearby facilities (hospitals, petrol pumps, police stations, etc.)
+            await fetchNearbyFacilitiesForLocation(userCoords);
 
             const nearest = locations.reduce((closest, loc) => {
               const distance = calculateDistance(
@@ -893,6 +1035,7 @@ function Relocation() {
               setNearestSafeZone({
                 ...nearest,
                 userState: data.address?.state || "Your Location",
+                userLocationName: data.display_name || "Your Current Location"
               });
               // Calculate travel details for future use
               calculateTravelDetails(userCoords, nearest);
@@ -908,6 +1051,11 @@ function Relocation() {
         (error) => {
           console.error("Error getting location:", error);
           setLoading(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000
         }
       );
     }
@@ -1157,7 +1305,7 @@ function Relocation() {
         <div
           className={`${
             darkMode ? "bg-dark-bg-secondary" : "bg-gray-800"
-          } rounded-xl w-full max-w-2xl relative`}
+          } rounded-xl w-full max-w-2xl max-w-[95vw] relative`}
         >
           {/* Modal Header */}
           <div
@@ -1409,8 +1557,8 @@ function Relocation() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
         <Header transparent={true} />
 
-        {/* Search Bar - positioned lower */}
-        <div className="absolute top-32 left-4 z-[1000] w-80 animate-fade-in-down">
+        {/* Search Bar - Responsive positioning */}
+        <div className="absolute top-20 md:top-32 left-4 right-4 md:right-auto z-[1000] md:w-80 animate-fade-in-down">
           <div className="flex flex-col gap-2">
             <button
               onClick={getUserLocation}
@@ -1451,8 +1599,8 @@ function Relocation() {
           </div>
       </div>
 
-        {/* Emergency Features Panel - Positioned lower */}
-        <div className="absolute top-32 right-4 z-[1000] w-80 animate-fade-in-down">
+        {/* Emergency Features Panel - Responsive positioning */}
+        <div className="absolute top-[180px] md:top-32 left-4 right-4 md:left-auto md:right-4 z-[1000] md:w-80 animate-fade-in-down">
           <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-white flex items-center">
@@ -1554,7 +1702,7 @@ function Relocation() {
         <div className="h-screen w-full relative overflow-hidden">
           <MapContainer
             center={userLocation || [20.5937, 78.9629]}
-            zoom={userLocation ? 8 : 4}
+            zoom={userLocation ? 12 : 4}
             className="h-full w-full"
             scrollWheelZoom={true}
             zoomControl={true}
@@ -1567,6 +1715,7 @@ function Relocation() {
               [37.6, 97.25],
             ]}
             onClick={handleMapClick}
+            ref={mapRef}
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -1581,6 +1730,18 @@ function Relocation() {
                 center={userLocation}
                 radius={5000}
                 pathOptions={{ color: "red", fillColor: "red" }}
+                eventHandlers={{
+                  click: () => {
+                    // Center the map on user location with smooth animation
+                    if (mapRef.current) {
+                      mapRef.current.setView(userLocation, 12, {
+                        animate: true,
+                        duration: 0.8,
+                        easeLinearity: 0.25
+                      });
+                    }
+                  }
+                }}
               >
                 <Popup>
                   <TranslatableText>Your Location</TranslatableText>
@@ -1637,6 +1798,14 @@ function Relocation() {
                       layer.unbindTooltip();
                     },
                     click: () => {
+                      // Center the map on the clicked zone with smooth animation
+                      if (mapRef.current) {
+                        mapRef.current.setView(zone.coordinates, 8, {
+                          animate: true,
+                          duration: 1.0,
+                          easeLinearity: 0.25
+                        });
+                      }
                       handleZoneClick(zone, userLocation);
                     },
                   }}
@@ -1805,118 +1974,147 @@ function Relocation() {
               />
             ))}
 
-            {/* Facility markers */}
+            {/* Enhanced Facility Markers */}
             {nearbyFacilities.map((facility) => (
-              <Circle
+              <Marker
                 key={facility.id}
-                center={facility.coordinates}
-                radius={1000}
-                pathOptions={{
-                  color: facility.color,
-                  fillColor: facility.color,
-                  fillOpacity: 0.6,
-                  weight: 2
+                position={facility.coordinates}
+                icon={createCustomIcon(facility.type, facility.color)}
+                eventHandlers={{
+                  click: () => {
+                    // Center the map on the clicked facility with smooth animation
+                    if (mapRef.current) {
+                      mapRef.current.setView(facility.coordinates, mapRef.current.getZoom(), {
+                        animate: true,
+                        duration: 0.8,
+                        easeLinearity: 0.25
+                      });
+                    }
+                  }
                 }}
               >
-                <Popup maxWidth={300} className="custom-facility-popup">
-                  <div className="bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 rounded-xl p-4 shadow-2xl border border-gray-600/50 backdrop-blur-xl text-center">
-                    {/* Facility Icon with Glow Effect */}
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg ${
-                      facility.color === 'red' ? 'bg-gradient-to-r from-red-600 to-red-700 shadow-red-500/50' :
-                      facility.color === 'green' ? 'bg-gradient-to-r from-green-600 to-green-700 shadow-green-500/50' :
-                      facility.color === 'blue' ? 'bg-gradient-to-r from-blue-600 to-blue-700 shadow-blue-500/50' :
-                      facility.color === 'orange' ? 'bg-gradient-to-r from-orange-600 to-orange-700 shadow-orange-500/50' :
-                      'bg-gradient-to-r from-purple-600 to-purple-700 shadow-purple-500/50'
-                    }`}>
-                      <span className="text-3xl">{facility.icon}</span>
-                    </div>
+                <Popup
+                  maxWidth={280}
+                  className="custom-facility-popup"
+                  closeOnClick={false}
+                  autoClose={false}
+                  closeButton={true}
+                >
+                  <div
+                    className="bg-white rounded-lg p-4 shadow-xl border border-gray-200 min-w-[260px] relative"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Custom Close Button */}
+                    <button
+                      onClick={() => mapRef.current?.closePopup()}
+                      className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200 hover:scale-110 shadow-lg z-10"
+                      style={{ lineHeight: '1' }}
+                    >
+                      ×
+                    </button>
 
-                    {/* Facility Name and Type */}
-                    <h4 className="font-bold text-white text-lg mb-1">{facility.name}</h4>
-                    <p className={`text-sm font-medium mb-2 ${
-                      facility.color === 'red' ? 'text-red-300' :
-                      facility.color === 'green' ? 'text-green-300' :
-                      facility.color === 'blue' ? 'text-blue-300' :
-                      facility.color === 'orange' ? 'text-orange-300' :
-                      'text-purple-300'
-                    }`}>
-                      {facility.type.toUpperCase()}
-                    </p>
-
-                    {/* Distance and Status */}
-                    <div className="bg-gray-800/60 rounded-lg p-3 mb-3 border border-gray-600/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center">
-                          <span className="text-lg mr-2">📍</span>
-                          <span className="text-gray-300 text-sm">Distance:</span>
-                        </div>
-                        <span className="text-white font-medium">{facility.distance} km</span>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <span className={`inline-block w-3 h-3 rounded-full mr-2 animate-pulse ${
-                            facility.isOpen ? 'bg-green-400 shadow-lg shadow-green-400/50' : 'bg-red-400 shadow-lg shadow-red-400/50'
-                          }`}></span>
-                          <span className="text-gray-300 text-sm">Status:</span>
-                        </div>
-                        <span className={`font-medium ${facility.isOpen ? 'text-green-400' : 'text-red-400'}`}>
-                          {facility.isOpen ? 'Open 24/7' : 'Closed'}
+                    {/* Compact Header */}
+                    <div className="flex items-center gap-3 mb-3 pr-8">
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-md ${
+                        facility.color === '#ef4444' ? 'bg-red-500' :
+                        facility.color === '#10b981' ? 'bg-green-500' :
+                        facility.color === '#3b82f6' ? 'bg-blue-500' :
+                        facility.color === '#f59e0b' ? 'bg-amber-500' :
+                        'bg-purple-500'
+                      }`}>
+                        <span className="text-xl text-white">
+                          {facility.type === 'hospital' ? '🏥' :
+                           facility.type === 'petrol' ? '⛽' :
+                           facility.type === 'police' ? '🚔' :
+                           facility.type === 'pharmacy' ? '💊' :
+                           facility.type === 'bank' ? '🏦' : '📍'}
                         </span>
                       </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-gray-900 text-base leading-tight">{facility.name}</h4>
+                        <p className={`text-xs font-medium px-2 py-1 rounded-md inline-block mt-1 ${
+                          facility.color === '#ef4444' ? 'bg-red-100 text-red-700' :
+                          facility.color === '#10b981' ? 'bg-green-100 text-green-700' :
+                          facility.color === '#3b82f6' ? 'bg-blue-100 text-blue-700' :
+                          facility.color === '#f59e0b' ? 'bg-amber-100 text-amber-700' :
+                          'bg-purple-100 text-purple-700'
+                        }`}>
+                          {facility.type.charAt(0).toUpperCase() + facility.type.slice(1)}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Services Available */}
-                    <div className="bg-gradient-to-r from-gray-800/40 to-slate-800/40 rounded-lg p-3 mb-3 border border-gray-500/30">
-                      <h5 className="text-white font-medium text-sm mb-2 flex items-center justify-center">
-                        <span className="mr-2">🏥</span>
-                        Services Available
-                      </h5>
-                      <div className="grid grid-cols-2 gap-1 text-xs">
-                        {(facility.services || ['Emergency Care', 'First Aid', '24/7 Service', 'Ambulance']).slice(0, 4).map((service, index) => (
-                          <div key={index} className="flex items-center text-gray-300">
-                            <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-2"></span>
+                    {/* Essential Info - Compact */}
+                    <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-1">
+                          <span className="text-blue-600">📍</span>
+                          <span className="text-gray-600">Distance:</span>
+                          <span className="font-semibold text-gray-900">{facility.distance} km</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-green-600">⏱️</span>
+                          <span className="font-semibold text-gray-900">{Math.ceil(parseFloat(facility.distance) * 3)} min</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Key Services - Simplified */}
+                    <div className="mb-3">
+                      <div className="flex flex-wrap gap-1">
+                        {(facility.type === 'hospital' ? ['Emergency', '24/7'] :
+                          facility.type === 'petrol' ? ['Fuel', 'Service'] :
+                          facility.type === 'police' ? ['Emergency', '24/7'] :
+                          facility.type === 'pharmacy' ? ['Medicine', 'Consultation'] :
+                          ['Banking', 'ATM']).slice(0, 2).map((service, index) => (
+                          <span key={index} className={`text-xs px-2 py-1 rounded-md font-medium ${
+                            facility.color === '#ef4444' ? 'bg-red-50 text-red-700 border border-red-200' :
+                            facility.color === '#10b981' ? 'bg-green-50 text-green-700 border border-green-200' :
+                            facility.color === '#3b82f6' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                            facility.color === '#f59e0b' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                            'bg-purple-50 text-purple-700 border border-purple-200'
+                          }`}>
                             {service}
-                          </div>
+                          </span>
                         ))}
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => window.open(`tel:${facility.contact}`, '_self')}
-                        className={`py-2 px-3 rounded-lg text-white text-sm font-medium transition-all duration-300 shadow-lg hover:scale-105 ${
-                          facility.color === 'red' ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 hover:shadow-red-500/25' :
-                          facility.color === 'green' ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:shadow-green-500/25' :
-                          facility.color === 'blue' ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 hover:shadow-blue-500/25' :
-                          facility.color === 'orange' ? 'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 hover:shadow-orange-500/25' :
-                          'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 hover:shadow-purple-500/25'
-                        }`}
-                      >
-                        <span className="mr-1">📞</span>
-                        Call Now
-                      </button>
+                    {/* Compact Action Buttons */}
+                    <div className="flex gap-2">
+                      {facility.phone !== 'N/A' && (
+                        <button
+                          onClick={() => window.open(`tel:${facility.phone}`, '_self')}
+                          className={`flex-1 py-2 px-3 rounded-lg text-white text-sm font-medium transition-all duration-200 hover:scale-105 ${
+                            facility.color === '#ef4444' ? 'bg-red-500 hover:bg-red-600' :
+                            facility.color === '#10b981' ? 'bg-green-500 hover:bg-green-600' :
+                            facility.color === '#3b82f6' ? 'bg-blue-500 hover:bg-blue-600' :
+                            facility.color === '#f59e0b' ? 'bg-amber-500 hover:bg-amber-600' :
+                            'bg-purple-500 hover:bg-purple-600'
+                          }`}
+                        >
+                          📞 Call
+                        </button>
+                      )}
                       <button
                         onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${facility.coordinates[0]},${facility.coordinates[1]}`, '_blank')}
-                        className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-gray-500/25 hover:scale-105"
+                        className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105"
                       >
-                        <span className="mr-1">🗺️</span>
-                        Directions
+                        🗺️ Navigate
                       </button>
                     </div>
 
-                    {/* Emergency Priority Badge */}
+                    {/* Emergency Badge - Compact */}
                     {facility.type === 'hospital' && (
-                      <div className="mt-3">
-                        <span className="bg-red-600/20 text-red-300 px-3 py-1 rounded-full text-xs font-medium border border-red-400/30 animate-pulse">
-                          🚨 Emergency Priority
+                      <div className="mt-2 text-center">
+                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded-md text-xs font-medium">
+                          🚨 Emergency
                         </span>
                       </div>
                     )}
                   </div>
                 </Popup>
-              </Circle>
+              </Marker>
             ))}
           </MapContainer>
         </div>
@@ -2167,9 +2365,9 @@ function Relocation() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
               {/* Emergency Kit */}
-              <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-black/30 transition-all duration-300 group">
+              <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl p-4 md:p-6 hover:bg-black/30 transition-all duration-300 group">
                 <div className="text-center mb-4">
                   <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                     <span className="text-2xl">🎒</span>
@@ -2459,9 +2657,9 @@ function Relocation() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
               {/* Air Transport */}
-              <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-black/30 transition-all duration-300 group">
+              <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl p-4 md:p-6 hover:bg-black/30 transition-all duration-300 group">
                 <div className="flex items-center mb-4">
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-sky-500 rounded-full flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
                     <span className="text-xl">✈️</span>
@@ -2702,9 +2900,9 @@ function Relocation() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
               {/* Volunteer Network */}
-              <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-black/30 transition-all duration-300 group">
+              <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl p-4 md:p-6 hover:bg-black/30 transition-all duration-300 group">
                 <div className="flex items-center mb-4">
                   <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
                     <span className="text-xl">🤝</span>

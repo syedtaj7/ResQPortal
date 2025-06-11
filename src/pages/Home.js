@@ -1988,8 +1988,8 @@ function Home() {
       <main className="relative">
         {/* Location Permission Notification */}
         {locationPermission === 'requesting' && (
-          <div className="absolute top-4 right-4 z-[1001] animate-fade-in-down">
-            <div className={`${darkMode ? "bg-blue-900/90 border-blue-700" : "bg-blue-100/90 border-blue-300"} backdrop-blur-sm border rounded-lg p-4 shadow-lg max-w-sm`}>
+          <div className="absolute top-4 right-4 left-4 md:left-auto z-[1001] animate-fade-in-down">
+            <div className={`${darkMode ? "bg-blue-900/90 border-blue-700" : "bg-blue-100/90 border-blue-300"} backdrop-blur-sm border rounded-lg p-4 shadow-lg max-w-sm mx-auto md:mx-0`}>
               <div className="flex items-center space-x-3">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
                 <div>
@@ -2006,8 +2006,8 @@ function Home() {
         )}
 
         {locationPermission === 'denied' && (
-          <div className="absolute top-4 right-4 z-[1001] animate-fade-in-down">
-            <div className={`${darkMode ? "bg-yellow-900/90 border-yellow-700" : "bg-yellow-100/90 border-yellow-300"} backdrop-blur-sm border rounded-lg p-4 shadow-lg max-w-sm`}>
+          <div className="absolute top-4 right-4 left-4 md:left-auto z-[1001] animate-fade-in-down">
+            <div className={`${darkMode ? "bg-yellow-900/90 border-yellow-700" : "bg-yellow-100/90 border-yellow-300"} backdrop-blur-sm border rounded-lg p-4 shadow-lg max-w-sm mx-auto md:mx-0`}>
               <div className="flex items-start space-x-3">
                 <svg className="w-5 h-5 text-yellow-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -2031,8 +2031,8 @@ function Home() {
           </div>
         )}
 
-        {/* Search Bar - Moved Lower */}
-        <div className="absolute top-32 left-4 z-[1000] w-80 animate-fade-in-down">
+        {/* Search Bar - Responsive positioning */}
+        <div className="absolute top-20 md:top-32 left-4 right-4 md:right-auto z-[1000] md:w-80 animate-fade-in-down">
           <div className="relative transform transition-all duration-300 hover:scale-105">
             <input
               type="text"
@@ -2093,8 +2093,8 @@ function Home() {
           />
         </div>
 
-        {/* Statistics Container - Bottom Left */}
-        <div className="absolute bottom-4 left-4 z-[1000] w-80 animate-fade-in-up">
+        {/* Statistics Container - Top Right positioning */}
+        <div className="absolute top-32 md:top-40 right-4 left-4 md:left-auto z-[1000] md:w-80 animate-fade-in-down">
           <div className={`${darkMode ? "bg-gray-800/95" : "bg-white/95"} backdrop-blur-md rounded-2xl shadow-2xl border ${darkMode ? "border-gray-700" : "border-gray-200"} overflow-hidden`}>
             {/* Header */}
             <div className={`${darkMode ? "bg-gray-700/50" : "bg-gray-50/50"} px-4 py-3 border-b ${darkMode ? "border-gray-600" : "border-gray-200"}`}>
@@ -2420,9 +2420,9 @@ function Home() {
                 <MapController location={location} />
               </MapContainer>
 
-              {/* Enhanced Bottom Left Detailed Popup */}
+              {/* Enhanced Bottom Right Detailed Popup - Responsive */}
               {showDetailedPopup && selectedDisasterGroup && (
-                <div className="absolute bottom-4 left-4 z-[1000] w-[480px] max-h-[85vh] overflow-y-auto animate-fade-in-up">
+                <div className="absolute bottom-4 right-4 left-4 md:left-auto z-[1000] md:w-[480px] max-h-[85vh] overflow-y-auto animate-fade-in-up">
                   <div className="bg-white backdrop-blur-xl border border-gray-300 rounded-2xl shadow-2xl ring-1 ring-gray-200 overflow-hidden">
                     {(() => {
                       const mainWarningInfo = getComprehensiveWeatherWarning(selectedDisasterGroup[0]);
@@ -2797,132 +2797,248 @@ function Home() {
               </div>
             </div>
 
-            {/* Disaster Updates Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Enhanced Critical Disaster Alerts Grid */}
+            <div className="space-y-8">
               {loading ? (
-                // Loading skeletons
-                Array.from({ length: 6 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className={`${
-                      darkMode ? "bg-gray-800" : "bg-white"
-                    } rounded-xl p-6 shadow-lg animate-pulse`}
-                  >
-                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-4"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2 mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-full mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-2/3"></div>
-                  </div>
-                ))
-              ) : filteredDisasters.length > 0 ? (
-                filteredDisasters.map((disaster, index) => {
-                  const typeColors =
-                    disasterTypeColors[disaster.type] ||
-                    disasterTypeColors.default;
-                  const alertReason = getAlertReason(disaster);
-                  return (
+                // Enhanced Loading skeletons
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                  {Array.from({ length: 6 }).map((_, index) => (
                     <div
-                      key={`${disaster.id}-${index}`}
+                      key={index}
                       className={`${
                         darkMode ? "bg-gray-800" : "bg-white"
-                      } rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-fade-in-up border-l-4 ${
-                        disaster.severity === "high"
-                          ? "border-red-500"
-                          : disaster.severity === "moderate"
-                          ? "border-yellow-500"
-                          : "border-green-500"
-                      }`}
-                      style={{ animationDelay: `${index * 100}ms` }}
+                      } rounded-2xl p-6 shadow-lg animate-pulse border border-gray-200`}
                     >
-                      <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 bg-gray-300 rounded-xl"></div>
                         <div className="flex-1">
-                          <h3 className={`font-bold text-lg ${darkMode ? "text-white" : "text-gray-900"} mb-2`}>
-                            <TranslatableText>{disaster.title}</TranslatableText>
-                          </h3>
+                          <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                          <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                      <div className="h-3 bg-gray-300 rounded w-full mb-2"></div>
+                      <div className="h-3 bg-gray-300 rounded w-2/3 mb-4"></div>
+                      <div className="flex gap-2">
+                        <div className="h-6 bg-gray-300 rounded-full w-16"></div>
+                        <div className="h-6 bg-gray-300 rounded-full w-20"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : filteredDisasters.length > 0 ? (
+                (() => {
+                  // Group disasters by severity for better organization
+                  const groupedDisasters = filteredDisasters.reduce((groups, disaster) => {
+                    const severity = disaster.severity;
+                    if (!groups[severity]) groups[severity] = [];
+                    groups[severity].push(disaster);
+                    return groups;
+                  }, {});
 
-                          {/* Alert Reason - Bold and Prominent for Critical Disasters */}
-                          {disaster.severity === 'high' && (
-                            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                              <div className="flex items-center gap-2">
-                                <span className="text-red-600 text-lg">🚨</span>
-                                <span className="font-bold text-red-800 text-sm">
-                                  <TranslatableText>ALERT REASON:</TranslatableText>
-                                </span>
-                              </div>
-                              <p className="font-bold text-red-900 text-base mt-1">
-                                <TranslatableText>{alertReason}</TranslatableText>
-                              </p>
+                  const severityOrder = ['high', 'moderate', 'low'];
+                  const severityLabels = {
+                    high: {
+                      label: 'Critical Emergency Alerts',
+                      icon: '🚨',
+                      color: 'red',
+                      bgGradient: 'from-red-800 to-red-900',
+                      textColor: 'text-white',
+                      borderColor: 'border-red-800',
+                      cardBg: 'bg-white',
+                      cardBorder: 'border-red-500',
+                      cardText: 'text-gray-900'
+                    },
+                    moderate: {
+                      label: 'Important Warnings',
+                      icon: '⚠️',
+                      color: 'amber',
+                      bgGradient: 'from-amber-600 to-amber-700',
+                      textColor: 'text-white',
+                      borderColor: 'border-amber-600',
+                      cardBg: 'bg-white',
+                      cardBorder: 'border-amber-500',
+                      cardText: 'text-gray-900'
+                    },
+                    low: {
+                      label: 'General Advisories',
+                      icon: '📢',
+                      color: 'blue',
+                      bgGradient: 'from-blue-700 to-blue-800',
+                      textColor: 'text-white',
+                      borderColor: 'border-blue-700',
+                      cardBg: 'bg-white',
+                      cardBorder: 'border-blue-500',
+                      cardText: 'text-gray-900'
+                    }
+                  };
+
+                  return severityOrder.map(severity => {
+                    if (!groupedDisasters[severity] || groupedDisasters[severity].length === 0) return null;
+
+                    const severityInfo = severityLabels[severity];
+                    const disasters = groupedDisasters[severity];
+
+                    return (
+                      <div key={severity} className="space-y-6">
+                        {/* Category Header */}
+                        <div className={`bg-gradient-to-r ${severityInfo.bgGradient} rounded-xl p-6 ${severityInfo.borderColor} border-2 shadow-2xl`}>
+                          <div className="flex items-center gap-4">
+                            <div className={`w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-lg`}>
+                              <span className="text-3xl">{severityInfo.icon}</span>
                             </div>
-                          )}
-
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${typeColors.bg} ${typeColors.text}`}>
-                              <TranslatableText>{disaster.type}</TranslatableText>
-                            </span>
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                disaster.severity === "high"
-                                  ? "bg-red-100 text-red-800"
-                                  : disaster.severity === "moderate"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-green-100 text-green-800"
-                              }`}
-                            >
-                              <TranslatableText>{disaster.severity}</TranslatableText>
-                            </span>
+                            <div className="flex-1">
+                              <h3 className={`text-2xl font-bold ${severityInfo.textColor} mb-2 drop-shadow-sm`}>
+                                <TranslatableText>{severityInfo.label}</TranslatableText>
+                              </h3>
+                              <div className="flex items-center gap-4">
+                                <span className={`px-4 py-2 bg-white text-gray-900 rounded-full text-sm font-bold shadow-md`}>
+                                  {disasters.length} Active Alert{disasters.length !== 1 ? 's' : ''}
+                                </span>
+                                {severity === 'high' && (
+                                  <div className="flex items-center gap-2 animate-pulse">
+                                    <div className="w-3 h-3 bg-yellow-300 rounded-full shadow-sm"></div>
+                                    <span className="text-white font-bold text-sm drop-shadow-sm">
+                                      <TranslatableText>Immediate Action Required</TranslatableText>
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex-shrink-0">
-                          <img
-                            src={`https://images.unsplash.com/photo-${
-                              disaster.type === "Earthquake" ? "1547036967-23d11aacaee0" :
-                              disaster.type === "Weather Warning" ? "1504608524841-42fe6f032b4b" :
-                              "1558618666-fcd25c85cd64"
-                            }?w=80&h=80&fit=crop&crop=center`}
-                            alt={disaster.type}
-                            className="w-16 h-16 rounded-lg object-cover"
-                          />
+
+                        {/* Disaster Cards Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                          {disasters.map((disaster, index) => {
+                            const typeColors = disasterTypeColors[disaster.type] || disasterTypeColors.default;
+                            const alertReason = getAlertReason(disaster);
+
+                            return (
+                              <div
+                                key={`${disaster.id}-${index}`}
+                                className={`group relative bg-white text-gray-900 rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] animate-fade-in-up border-l-4 ${
+                                  disaster.severity === "high"
+                                    ? "border-l-red-600 border border-red-200 hover:border-red-300 hover:shadow-red-100"
+                                    : disaster.severity === "moderate"
+                                    ? "border-l-amber-500 border border-amber-200 hover:border-amber-300 hover:shadow-amber-100"
+                                    : "border-l-blue-600 border border-blue-200 hover:border-blue-300 hover:shadow-blue-100"
+                                } overflow-hidden`}
+                                style={{ animationDelay: `${index * 150}ms` }}
+                              >
+                                {/* Severity Indicator */}
+                                <div className={`absolute top-4 right-4 w-4 h-4 rounded-full ${
+                                  disaster.severity === "high" ? "bg-red-600 animate-pulse shadow-red-300" :
+                                  disaster.severity === "moderate" ? "bg-amber-500 shadow-amber-300" : "bg-blue-600 shadow-blue-300"
+                                } shadow-lg`}></div>
+
+                                {/* Enhanced Header with Icon */}
+                                <div className="flex items-start gap-4 mb-4">
+                                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-lg ${
+                                    disaster.severity === "high" ? "bg-red-600" :
+                                    disaster.severity === "moderate" ? "bg-amber-500" : "bg-blue-600"
+                                  }`}>
+                                    <span className="text-2xl text-white">
+                                      {disaster.type === "Weather Warning" ? "🌦️" :
+                                       disaster.type === "Earthquake" ? "🏔️" :
+                                       disaster.type === "Flash Flood" ? "🌊" :
+                                       disaster.type === "Landslide Warning" ? "⛰️" :
+                                       disaster.type === "Air Quality Warning" ? "💨" : "⚠️"}
+                                    </span>
+                                  </div>
+                                  <div className="flex-1">
+                                    <h3 className={`font-bold text-lg text-gray-900 mb-2 group-hover:text-blue-700 transition-colors`}>
+                                      <TranslatableText>{disaster.title}</TranslatableText>
+                                    </h3>
+
+                                    {/* Enhanced Tags */}
+                                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                                      <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${
+                                        disaster.severity === "high" ? "bg-red-50 text-red-900 border border-red-200" :
+                                        disaster.severity === "moderate" ? "bg-amber-50 text-amber-900 border border-amber-200" :
+                                        "bg-blue-50 text-blue-900 border border-blue-200"
+                                      }`}>
+                                        <TranslatableText>{disaster.type}</TranslatableText>
+                                      </span>
+                                      <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm text-white ${
+                                        disaster.severity === "high"
+                                          ? "bg-red-600"
+                                          : disaster.severity === "moderate"
+                                          ? "bg-amber-500"
+                                          : "bg-blue-600"
+                                      }`}>
+                                        <TranslatableText>{disaster.severity.toUpperCase()}</TranslatableText>
+                                      </span>
+                                      {disaster.severity === 'high' && (
+                                        <span className="px-3 py-1.5 bg-red-700 text-white rounded-lg text-xs font-bold animate-pulse shadow-lg">
+                                          🚨 URGENT
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Enhanced Alert Reason for Critical Disasters */}
+                                {disaster.severity === 'high' && (
+                                  <div className="mb-4 p-4 bg-red-700 text-white border-l-4 border-red-900 rounded-lg shadow-xl">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="text-yellow-300 text-lg">🚨</span>
+                                      <span className="font-bold text-white text-sm tracking-wide">
+                                        <TranslatableText>CRITICAL ALERT REASON:</TranslatableText>
+                                      </span>
+                                    </div>
+                                    <p className="font-semibold text-white text-base leading-relaxed">
+                                      <TranslatableText>{alertReason}</TranslatableText>
+                                    </p>
+                                  </div>
+                                )}
+
+                                {/* Enhanced Description */}
+                                <div className="mb-4">
+                                  <p className="text-sm text-gray-700 leading-relaxed line-clamp-3">
+                                    <TranslatableText>{disaster.details}</TranslatableText>
+                                  </p>
+                                </div>
+
+                                {/* Enhanced Footer */}
+                                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                                  <div className="flex items-center gap-2">
+                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <time className="text-xs text-gray-600 font-medium">
+                                      {new Date(disaster.date).toLocaleDateString("en-IN", {
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      })}
+                                    </time>
+                                  </div>
+                                  <a
+                                    href={disaster.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 text-white ${
+                                      disaster.severity === "high" ? "bg-red-600 hover:bg-red-700" :
+                                      disaster.severity === "moderate" ? "bg-amber-600 hover:bg-amber-700" :
+                                      "bg-blue-600 hover:bg-blue-700"
+                                    }`}
+                                  >
+                                    <TranslatableText>View Details</TranslatableText>
+                                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                  </a>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-
-                      <p className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"} mb-4 line-clamp-3`}>
-                        <TranslatableText>{disaster.details}</TranslatableText>
-                      </p>
-
-                      <div className="flex items-center justify-between">
-                        <time className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-                          {new Date(disaster.date).toLocaleDateString("en-IN", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </time>
-                        <a
-                          href={disaster.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center gap-1 group transition-all duration-300"
-                        >
-                          <TranslatableText>Read More</TranslatableText>
-                          <svg
-                            className="w-4 h-4 transition-transform group-hover:translate-x-1"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
-                        </a>
-                      </div>
-                    </div>                  );
-                })
+                    );
+                  }).filter(Boolean);
+                })()
               ) : (
                 <div className="col-span-full text-center py-12">
                   <div className={`${darkMode ? "text-gray-400" : "text-gray-500"} text-lg`}>
