@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TranslatableText from './TranslatableText';
 import emergencyServices from '../services/emergencyServices';
 import EmergencyContactsSetup from './EmergencyContactsSetup';
+import emailService from '../services/emailService';
 
 const GoogleVoiceAssistant = () => {
   const [isListening, setIsListening] = useState(false);
@@ -12,6 +13,7 @@ const GoogleVoiceAssistant = () => {
   const [lastError, setLastError] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [showContactsSetup, setShowContactsSetup] = useState(false);
+
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -427,18 +429,30 @@ const GoogleVoiceAssistant = () => {
       };
 
       const results = await emergencyServices.triggerEmergencyAlert(emergencyData);
-      
+
       console.log('Emergency services response:', results);
       setAlertingAuthorities(false);
-      
+
       const locationText = results.location?.address || 'Location unavailable';
       const servicesNotified = results.emergencyServices?.length || 0;
       const contactsNotified = results.notifications?.length || 0;
-      
+
+      // Count successful email notifications
+      const successfulEmails = results.notifications?.filter(n => n.status === 'success').length || 0;
+
+      let emailStatusText = '';
+      if (successfulEmails > 0) {
+        emailStatusText = `\n📧 Email alerts sent: ${successfulEmails} (via EmailJS)`;
+      } else if (contactsNotified === 0) {
+        emailStatusText = `\n📧 No emergency contacts configured`;
+      } else {
+        emailStatusText = `\n📧 Email sending failed - check EmailJS configuration`;
+      }
+
       alert(`🚨 EMERGENCY SERVICES HAVE BEEN NOTIFIED!\n\n` +
-            `Location: ${locationText}\n` +
-            `Services Notified: ${servicesNotified}\n` +
-            `Contacts Notified: ${contactsNotified}\n\n` +
+            `📍 Location: ${locationText}\n` +
+            `🚔 Services Notified: ${servicesNotified}\n` +
+            `👥 Contacts Notified: ${contactsNotified}${emailStatusText}\n\n` +
             `Help is on the way. Stay calm and stay safe.`);
 
     } catch (error) {
@@ -484,6 +498,8 @@ const GoogleVoiceAssistant = () => {
     setAlertingAuthorities(false);
     setTranscript('');
   };
+
+
 
   // Cleanup on unmount
   useEffect(() => {

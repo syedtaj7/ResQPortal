@@ -55,44 +55,47 @@ class EmailService {
   // Main email sending function
   async sendEmergencyEmail(contact, alertData) {
     const emailData = this.createEmergencyEmailData(contact, alertData);
-    
-    // Try EmailJS first (preferred for frontend)
-    if (this.config.emailjs.enabled) {
-      try {
-        const result = await this.sendViaEmailJS(emailData);
-        return {
-          contact: contact.name,
-          email: contact.email,
-          provider: 'emailjs',
-          status: 'success',
-          messageId: result.text,
-          timestamp: new Date().toISOString()
-        };
-      } catch (error) {
-        console.error('EmailJS failed:', error);
-        // Continue to SMTP if available
-      }
+
+    // Check if EmailJS is configured
+    if (!this.config.emailjs.enabled) {
+      throw new Error('EmailJS is not configured. Please check your .env file and ensure REACT_APP_EMAILJS_SERVICE_ID, REACT_APP_EMAILJS_TEMPLATE_ID, and REACT_APP_EMAILJS_PUBLIC_KEY are set with valid values from https://www.emailjs.com/');
     }
-    
-    // Try SMTP as fallback
-    if (this.config.smtp.enabled) {
-      try {
-        const result = await this.sendViaSMTP(emailData);
-        return {
-          contact: contact.name,
-          email: contact.email,
-          provider: 'smtp',
-          status: 'success',
-          messageId: result.messageId,
-          timestamp: new Date().toISOString()
-        };
-      } catch (error) {
-        console.error('SMTP failed:', error);
+
+    // Try EmailJS (required for real-time implementation)
+    try {
+      const result = await this.sendViaEmailJS(emailData);
+      return {
+        contact: contact.name,
+        email: contact.email,
+        provider: 'emailjs',
+        status: 'success',
+        messageId: result.text,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('EmailJS failed:', error);
+
+      // Provide specific error messages based on the error
+      let errorMessage = 'EmailJS failed: ';
+      if (error.text) {
+        errorMessage += error.text;
+      } else if (error.message) {
+        errorMessage += error.message;
+      } else {
+        errorMessage += 'Unknown error';
       }
+
+      // Add helpful information for common errors
+      if (error.text && error.text.includes('Public Key is invalid')) {
+        errorMessage += '\n\nThe Public Key in your .env file is invalid. Please:\n1. Go to https://dashboard.emailjs.com/admin/account\n2. Copy your correct Public Key\n3. Update REACT_APP_EMAILJS_PUBLIC_KEY in your .env file\n4. Restart the application';
+      } else if (error.text && error.text.includes('Service ID')) {
+        errorMessage += '\n\nThe Service ID is invalid. Please check REACT_APP_EMAILJS_SERVICE_ID in your .env file.';
+      } else if (error.text && error.text.includes('Template ID')) {
+        errorMessage += '\n\nThe Template ID is invalid. Please check REACT_APP_EMAILJS_TEMPLATE_ID in your .env file.';
+      }
+
+      throw new Error(errorMessage);
     }
-    
-    // If all providers fail, return simulation
-    return this.simulateEmail(contact, emailData);
   }
 
   // Create emergency email data
@@ -249,17 +252,7 @@ Do not reply to this email.`,
     return { messageId: 'smtp_' + Date.now() };
   }
 
-  // Simulate email when no provider is configured
-  simulateEmail(contact, emailData) {
-    return {
-      contact: contact.name,
-      email: contact.email,
-      provider: 'simulation',
-      status: 'simulated',
-      message: 'Email simulated - no provider configured',
-      timestamp: new Date().toISOString()
-    };
-  }
+
 
   // Get real user location
   async getRealUserLocation() {
@@ -336,24 +329,117 @@ Do not reply to this email.`,
     });
   }
 
-  // Test email functionality with real location
-  async testEmail(testEmail = null) {
-    const testContact = {
-      name: 'Test Contact',
-      email: testEmail || 'test@example.com',
-      relationship: 'Test'
-    };
+  // Send contact form email
+  async sendContactEmail(contactData) {
+    const emailData = this.createContactEmailData(contactData);
 
-    // Get real user location
-    const realLocation = await this.getRealUserLocation();
+    // Check if EmailJS is configured
+    if (!this.config.emailjs.enabled) {
+      throw new Error('EmailJS is not configured. Please check your .env file and ensure REACT_APP_EMAILJS_SERVICE_ID, REACT_APP_EMAILJS_TEMPLATE_ID, and REACT_APP_EMAILJS_PUBLIC_KEY are set with valid values from https://www.emailjs.com/');
+    }
 
-    const testAlertData = {
-      location: realLocation
-    };
+    // Try EmailJS (required for real-time implementation)
+    try {
+      const result = await this.sendViaEmailJS(emailData);
+      return {
+        status: 'success',
+        provider: 'emailjs',
+        messageId: result.text,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('EmailJS failed for contact form:', error);
 
-    const result = await this.sendEmergencyEmail(testContact, testAlertData);
-    return result;
+      // Provide specific error messages
+      let errorMessage = 'EmailJS failed: ';
+      if (error.text) {
+        errorMessage += error.text;
+      } else if (error.message) {
+        errorMessage += error.message;
+      } else {
+        errorMessage += 'Unknown error';
+      }
+
+      throw new Error(errorMessage);
+    }
   }
+
+  // Create contact form email data
+  createContactEmailData(contactData) {
+    const timestamp = new Date().toLocaleString();
+
+    return {
+      // Standard EmailJS variables
+      to_email: 'contact@resqtech.com', // Your contact email
+      to_name: 'ResQTech Team',
+      from_name: contactData.name,
+      from_email: contactData.email,
+      reply_to: contactData.email,
+
+      // Subject line
+      subject: `Contact Form: ${contactData.subject}`,
+
+      // Main message content
+      message: `New contact form submission from ResQTech website:
+
+📧 CONTACT DETAILS:
+👤 Name: ${contactData.name}
+📧 Email: ${contactData.email}
+📋 Subject: ${contactData.subject}
+⏰ Time: ${timestamp}
+
+💬 MESSAGE:
+${contactData.message}
+
+---
+This message was sent from the ResQTech contact form.
+Please respond to: ${contactData.email}`,
+
+      // HTML version for better formatting
+      html_message: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+          <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="color: #2563eb; margin-top: 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px;">
+              📧 New Contact Form Submission
+            </h2>
+
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #374151; margin-top: 0;">Contact Details:</h3>
+              <p><strong>👤 Name:</strong> ${contactData.name}</p>
+              <p><strong>📧 Email:</strong> ${contactData.email}</p>
+              <p><strong>📋 Subject:</strong> ${contactData.subject}</p>
+              <p><strong>⏰ Time:</strong> ${timestamp}</p>
+            </div>
+
+            <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #374151; margin-top: 0;">💬 Message:</h3>
+              <p style="white-space: pre-wrap; line-height: 1.6;">${contactData.message}</p>
+            </div>
+
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px;">
+              <p>This message was sent from the <strong>ResQTech</strong> contact form.</p>
+              <p>Please respond to: <a href="mailto:${contactData.email}" style="color: #2563eb;">${contactData.email}</a></p>
+            </div>
+          </div>
+        </div>
+      `,
+
+      // Individual template variables
+      contact_name: contactData.name,
+      contact_email: contactData.email,
+      contact_subject: contactData.subject,
+      contact_message: contactData.message,
+      contact_timestamp: timestamp,
+
+      // System information
+      form_type: 'Contact Form',
+      website: 'ResQTech Emergency System'
+    };
+  }
+
+
+
+
 
   // Get email service status
   getStatus() {

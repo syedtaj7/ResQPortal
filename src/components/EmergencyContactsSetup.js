@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import TranslatableText from './TranslatableText';
-import emailService from '../services/emailService';
+
 
 const EmergencyContactsSetup = ({ isOpen, onClose }) => {
   const [contacts, setContacts] = useState([]);
@@ -103,33 +103,7 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
 
 
 
-  // Send test alert to specific contact
-  const testEmailForContact = async (contact) => {
-    if (!contact.email) {
-      alert('No email address available for this contact.');
-      return;
-    }
 
-    try {
-      // Get real location for the alert
-      const realLocation = await emailService.getRealUserLocation();
-
-      const result = await emailService.sendEmergencyEmail(contact, {
-        location: realLocation
-      });
-
-      if (result.status === 'success') {
-        alert(`✅ Emergency alert sent to ${contact.name}!\n\nThey will receive the alert at ${contact.email}.`);
-      } else if (result.status === 'simulated') {
-        alert(`📧 Alert simulated for ${contact.name}.\n\nEmailJS service not configured.`);
-      } else {
-        alert(`❌ Failed to send alert to ${contact.name}.\n\nError: ${result.error || 'Unknown error'}`);
-      }
-    } catch (error) {
-      console.error('Alert sending error:', error);
-      alert(`❌ Failed to send alert: ${error.message}`);
-    }
-  };
 
 
 
@@ -152,12 +126,14 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-red-600 to-orange-600 p-6">
-          <h2 className="text-2xl font-bold text-white mb-2">
-            <TranslatableText>Emergency Contacts Setup</TranslatableText>
-          </h2>
-          <p className="text-red-100">
-            <TranslatableText>Configure emergency contacts for instant email alerts during voice emergencies</TranslatableText>
-          </p>
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-2">
+              <TranslatableText>Emergency Contacts Setup</TranslatableText>
+            </h2>
+            <p className="text-red-100">
+              <TranslatableText>Configure emergency contacts for instant email alerts during voice emergencies</TranslatableText>
+            </p>
+          </div>
         </div>
 
         {/* Content */}
@@ -312,13 +288,6 @@ const EmergencyContactsSetup = ({ isOpen, onClose }) => {
                     </div>
                     
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => testEmailForContact(contact)}
-                        className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
-                        title="Send Test Alert"
-                      >
-                        📧
-                      </button>
                       <button
                         onClick={() => editContact(index)}
                         className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
