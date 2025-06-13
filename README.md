@@ -119,19 +119,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact & Support
 
-- 📧 Email: support@resqtech.org
-- 💬 Discord: [Join our community](https://discord.gg/resqtech)
-- 🌐 Website: [resqtech.org](https://resqtech.org)
-- 🐦 Twitter: [@ResQTech](https://twitter.com/ResQTech)
-
-## 🙏 Acknowledgments
-
-- Emergency Services Partners
-- Weather Data Providers
-- NGO Network Partners
-- Volunteer Community
-- Government Agencies
-- Technical Advisors
+- 📧 Email: syedtaj9849@gmail.com
+- 🌐 Website: [resqtech.org](https://resqportal.vercel.app/)
 
 ---
 
