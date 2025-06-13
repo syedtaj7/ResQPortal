@@ -120,7 +120,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Contact & Support
 
 - 📧 Email: syedtaj9849@gmail.com
-- 🌐 Website: [resqtech.org](https://resqportal.vercel.app/)
+- 🌐 Website: [ResQPortal](https://resqportal.vercel.app/)
 
 ---
 
