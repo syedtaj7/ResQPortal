@@ -1,4 +1,4 @@
-```markdown
+
 <div align="center">
   
 # 🌍 ResQTech - Disaster Management Portal
@@ -289,4 +289,3 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 <div align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=100&section=footer" width="100%"/>
 </div>
-```
