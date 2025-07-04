@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import {
   MapContainer,
   TileLayer,
@@ -85,6 +91,8 @@ function Relocation() {
   const [showBottomPopup, setShowBottomPopup] = useState(false);
   const [nearbyFacilities, setNearbyFacilities] = useState([]);
   const [facilityLines, setFacilityLines] = useState([]);
+  const [emergencyControlsCollapsed, setEmergencyControlsCollapsed] =
+    useState(true); // Start collapsed on mobile
   const mapRef = useRef(null);
 
   const { darkMode } = useTheme();
@@ -92,17 +100,17 @@ function Relocation() {
   // Custom marker icons for different facility types
   const createCustomIcon = (type, color) => {
     const iconMap = {
-      hospital: '🏥',
-      petrol: '⛽',
-      police: '🚔',
-      fire: '🚒',
-      pharmacy: '💊',
-      bank: '🏦',
-      atm: '💳',
-      restaurant: '🍽️',
-      hotel: '🏨',
-      school: '🏫',
-      default: '📍'
+      hospital: "🏥",
+      petrol: "⛽",
+      police: "🚔",
+      fire: "🚒",
+      pharmacy: "💊",
+      bank: "🏦",
+      atm: "💳",
+      restaurant: "🍽️",
+      hotel: "🏨",
+      school: "🏫",
+      default: "📍",
     };
 
     return L.divIcon({
@@ -123,78 +131,102 @@ function Relocation() {
           ${iconMap[type] || iconMap.default}
         </div>
       `,
-      className: 'custom-facility-marker',
+      className: "custom-facility-marker",
       iconSize: [40, 40],
       iconAnchor: [20, 20],
-      popupAnchor: [0, -20]
+      popupAnchor: [0, -20],
     });
   };
 
   // Enhanced facility fetching function
-  const fetchNearbyFacilitiesForLocation = async (coordinates, radius = 5000) => {
+  const fetchNearbyFacilitiesForLocation = async (
+    coordinates,
+    radius = 5000
+  ) => {
     try {
       setLoading(true);
       const [lat, lon] = coordinates;
 
       const facilityQueries = [
         {
-          type: 'hospital',
+          type: "hospital",
           query: `[out:json][timeout:25];(node["amenity"="hospital"](around:${radius},${lat},${lon});way["amenity"="hospital"](around:${radius},${lat},${lon}););out body;`,
-          color: '#ef4444'
+          color: "#ef4444",
         },
         {
-          type: 'petrol',
+          type: "petrol",
           query: `[out:json][timeout:25];(node["amenity"="fuel"](around:${radius},${lat},${lon});way["amenity"="fuel"](around:${radius},${lat},${lon}););out body;`,
-          color: '#f59e0b'
+          color: "#f59e0b",
         },
         {
-          type: 'police',
+          type: "police",
           query: `[out:json][timeout:25];(node["amenity"="police"](around:${radius},${lat},${lon});way["amenity"="police"](around:${radius},${lat},${lon}););out body;`,
-          color: '#3b82f6'
+          color: "#3b82f6",
         },
         {
-          type: 'pharmacy',
+          type: "pharmacy",
           query: `[out:json][timeout:25];(node["amenity"="pharmacy"](around:${radius},${lat},${lon});way["amenity"="pharmacy"](around:${radius},${lat},${lon}););out body;`,
-          color: '#10b981'
+          color: "#10b981",
         },
         {
-          type: 'bank',
+          type: "bank",
           query: `[out:json][timeout:25];(node["amenity"="bank"](around:${radius},${lat},${lon});way["amenity"="bank"](around:${radius},${lat},${lon}););out body;`,
-          color: '#8b5cf6'
-        }
+          color: "#8b5cf6",
+        },
       ];
 
       const allFacilities = [];
 
       for (const facilityType of facilityQueries) {
         try {
-          const response = await fetch("https://overpass-api.de/api/interpreter", {
-            method: "POST",
-            body: facilityType.query,
-          });
+          const response = await fetch(
+            "https://overpass-api.de/api/interpreter",
+            {
+              method: "POST",
+              body: facilityType.query,
+            }
+          );
 
           const data = await response.json();
 
           const facilities = data.elements
-            .filter(element => element.lat && element.lon && element.tags?.name)
-            .map(facility => ({
+            .filter(
+              (element) => element.lat && element.lon && element.tags?.name
+            )
+            .map((facility) => ({
               id: `${facilityType.type}-${facility.id}`,
               name: facility.tags.name,
               type: facilityType.type,
               coordinates: [facility.lat, facility.lon],
               color: facilityType.color,
-              phone: facility.tags.phone || facility.tags['contact:phone'] || 'N/A',
-              address: facility.tags['addr:full'] || facility.tags['addr:street'] || 'Address not available',
-              opening_hours: facility.tags.opening_hours || 'Hours not available',
-              website: facility.tags.website || facility.tags['contact:website'] || null,
-              distance: calculateDistance(lat, lon, facility.lat, facility.lon).toFixed(1)
+              phone:
+                facility.tags.phone || facility.tags["contact:phone"] || "N/A",
+              address:
+                facility.tags["addr:full"] ||
+                facility.tags["addr:street"] ||
+                "Address not available",
+              opening_hours:
+                facility.tags.opening_hours || "Hours not available",
+              website:
+                facility.tags.website ||
+                facility.tags["contact:website"] ||
+                null,
+              distance: calculateDistance(
+                lat,
+                lon,
+                facility.lat,
+                facility.lon
+              ).toFixed(1),
             }))
             .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance))
             .slice(0, 10); // Limit to 10 per type
 
           allFacilities.push(...facilities);
         } catch (error) {
-          console.error(`Error fetching ${facilityType.type} facilities:`, error);
+          console.error(
+            `Error fetching ${facilityType.type} facilities:`,
+            error
+          );
         }
       }
 
@@ -207,21 +239,24 @@ function Relocation() {
   };
 
   // OpenWeatherMap API configuration (from disaster service)
-  const OPENWEATHER_API_KEY = '80df7ef9d51c1d3f6322bb375bbb62b9';
+  const OPENWEATHER_API_KEY = "80df7ef9d51c1d3f6322bb375bbb62b9";
 
   // Major Indian cities for emergency monitoring (memoized to prevent re-renders)
-  const MAJOR_CITIES = useMemo(() => ({
-    mumbai: [19.0760, 72.8777],
-    delhi: [28.7041, 77.1025],
-    bangalore: [12.9716, 77.5946],
-    hyderabad: [17.3850, 78.4867],
-    chennai: [13.0827, 80.2707],
-    kolkata: [22.5726, 88.3639],
-    pune: [18.5204, 73.8567],
-    ahmedabad: [23.0225, 72.5714],
-    jaipur: [26.9124, 75.7873],
-    lucknow: [26.8467, 80.9462]
-  }), []);
+  const MAJOR_CITIES = useMemo(
+    () => ({
+      mumbai: [19.076, 72.8777],
+      delhi: [28.7041, 77.1025],
+      bangalore: [12.9716, 77.5946],
+      hyderabad: [17.385, 78.4867],
+      chennai: [13.0827, 80.2707],
+      kolkata: [22.5726, 88.3639],
+      pune: [18.5204, 73.8567],
+      ahmedabad: [23.0225, 72.5714],
+      jaipur: [26.9124, 75.7873],
+      lucknow: [26.8467, 80.9462],
+    }),
+    []
+  );
 
   // Emergency alerts fetching function using OpenWeatherMap API
   const fetchEmergencyAlerts = useCallback(async () => {
@@ -230,59 +265,71 @@ function Relocation() {
       const alerts = [];
 
       // Fetch weather alerts for major cities
-      const promises = Object.entries(MAJOR_CITIES).map(async ([cityName, coords]) => {
-        try {
-          const [lat, lon] = coords;
+      const promises = Object.entries(MAJOR_CITIES).map(
+        async ([cityName, coords]) => {
+          try {
+            const [lat, lon] = coords;
 
-          // Fetch current weather and alerts
-          const [currentResponse, forecastResponse] = await Promise.all([
-            fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`),
-            fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`)
-          ]);
+            // Fetch current weather and alerts
+            const [currentResponse, forecastResponse] = await Promise.all([
+              fetch(
+                `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`
+              ),
+              fetch(
+                `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`
+              ),
+            ]);
 
-          if (currentResponse.ok && forecastResponse.ok) {
-            const current = await currentResponse.json();
-            const forecast = await forecastResponse.json();
+            if (currentResponse.ok && forecastResponse.ok) {
+              const current = await currentResponse.json();
+              const forecast = await forecastResponse.json();
 
-            // Analyze current conditions for alerts
-            const conditions = {
-              temp: current.main.temp,
-              humidity: current.main.humidity,
-              windSpeed: (current.wind?.speed || 0) * 3.6, // Convert m/s to km/h
-              description: current.weather[0].description,
-              pressure: current.main.pressure,
-              rain: current.rain?.["1h"] || 0,
-              visibility: current.visibility || 10000,
-              clouds: current.clouds?.all || 0,
-              weatherMain: current.weather[0].main.toLowerCase()
-            };
+              // Analyze current conditions for alerts
+              const conditions = {
+                temp: current.main.temp,
+                humidity: current.main.humidity,
+                windSpeed: (current.wind?.speed || 0) * 3.6, // Convert m/s to km/h
+                description: current.weather[0].description,
+                pressure: current.main.pressure,
+                rain: current.rain?.["1h"] || 0,
+                visibility: current.visibility || 10000,
+                clouds: current.clouds?.all || 0,
+                weatherMain: current.weather[0].main.toLowerCase(),
+              };
 
-            // Check for emergency conditions
-            const cityAlerts = analyzeWeatherForAlerts(cityName, conditions, forecast);
-            alerts.push(...cityAlerts);
+              // Check for emergency conditions
+              const cityAlerts = analyzeWeatherForAlerts(
+                cityName,
+                conditions,
+                forecast
+              );
+              alerts.push(...cityAlerts);
+            }
+          } catch (error) {
+            console.error(`Error fetching weather for ${cityName}:`, error);
           }
-        } catch (error) {
-          console.error(`Error fetching weather for ${cityName}:`, error);
         }
-      });
+      );
 
       await Promise.all(promises);
 
       // Sort alerts by severity and time
       const sortedAlerts = alerts.sort((a, b) => {
         const severityOrder = { critical: 3, high: 2, moderate: 1, low: 0 };
-        return severityOrder[b.severity] - severityOrder[a.severity] ||
-               new Date(b.timestamp) - new Date(a.timestamp);
+        return (
+          severityOrder[b.severity] - severityOrder[a.severity] ||
+          new Date(b.timestamp) - new Date(a.timestamp)
+        );
       });
 
       setEmergencyAlerts(sortedAlerts.slice(0, 10)); // Show top 10 alerts
     } catch (error) {
-      console.error('Error fetching emergency alerts:', error);
+      console.error("Error fetching emergency alerts:", error);
       setEmergencyAlerts([]);
     } finally {
       setAlertsLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [OPENWEATHER_API_KEY, MAJOR_CITIES]);
 
   // Analyze weather conditions for emergency alerts
@@ -294,28 +341,32 @@ function Relocation() {
     if (conditions.temp >= 45) {
       alerts.push({
         id: `heat-${cityName}-${now.getTime()}`,
-        type: 'Extreme Heat Warning',
-        severity: 'critical',
+        type: "Extreme Heat Warning",
+        severity: "critical",
         city: cityName,
-        description: `Extreme heat wave conditions with temperature reaching ${conditions.temp.toFixed(1)}°C. Heat stroke risk is very high.`,
-        icon: '🌡️',
-        color: 'red',
+        description: `Extreme heat wave conditions with temperature reaching ${conditions.temp.toFixed(
+          1
+        )}°C. Heat stroke risk is very high.`,
+        icon: "🌡️",
+        color: "red",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
-        affectedAreas: [cityName.charAt(0).toUpperCase() + cityName.slice(1)]
+        timeAgo: "Just now",
+        affectedAreas: [cityName.charAt(0).toUpperCase() + cityName.slice(1)],
       });
     } else if (conditions.temp >= 40) {
       alerts.push({
         id: `heat-${cityName}-${now.getTime()}`,
-        type: 'Heat Warning',
-        severity: 'high',
+        type: "Heat Warning",
+        severity: "high",
         city: cityName,
-        description: `High temperature alert with ${conditions.temp.toFixed(1)}°C. Stay hydrated and avoid outdoor activities.`,
-        icon: '☀️',
-        color: 'orange',
+        description: `High temperature alert with ${conditions.temp.toFixed(
+          1
+        )}°C. Stay hydrated and avoid outdoor activities.`,
+        icon: "☀️",
+        color: "orange",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
-        affectedAreas: [cityName.charAt(0).toUpperCase() + cityName.slice(1)]
+        timeAgo: "Just now",
+        affectedAreas: [cityName.charAt(0).toUpperCase() + cityName.slice(1)],
       });
     }
 
@@ -323,15 +374,17 @@ function Relocation() {
     if (conditions.temp <= 5) {
       alerts.push({
         id: `cold-${cityName}-${now.getTime()}`,
-        type: 'Extreme Cold Warning',
-        severity: 'critical',
+        type: "Extreme Cold Warning",
+        severity: "critical",
         city: cityName,
-        description: `Severe cold wave with temperature dropping to ${conditions.temp.toFixed(1)}°C. Frostbite risk is high.`,
-        icon: '❄️',
-        color: 'blue',
+        description: `Severe cold wave with temperature dropping to ${conditions.temp.toFixed(
+          1
+        )}°C. Frostbite risk is high.`,
+        icon: "❄️",
+        color: "blue",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
-        affectedAreas: [cityName.charAt(0).toUpperCase() + cityName.slice(1)]
+        timeAgo: "Just now",
+        affectedAreas: [cityName.charAt(0).toUpperCase() + cityName.slice(1)],
       });
     }
 
@@ -339,67 +392,74 @@ function Relocation() {
     if (conditions.windSpeed > 62) {
       alerts.push({
         id: `wind-${cityName}-${now.getTime()}`,
-        type: 'High Wind Warning',
-        severity: 'high',
+        type: "High Wind Warning",
+        severity: "high",
         city: cityName,
-        description: `Strong winds at ${conditions.windSpeed.toFixed(1)} km/h. Avoid outdoor activities and secure loose objects.`,
-        icon: '💨',
-        color: 'yellow',
+        description: `Strong winds at ${conditions.windSpeed.toFixed(
+          1
+        )} km/h. Avoid outdoor activities and secure loose objects.`,
+        icon: "💨",
+        color: "yellow",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
-        affectedAreas: [cityName.charAt(0).toUpperCase() + cityName.slice(1)]
+        timeAgo: "Just now",
+        affectedAreas: [cityName.charAt(0).toUpperCase() + cityName.slice(1)],
       });
     }
 
     // 🌊 ENHANCED FLASH FLOOD DETECTION SYSTEM
-    const cityDisplayName = cityName.charAt(0).toUpperCase() + cityName.slice(1);
-    const floodRiskData = calculateFloodRiskForRelocation(cityName, conditions, forecast);
+    const cityDisplayName =
+      cityName.charAt(0).toUpperCase() + cityName.slice(1);
+    const floodRiskData = calculateFloodRiskForRelocation(
+      cityName,
+      conditions,
+      forecast
+    );
 
     // Generate flash flood alerts based on risk level
     if (floodRiskData.riskLevel === "EXTREME") {
       alerts.push({
         id: `flood-extreme-${cityName}-${now.getTime()}`,
-        type: '🚨 FLASH FLOOD EMERGENCY',
-        severity: 'critical',
+        type: "🚨 FLASH FLOOD EMERGENCY",
+        severity: "critical",
         city: cityName,
         description: `EXTREME FLASH FLOOD EMERGENCY: ${floodRiskData.details}. IMMEDIATE EVACUATION REQUIRED!`,
-        icon: '🌊',
-        color: 'red',
+        icon: "🌊",
+        color: "red",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
+        timeAgo: "Just now",
         affectedAreas: [cityDisplayName],
-        emergencyLevel: 'CRITICAL',
-        actionRequired: 'EVACUATE IMMEDIATELY'
+        emergencyLevel: "CRITICAL",
+        actionRequired: "EVACUATE IMMEDIATELY",
       });
     } else if (floodRiskData.riskLevel === "HIGH") {
       alerts.push({
         id: `flood-high-${cityName}-${now.getTime()}`,
-        type: '🌊 Flash Flood Warning',
-        severity: 'critical',
+        type: "🌊 Flash Flood Warning",
+        severity: "critical",
         city: cityName,
         description: `HIGH FLASH FLOOD RISK: ${floodRiskData.details}. Prepare for immediate evacuation.`,
-        icon: '🌊',
-        color: 'red',
+        icon: "🌊",
+        color: "red",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
+        timeAgo: "Just now",
         affectedAreas: [cityDisplayName],
-        emergencyLevel: 'HIGH',
-        actionRequired: 'PREPARE FOR EVACUATION'
+        emergencyLevel: "HIGH",
+        actionRequired: "PREPARE FOR EVACUATION",
       });
     } else if (floodRiskData.riskLevel === "MODERATE") {
       alerts.push({
         id: `flood-moderate-${cityName}-${now.getTime()}`,
-        type: '🌧️ Heavy Rain Alert',
-        severity: 'high',
+        type: "🌧️ Heavy Rain Alert",
+        severity: "high",
         city: cityName,
         description: `MODERATE FLOOD RISK: ${floodRiskData.details}. Monitor conditions closely.`,
-        icon: '🌦️',
-        color: 'orange',
+        icon: "🌦️",
+        color: "orange",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
+        timeAgo: "Just now",
         affectedAreas: [cityDisplayName],
-        emergencyLevel: 'MODERATE',
-        actionRequired: 'MONITOR CONDITIONS'
+        emergencyLevel: "MODERATE",
+        actionRequired: "MONITOR CONDITIONS",
       });
     }
 
@@ -407,78 +467,104 @@ function Relocation() {
     if (conditions.rain > 75) {
       alerts.push({
         id: `rain-extreme-${cityName}-${now.getTime()}`,
-        type: '🌊 EXTREME RAINFALL EMERGENCY',
-        severity: 'critical',
+        type: "🌊 EXTREME RAINFALL EMERGENCY",
+        severity: "critical",
         city: cityName,
-        description: `EXTREME rainfall of ${conditions.rain.toFixed(1)} mm/h. Life-threatening flash flooding imminent. EVACUATE NOW!`,
-        icon: '🌊',
-        color: 'red',
+        description: `EXTREME rainfall of ${conditions.rain.toFixed(
+          1
+        )} mm/h. Life-threatening flash flooding imminent. EVACUATE NOW!`,
+        icon: "🌊",
+        color: "red",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
+        timeAgo: "Just now",
         affectedAreas: [cityDisplayName],
-        emergencyLevel: 'CRITICAL'
+        emergencyLevel: "CRITICAL",
       });
     } else if (conditions.rain > 50) {
       alerts.push({
         id: `rain-severe-${cityName}-${now.getTime()}`,
-        type: '🌊 Flash Flood Warning',
-        severity: 'critical',
+        type: "🌊 Flash Flood Warning",
+        severity: "critical",
         city: cityName,
-        description: `Very heavy rainfall of ${conditions.rain.toFixed(1)} mm/h. Flash flooding likely. Avoid low-lying areas.`,
-        icon: '🌊',
-        color: 'red',
+        description: `Very heavy rainfall of ${conditions.rain.toFixed(
+          1
+        )} mm/h. Flash flooding likely. Avoid low-lying areas.`,
+        icon: "🌊",
+        color: "red",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
+        timeAgo: "Just now",
         affectedAreas: [cityDisplayName],
-        emergencyLevel: 'HIGH'
+        emergencyLevel: "HIGH",
       });
     } else if (conditions.rain > 25) {
       alerts.push({
         id: `rain-heavy-${cityName}-${now.getTime()}`,
-        type: '🌧️ Heavy Rainfall Alert',
-        severity: 'high',
+        type: "🌧️ Heavy Rainfall Alert",
+        severity: "high",
         city: cityName,
-        description: `Heavy rainfall of ${conditions.rain.toFixed(1)} mm/h. Potential for flash flooding in vulnerable areas.`,
-        icon: '🌧️',
-        color: 'orange',
+        description: `Heavy rainfall of ${conditions.rain.toFixed(
+          1
+        )} mm/h. Potential for flash flooding in vulnerable areas.`,
+        icon: "🌧️",
+        color: "orange",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
+        timeAgo: "Just now",
         affectedAreas: [cityDisplayName],
-        emergencyLevel: 'MODERATE'
+        emergencyLevel: "MODERATE",
       });
     } else if (conditions.rain > 10) {
       alerts.push({
         id: `rain-moderate-${cityName}-${now.getTime()}`,
-        type: '🌦️ Moderate Rain Watch',
-        severity: 'moderate',
+        type: "🌦️ Moderate Rain Watch",
+        severity: "moderate",
         city: cityName,
-        description: `Moderate rainfall of ${conditions.rain.toFixed(1)} mm/h. Monitor for potential flooding.`,
-        icon: '🌦️',
-        color: 'yellow',
+        description: `Moderate rainfall of ${conditions.rain.toFixed(
+          1
+        )} mm/h. Monitor for potential flooding.`,
+        icon: "🌦️",
+        color: "yellow",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
+        timeAgo: "Just now",
         affectedAreas: [cityDisplayName],
-        emergencyLevel: 'LOW'
+        emergencyLevel: "LOW",
       });
     }
 
     // Enhanced storm detection with flood correlation
-    if (conditions.weatherMain.includes('thunderstorm') || conditions.weatherMain.includes('storm')) {
-      const stormSeverity = conditions.rain > 20 && conditions.windSpeed > 50 ? 'critical' :
-                           conditions.rain > 10 && conditions.windSpeed > 30 ? 'high' : 'moderate';
+    if (
+      conditions.weatherMain.includes("thunderstorm") ||
+      conditions.weatherMain.includes("storm")
+    ) {
+      const stormSeverity =
+        conditions.rain > 20 && conditions.windSpeed > 50
+          ? "critical"
+          : conditions.rain > 10 && conditions.windSpeed > 30
+          ? "high"
+          : "moderate";
 
       alerts.push({
         id: `storm-${cityName}-${now.getTime()}`,
-        type: stormSeverity === 'critical' ? '⛈️ Severe Thunderstorm Emergency' : '⛈️ Thunderstorm Alert',
+        type:
+          stormSeverity === "critical"
+            ? "⛈️ Severe Thunderstorm Emergency"
+            : "⛈️ Thunderstorm Alert",
         severity: stormSeverity,
         city: cityName,
-        description: `${stormSeverity === 'critical' ? 'Severe thunderstorm' : 'Thunderstorm'} with ${conditions.rain.toFixed(1)}mm/h rain and ${conditions.windSpeed.toFixed(1)}km/h winds. ${stormSeverity === 'critical' ? 'Flash flooding and wind damage possible.' : 'Stay indoors and avoid electrical appliances.'}`,
-        icon: '⛈️',
-        color: stormSeverity === 'critical' ? 'red' : 'purple',
+        description: `${
+          stormSeverity === "critical" ? "Severe thunderstorm" : "Thunderstorm"
+        } with ${conditions.rain.toFixed(
+          1
+        )}mm/h rain and ${conditions.windSpeed.toFixed(1)}km/h winds. ${
+          stormSeverity === "critical"
+            ? "Flash flooding and wind damage possible."
+            : "Stay indoors and avoid electrical appliances."
+        }`,
+        icon: "⛈️",
+        color: stormSeverity === "critical" ? "red" : "purple",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
+        timeAgo: "Just now",
         affectedAreas: [cityDisplayName],
-        emergencyLevel: stormSeverity === 'critical' ? 'HIGH' : 'MODERATE'
+        emergencyLevel: stormSeverity === "critical" ? "HIGH" : "MODERATE",
       });
     }
 
@@ -486,28 +572,39 @@ function Relocation() {
     if (conditions.visibility < 1000) {
       alerts.push({
         id: `air-${cityName}-${now.getTime()}`,
-        type: 'Poor Air Quality Alert',
-        severity: 'moderate',
+        type: "Poor Air Quality Alert",
+        severity: "moderate",
         city: cityName,
-        description: `Very low visibility (${(conditions.visibility/1000).toFixed(1)} km). Air quality may be hazardous.`,
-        icon: '🌫️',
-        color: 'gray',
+        description: `Very low visibility (${(
+          conditions.visibility / 1000
+        ).toFixed(1)} km). Air quality may be hazardous.`,
+        icon: "🌫️",
+        color: "gray",
         timestamp: now.toISOString(),
-        timeAgo: 'Just now',
-        affectedAreas: [cityName.charAt(0).toUpperCase() + cityName.slice(1)]
+        timeAgo: "Just now",
+        affectedAreas: [cityName.charAt(0).toUpperCase() + cityName.slice(1)],
       });
     }
 
     // Log flash flood detection for monitoring
     if (conditions.rain > 10) {
-      console.log(`🌊 RELOCATION PAGE - Flash Flood Detection for ${cityDisplayName}:`, {
-        rainfall: `${conditions.rain}mm/h`,
-        floodRisk: floodRiskData.riskLevel,
-        riskScore: floodRiskData.riskScore,
-        alertsGenerated: alerts.filter(a => a.icon === '🌊' || a.icon === '🌧️' || a.icon === '🌦️').length,
-        emergencyLevel: floodRiskData.riskLevel === "EXTREME" ? "CRITICAL" :
-                       floodRiskData.riskLevel === "HIGH" ? "HIGH" : "MODERATE"
-      });
+      console.log(
+        `🌊 RELOCATION PAGE - Flash Flood Detection for ${cityDisplayName}:`,
+        {
+          rainfall: `${conditions.rain}mm/h`,
+          floodRisk: floodRiskData.riskLevel,
+          riskScore: floodRiskData.riskScore,
+          alertsGenerated: alerts.filter(
+            (a) => a.icon === "🌊" || a.icon === "🌧️" || a.icon === "🌦️"
+          ).length,
+          emergencyLevel:
+            floodRiskData.riskLevel === "EXTREME"
+              ? "CRITICAL"
+              : floodRiskData.riskLevel === "HIGH"
+              ? "HIGH"
+              : "MODERATE",
+        }
+      );
     }
 
     return alerts;
@@ -562,9 +659,23 @@ function Relocation() {
 
     // Location-specific factors for flood-prone areas
     const floodProneAreas = [
-      "mumbai", "chennai", "kolkata", "guwahati", "patna", "varanasi",
-      "jammu", "srinagar", "kochi", "mangalore", "puducherry", "puri",
-      "digha", "chilika", "haldia", "daman", "alibag"
+      "mumbai",
+      "chennai",
+      "kolkata",
+      "guwahati",
+      "patna",
+      "varanasi",
+      "jammu",
+      "srinagar",
+      "kochi",
+      "mangalore",
+      "puducherry",
+      "puri",
+      "digha",
+      "chilika",
+      "haldia",
+      "daman",
+      "alibag",
     ];
 
     if (floodProneAreas.includes(cityName.toLowerCase())) {
@@ -574,11 +685,23 @@ function Relocation() {
 
     // Coastal areas (storm surge risk)
     const coastalAreas = [
-      "mumbai", "chennai", "kochi", "visakhapatnam", "mangalore",
-      "puducherry", "puri", "digha", "porbandar", "diu", "karwar"
+      "mumbai",
+      "chennai",
+      "kochi",
+      "visakhapatnam",
+      "mangalore",
+      "puducherry",
+      "puri",
+      "digha",
+      "porbandar",
+      "diu",
+      "karwar",
     ];
 
-    if (coastalAreas.includes(cityName.toLowerCase()) && conditions.windSpeed > 40) {
+    if (
+      coastalAreas.includes(cityName.toLowerCase()) &&
+      conditions.windSpeed > 40
+    ) {
       riskScore += 12;
       riskFactors.push("Coastal storm surge potential");
     }
@@ -586,8 +709,8 @@ function Relocation() {
     // Forecast analysis for upcoming risks
     if (forecast && forecast.list) {
       const next24Hours = forecast.list.slice(0, 8); // Next 24 hours
-      const heavyRainForecast = next24Hours.filter(item =>
-        (item.rain?.["3h"] || 0) / 3 > 15 // More than 15mm/h expected
+      const heavyRainForecast = next24Hours.filter(
+        (item) => (item.rain?.["3h"] || 0) / 3 > 15 // More than 15mm/h expected
       );
 
       if (heavyRainForecast.length > 0) {
@@ -618,28 +741,38 @@ function Relocation() {
   // Utility functions for button interactions
   const handleEmergencyCall = (service, number) => {
     if (window.confirm(`Call ${service} at ${number}?`)) {
-      window.open(`tel:${number}`, '_self');
+      window.open(`tel:${number}`, "_self");
     }
   };
 
   const handleTransportRequest = (type) => {
-    alert(`${type} transport request submitted! You will be contacted within 15 minutes with details.`);
+    alert(
+      `${type} transport request submitted! You will be contacted within 15 minutes with details.`
+    );
   };
 
   const handleVolunteerRequest = () => {
-    alert('Volunteer help request submitted! Nearby volunteers will be notified.');
+    alert(
+      "Volunteer help request submitted! Nearby volunteers will be notified."
+    );
   };
 
   const handleResourceRequest = () => {
-    alert('Resource sharing request submitted! Community members will be notified.');
+    alert(
+      "Resource sharing request submitted! Community members will be notified."
+    );
   };
 
   const handleCommunityChat = () => {
-    alert('Joining community chat... This feature will connect you with local emergency groups.');
+    alert(
+      "Joining community chat... This feature will connect you with local emergency groups."
+    );
   };
 
   const handleAlertSubscription = () => {
-    alert('Successfully subscribed to emergency alerts! You will receive notifications for your area.');
+    alert(
+      "Successfully subscribed to emergency alerts! You will receive notifications for your area."
+    );
   };
 
   const handleViewMoreAlerts = () => {
@@ -650,26 +783,36 @@ function Relocation() {
   const toggleEmergencyMode = () => {
     setEmergencyMode(!emergencyMode);
     if (!emergencyMode) {
-      alert('🚨 EMERGENCY MODE ACTIVATED! All emergency services are now prioritized. Your location is being shared with emergency contacts.');
+      alert(
+        "🚨 EMERGENCY MODE ACTIVATED! All emergency services are now prioritized. Your location is being shared with emergency contacts."
+      );
     } else {
-      alert('Emergency mode deactivated. Normal operations resumed.');
+      alert("Emergency mode deactivated. Normal operations resumed.");
     }
   };
 
   const handleAlertFamily = () => {
     if (familyAlerted) {
-      alert('Family has already been alerted. Additional notifications sent.');
+      alert("Family has already been alerted. Additional notifications sent.");
     } else {
       setFamilyAlerted(true);
-      alert('🚨 FAMILY ALERT SENT! Emergency message with your location has been sent to all emergency contacts.');
+      alert(
+        "🚨 FAMILY ALERT SENT! Emergency message with your location has been sent to all emergency contacts."
+      );
     }
   };
 
   const handleSOSPanic = () => {
-    if (window.confirm('🚨 EMERGENCY SOS - This will immediately alert emergency services and your emergency contacts. Continue?')) {
-      alert('🚨 SOS ACTIVATED! Emergency services (112) have been notified. Your location and emergency details are being transmitted.');
+    if (
+      window.confirm(
+        "🚨 EMERGENCY SOS - This will immediately alert emergency services and your emergency contacts. Continue?"
+      )
+    ) {
+      alert(
+        "🚨 SOS ACTIVATED! Emergency services (112) have been notified. Your location and emergency details are being transmitted."
+      );
       // In a real app, this would trigger actual emergency protocols
-      window.open('tel:112', '_self');
+      window.open("tel:112", "_self");
     }
   };
 
@@ -682,27 +825,33 @@ function Relocation() {
 
           if (navigator.share) {
             navigator.share({
-              title: 'My Emergency Location',
-              text: 'I need help! Here is my current location:',
-              url: locationUrl
+              title: "My Emergency Location",
+              text: "I need help! Here is my current location:",
+              url: locationUrl,
             });
           } else {
             // Fallback for browsers that don't support Web Share API
             navigator.clipboard.writeText(`Emergency Location: ${locationUrl}`);
-            alert('📍 Location copied to clipboard! Share this with emergency contacts.');
+            alert(
+              "📍 Location copied to clipboard! Share this with emergency contacts."
+            );
           }
         },
         () => {
-          alert('Unable to get your location. Please enable location services.');
+          alert(
+            "Unable to get your location. Please enable location services."
+          );
         }
       );
     } else {
-      alert('Geolocation is not supported by this browser.');
+      alert("Geolocation is not supported by this browser.");
     }
   };
 
   const handleEmergencyBroadcast = () => {
-    alert('📢 EMERGENCY BROADCAST: Your emergency status has been shared with the local community network. Nearby volunteers and emergency responders have been notified.');
+    alert(
+      "📢 EMERGENCY BROADCAST: Your emergency status has been shared with the local community network. Nearby volunteers and emergency responders have been notified."
+    );
   };
 
   // Generate nearby facilities around user's location
@@ -710,66 +859,109 @@ function Relocation() {
     const facilities = [];
     const facilityTypes = [
       {
-        type: 'hospital',
-        icon: '🏥',
-        color: 'red',
-        names: ['City General Hospital', 'Emergency Medical Center', 'Trauma Care Hospital', 'District Hospital', 'Primary Health Center']
+        type: "hospital",
+        icon: "🏥",
+        color: "red",
+        names: [
+          "City General Hospital",
+          "Emergency Medical Center",
+          "Trauma Care Hospital",
+          "District Hospital",
+          "Primary Health Center",
+        ],
       },
       {
-        type: 'pharmacy',
-        icon: '💊',
-        color: 'green',
-        names: ['MedPlus Pharmacy', 'Apollo Pharmacy', '24/7 Medical Store', 'Emergency Pharmacy', 'Health Care Pharmacy']
+        type: "pharmacy",
+        icon: "💊",
+        color: "green",
+        names: [
+          "MedPlus Pharmacy",
+          "Apollo Pharmacy",
+          "24/7 Medical Store",
+          "Emergency Pharmacy",
+          "Health Care Pharmacy",
+        ],
       },
       {
-        type: 'convenience',
-        icon: '🏪',
-        color: 'blue',
-        names: ['Emergency Supplies Store', '24/7 Convenience Store', 'Quick Mart', 'Essential Goods Store', 'Emergency Provisions']
+        type: "convenience",
+        icon: "🏪",
+        color: "blue",
+        names: [
+          "Emergency Supplies Store",
+          "24/7 Convenience Store",
+          "Quick Mart",
+          "Essential Goods Store",
+          "Emergency Provisions",
+        ],
       },
       {
-        type: 'fuel',
-        icon: '⛽',
-        color: 'orange',
-        names: ['Emergency Fuel Station', 'Highway Petrol Pump', '24/7 Fuel Stop', 'Emergency Gas Station', 'Quick Fuel']
+        type: "fuel",
+        icon: "⛽",
+        color: "orange",
+        names: [
+          "Emergency Fuel Station",
+          "Highway Petrol Pump",
+          "24/7 Fuel Stop",
+          "Emergency Gas Station",
+          "Quick Fuel",
+        ],
       },
       {
-        type: 'police',
-        icon: '🚔',
-        color: 'darkblue',
-        names: ['Police Station', 'Emergency Response Unit', 'Highway Police Post', 'Security Outpost', 'Emergency Services']
-      }
+        type: "police",
+        icon: "🚔",
+        color: "darkblue",
+        names: [
+          "Police Station",
+          "Emergency Response Unit",
+          "Highway Police Post",
+          "Security Outpost",
+          "Emergency Services",
+        ],
+      },
     ];
 
-    facilityTypes.forEach(facilityType => {
+    facilityTypes.forEach((facilityType) => {
       // Generate 2-4 facilities of each type
       const count = Math.floor(Math.random() * 3) + 2;
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * 2 * Math.PI;
         const distance = Math.random() * 0.05 + 0.01; // 1-6 km radius
 
-        const lat = centerLocation[0] + (distance * Math.cos(angle));
-        const lng = centerLocation[1] + (distance * Math.sin(angle));
+        const lat = centerLocation[0] + distance * Math.cos(angle);
+        const lng = centerLocation[1] + distance * Math.sin(angle);
 
         facilities.push({
           id: `${facilityType.type}_${i}_${Date.now()}`,
           type: facilityType.type,
-          name: facilityType.names[Math.floor(Math.random() * facilityType.names.length)],
+          name: facilityType.names[
+            Math.floor(Math.random() * facilityType.names.length)
+          ],
           icon: facilityType.icon,
           color: facilityType.color,
           coordinates: [lat, lng],
           distance: Math.round(distance * 111), // Convert to km
           isOpen: Math.random() > 0.1, // 90% chance of being open
-          contact: '+91-' + Math.floor(Math.random() * 9000000000 + 1000000000),
-          services: facilityType.type === 'hospital'
-            ? ['Emergency Care', 'Ambulance', 'ICU', 'Trauma Unit']
-            : facilityType.type === 'pharmacy'
-            ? ['Prescription Medicines', 'Emergency Drugs', 'First Aid', 'Medical Equipment']
-            : facilityType.type === 'convenience'
-            ? ['Food', 'Water', 'Batteries', 'Emergency Supplies']
-            : facilityType.type === 'fuel'
-            ? ['Petrol', 'Diesel', 'Emergency Fuel', 'Vehicle Services']
-            : ['Emergency Response', 'Security', 'Traffic Control', 'Emergency Coordination']
+          contact: "+91-" + Math.floor(Math.random() * 9000000000 + 1000000000),
+          services:
+            facilityType.type === "hospital"
+              ? ["Emergency Care", "Ambulance", "ICU", "Trauma Unit"]
+              : facilityType.type === "pharmacy"
+              ? [
+                  "Prescription Medicines",
+                  "Emergency Drugs",
+                  "First Aid",
+                  "Medical Equipment",
+                ]
+              : facilityType.type === "convenience"
+              ? ["Food", "Water", "Batteries", "Emergency Supplies"]
+              : facilityType.type === "fuel"
+              ? ["Petrol", "Diesel", "Emergency Fuel", "Vehicle Services"]
+              : [
+                  "Emergency Response",
+                  "Security",
+                  "Traffic Control",
+                  "Emergency Coordination",
+                ],
         });
       }
     });
@@ -778,147 +970,168 @@ function Relocation() {
   }, []);
 
   // Calculate comprehensive emergency zone details
-  const calculateEmergencyZoneDetails = useCallback((zone) => {
-    const currentTime = new Date();
-    const distance = userLocation ?
-      Math.round(Math.sqrt(
-        Math.pow(userLocation[0] - zone.coordinates[0], 2) +
-        Math.pow(userLocation[1] - zone.coordinates[1], 2)
-      ) * 111) : Math.round(Math.random() * 200 + 50); // Rough km calculation
+  const calculateEmergencyZoneDetails = useCallback(
+    (zone) => {
+      const currentTime = new Date();
+      const distance = userLocation
+        ? Math.round(
+            Math.sqrt(
+              Math.pow(userLocation[0] - zone.coordinates[0], 2) +
+                Math.pow(userLocation[1] - zone.coordinates[1], 2)
+            ) * 111
+          )
+        : Math.round(Math.random() * 200 + 50); // Rough km calculation
 
-    // Calculate different transport modes
-    const transportModes = [
-      {
-        type: 'Air Transport',
-        icon: '🚁',
-        time: Math.round(distance / 200 * 60), // Helicopter speed ~200 km/h
-        cost: 'Emergency Service',
-        availability: Math.random() > 0.3 ? 'Available' : 'Limited',
-        description: 'Helicopter evacuation - Fastest for long distances',
-        emergencyNumber: '1073',
-        color: 'blue'
-      },
-      {
-        type: 'Road Transport',
-        icon: '🚗',
-        time: Math.round(distance / 80 * 60), // Car speed ~80 km/h
-        cost: 'Free Emergency',
-        availability: 'Available',
-        description: 'Emergency vehicle transport - Most reliable',
-        emergencyNumber: '108',
-        color: 'green'
-      },
-      {
-        type: 'Rail Transport',
-        icon: '🚂',
-        time: Math.round(distance / 120 * 60), // Train speed ~120 km/h
-        cost: 'Emergency Fare',
-        availability: Math.random() > 0.5 ? 'Available' : 'Limited',
-        description: 'Emergency train service - Good for medium distances',
-        emergencyNumber: '139',
-        color: 'orange'
-      },
-      {
-        type: 'Water Transport',
-        icon: '🚤',
-        time: Math.round(distance / 50 * 60), // Boat speed ~50 km/h
-        cost: 'Emergency Service',
-        availability: zone.state.includes('coastal') || Math.random() > 0.7 ? 'Available' : 'Not Available',
-        description: 'Emergency boat service - For coastal/river areas',
-        emergencyNumber: '1554',
-        color: 'cyan'
-      }
-    ];
+      // Calculate different transport modes
+      const transportModes = [
+        {
+          type: "Air Transport",
+          icon: "🚁",
+          time: Math.round((distance / 200) * 60), // Helicopter speed ~200 km/h
+          cost: "Emergency Service",
+          availability: Math.random() > 0.3 ? "Available" : "Limited",
+          description: "Helicopter evacuation - Fastest for long distances",
+          emergencyNumber: "1073",
+          color: "blue",
+        },
+        {
+          type: "Road Transport",
+          icon: "🚗",
+          time: Math.round((distance / 80) * 60), // Car speed ~80 km/h
+          cost: "Free Emergency",
+          availability: "Available",
+          description: "Emergency vehicle transport - Most reliable",
+          emergencyNumber: "108",
+          color: "green",
+        },
+        {
+          type: "Rail Transport",
+          icon: "🚂",
+          time: Math.round((distance / 120) * 60), // Train speed ~120 km/h
+          cost: "Emergency Fare",
+          availability: Math.random() > 0.5 ? "Available" : "Limited",
+          description: "Emergency train service - Good for medium distances",
+          emergencyNumber: "139",
+          color: "orange",
+        },
+        {
+          type: "Water Transport",
+          icon: "🚤",
+          time: Math.round((distance / 50) * 60), // Boat speed ~50 km/h
+          cost: "Emergency Service",
+          availability:
+            zone.state.includes("coastal") || Math.random() > 0.7
+              ? "Available"
+              : "Not Available",
+          description: "Emergency boat service - For coastal/river areas",
+          emergencyNumber: "1554",
+          color: "cyan",
+        },
+      ];
 
-    // Sort by time (fastest first)
-    transportModes.sort((a, b) => a.time - b.time);
-    const fastestMode = transportModes[0];
+      // Sort by time (fastest first)
+      transportModes.sort((a, b) => a.time - b.time);
+      const fastestMode = transportModes[0];
 
-    // Generate emergency facilities
-    const emergencyFacilities = [
-      {
-        name: 'Primary Emergency Hospital',
-        type: 'Medical',
-        icon: '🏥',
-        distance: Math.round(Math.random() * 5 + 1),
-        capacity: Math.round(Math.random() * 200 + 100),
-        specialties: ['Emergency Care', 'Trauma', 'ICU'],
-        contact: '+91-' + Math.floor(Math.random() * 9000000000 + 1000000000)
-      },
-      {
-        name: 'Emergency Shelter Complex',
-        type: 'Shelter',
-        icon: '🏠',
-        distance: Math.round(Math.random() * 3 + 0.5),
-        capacity: Math.round(Math.random() * 500 + 200),
-        amenities: ['Food', 'Water', 'Bedding', 'Security'],
-        contact: '+91-' + Math.floor(Math.random() * 9000000000 + 1000000000)
-      },
-      {
-        name: 'Emergency Supply Center',
-        type: 'Supplies',
-        icon: '📦',
-        distance: Math.round(Math.random() * 4 + 1),
-        capacity: 'Unlimited',
-        resources: ['Food Packets', 'Water', 'Medical Supplies', 'Clothing'],
-        contact: '+91-' + Math.floor(Math.random() * 9000000000 + 1000000000)
-      }
-    ];
+      // Generate emergency facilities
+      const emergencyFacilities = [
+        {
+          name: "Primary Emergency Hospital",
+          type: "Medical",
+          icon: "🏥",
+          distance: Math.round(Math.random() * 5 + 1),
+          capacity: Math.round(Math.random() * 200 + 100),
+          specialties: ["Emergency Care", "Trauma", "ICU"],
+          contact: "+91-" + Math.floor(Math.random() * 9000000000 + 1000000000),
+        },
+        {
+          name: "Emergency Shelter Complex",
+          type: "Shelter",
+          icon: "🏠",
+          distance: Math.round(Math.random() * 3 + 0.5),
+          capacity: Math.round(Math.random() * 500 + 200),
+          amenities: ["Food", "Water", "Bedding", "Security"],
+          contact: "+91-" + Math.floor(Math.random() * 9000000000 + 1000000000),
+        },
+        {
+          name: "Emergency Supply Center",
+          type: "Supplies",
+          icon: "📦",
+          distance: Math.round(Math.random() * 4 + 1),
+          capacity: "Unlimited",
+          resources: ["Food Packets", "Water", "Medical Supplies", "Clothing"],
+          contact: "+91-" + Math.floor(Math.random() * 9000000000 + 1000000000),
+        },
+      ];
 
-    return {
-      ...zone,
-      distance,
-      fastestMode,
-      transportModes,
-      emergencyFacilities,
-      currentOccupancy: Math.round(Math.random() * 80 + 10),
-      estimatedArrival: new Date(currentTime.getTime() + fastestMode.time * 60000),
-      emergencyLevel: distance < 50 ? 'Low' : distance < 100 ? 'Medium' : 'High',
-      weatherCondition: ['Clear', 'Cloudy', 'Light Rain', 'Windy'][Math.floor(Math.random() * 4)],
-      lastUpdated: currentTime
-    };
-  }, [userLocation]);
-
-
+      return {
+        ...zone,
+        distance,
+        fastestMode,
+        transportModes,
+        emergencyFacilities,
+        currentOccupancy: Math.round(Math.random() * 80 + 10),
+        estimatedArrival: new Date(
+          currentTime.getTime() + fastestMode.time * 60000
+        ),
+        emergencyLevel:
+          distance < 50 ? "Low" : distance < 100 ? "Medium" : "High",
+        weatherCondition: ["Clear", "Cloudy", "Light Rain", "Windy"][
+          Math.floor(Math.random() * 4)
+        ],
+        lastUpdated: currentTime,
+      };
+    },
+    [userLocation]
+  );
 
   // Handle zone click for bottom popup
-  const handleZoneClick = useCallback((zone, userLocationCoords = null) => {
-    const enhancedZoneDetails = calculateEmergencyZoneDetails(zone);
+  const handleZoneClick = useCallback(
+    (zone, userLocationCoords = null) => {
+      const enhancedZoneDetails = calculateEmergencyZoneDetails(zone);
 
-    // Use user location if available, otherwise use zone coordinates as fallback
-    const facilitiesLocation = userLocationCoords || userLocation || zone.coordinates;
-    const facilities = generateNearbyFacilities(facilitiesLocation);
+      // Use user location if available, otherwise use zone coordinates as fallback
+      const facilitiesLocation =
+        userLocationCoords || userLocation || zone.coordinates;
+      const facilities = generateNearbyFacilities(facilitiesLocation);
 
-    setSelectedZoneDetails(enhancedZoneDetails);
-    setNearbyFacilities(facilities);
-    setFacilityLines(facilities.map(facility => ({
-      from: facilitiesLocation,
-      to: facility.coordinates,
-      color: facility.color,
-      facility: facility
-    })));
-    setShowBottomPopup(true);
-  }, [calculateEmergencyZoneDetails, generateNearbyFacilities, userLocation]);
+      setSelectedZoneDetails(enhancedZoneDetails);
+      setNearbyFacilities(facilities);
+      setFacilityLines(
+        facilities.map((facility) => ({
+          from: facilitiesLocation,
+          to: facility.coordinates,
+          color: facility.color,
+          facility: facility,
+        }))
+      );
+      setShowBottomPopup(true);
+    },
+    [calculateEmergencyZoneDetails, generateNearbyFacilities, userLocation]
+  );
 
   // Enhanced map click handler to close all popups
-  const handleMapClick = useCallback((e) => {
-    // Close bottom popup if open
-    if (showBottomPopup) {
-      setShowBottomPopup(false);
-      setNearbyFacilities([]);
-      setFacilityLines([]);
-    }
+  const handleMapClick = useCallback(
+    (e) => {
+      // Close bottom popup if open
+      if (showBottomPopup) {
+        setShowBottomPopup(false);
+        setNearbyFacilities([]);
+        setFacilityLines([]);
+      }
 
-    // Close all facility popups by accessing the map instance
-    if (mapRef.current) {
-      mapRef.current.closePopup();
-    }
+      // Close all facility popups by accessing the map instance
+      if (mapRef.current) {
+        mapRef.current.closePopup();
+      }
 
-    // Prevent event from bubbling to markers
-    if (e && e.originalEvent) {
-      e.originalEvent.stopPropagation();
-    }
-  }, [showBottomPopup]);
+      // Prevent event from bubbling to markers
+      if (e && e.originalEvent) {
+        e.originalEvent.stopPropagation();
+      }
+    },
+    [showBottomPopup]
+  );
 
   // Move calculateTravelDetails to the top of component
   const calculateTravelDetails = useCallback((from, to) => {
@@ -1004,7 +1217,7 @@ function Relocation() {
           if (mapRef.current) {
             mapRef.current.setView(userCoords, 12, {
               animate: true,
-              duration: 1.5
+              duration: 1.5,
             });
           }
 
@@ -1035,7 +1248,7 @@ function Relocation() {
               setNearestSafeZone({
                 ...nearest,
                 userState: data.address?.state || "Your Location",
-                userLocationName: data.display_name || "Your Current Location"
+                userLocationName: data.display_name || "Your Current Location",
               });
               // Calculate travel details for future use
               calculateTravelDetails(userCoords, nearest);
@@ -1055,7 +1268,7 @@ function Relocation() {
         {
           enableHighAccuracy: true,
           timeout: 10000,
-          maximumAge: 300000
+          maximumAge: 300000,
         }
       );
     }
@@ -1276,8 +1489,6 @@ function Relocation() {
   `;
 
   // Remove duplicate declaration of calculateTravelDetails
-
-
 
   // Update the LocationDetailsModal component
   const LocationDetailsModal = ({ location, onClose }) => {
@@ -1564,9 +1775,24 @@ function Relocation() {
               onClick={getUserLocation}
               className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 border border-white/20 text-sm"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
               </svg>
               <TranslatableText>Use My Location</TranslatableText>
             </button>
@@ -1583,120 +1809,186 @@ function Relocation() {
                 className="w-full p-3 pl-10 pr-10 bg-white/90 backdrop-blur-md border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-300 shadow-lg"
               />
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </div>
               <button
                 onClick={() => handleLocationSearch(locationSearch)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1 transition-colors duration-200"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </button>
             </div>
           </div>
-      </div>
+        </div>
 
-        {/* Emergency Features Panel - Responsive positioning */}
-        <div className="absolute top-[180px] md:top-32 left-4 right-4 md:left-auto md:right-4 z-[1000] md:w-80 animate-fade-in-down">
-          <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
+        {/* Emergency Controls Floating Button - Mobile Only */}
+        <button
+          onClick={() =>
+            setEmergencyControlsCollapsed(!emergencyControlsCollapsed)
+          }
+          className={`md:hidden fixed bottom-20 right-4 z-[1000] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 ${
+            emergencyMode
+              ? "bg-red-600 hover:bg-red-700 animate-pulse"
+              : "bg-black/30 backdrop-blur-xl border border-white/20 hover:bg-black/40"
+          }`}
+        >
+          <span className="text-2xl">🚨</span>
+        </button>
+
+        {/* Emergency Features Panel - Hidden on mobile unless opened, always visible on desktop */}
+        <div
+          className={`absolute top-[180px] md:top-32 left-4 right-4 md:left-auto md:right-4 z-[1000] md:w-80 animate-fade-in-down transition-all duration-300 ${
+            emergencyControlsCollapsed ? "hidden md:block" : "block"
+          }`}
+        >
+          <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl">
+            {/* Header with close button for mobile */}
+            <div className="flex items-center justify-between p-4 pb-2">
               <h3 className="text-lg font-bold text-white flex items-center">
                 <span className="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse"></span>
                 <TranslatableText>Emergency Controls</TranslatableText>
               </h3>
-              <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                emergencyMode
-                  ? 'bg-red-500/20 text-red-300 border border-red-400/30'
-                  : 'bg-gray-500/20 text-gray-300 border border-gray-400/30'
-              }`}>
-                <TranslatableText>{emergencyMode ? 'ACTIVE' : 'STANDBY'}</TranslatableText>
+              <div className="flex items-center space-x-2">
+                <div
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    emergencyMode
+                      ? "bg-red-500/20 text-red-300 border border-red-400/30"
+                      : "bg-gray-500/20 text-gray-300 border border-gray-400/30"
+                  }`}
+                >
+                  <TranslatableText>
+                    {emergencyMode ? "ACTIVE" : "STANDBY"}
+                  </TranslatableText>
+                </div>
+                {/* Close button - only visible on mobile */}
+                <button
+                  onClick={() => setEmergencyControlsCollapsed(true)}
+                  className="md:hidden p-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors duration-200"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {/* Emergency Mode Toggle */}
-              <button
-                onClick={toggleEmergencyMode}
-                className={`p-3 rounded-xl font-medium transition-all duration-300 flex flex-col items-center text-center ${
-                  emergencyMode
-                    ? 'bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/25'
-                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
-                }`}
-              >
-                <span className="text-2xl mb-1">🚨</span>
-                <span className="text-xs">
-                  <TranslatableText>{emergencyMode ? 'Exit Emergency' : 'Emergency Mode'}</TranslatableText>
-                </span>
-              </button>
+            {/* Panel content */}
+            <div className="px-4 pb-4">
+              <div className="grid grid-cols-2 gap-3">
+                {/* Emergency Mode Toggle */}
+                <button
+                  onClick={toggleEmergencyMode}
+                  className={`p-3 rounded-xl font-medium transition-all duration-300 flex flex-col items-center text-center ${
+                    emergencyMode
+                      ? "bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/25"
+                      : "bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                  }`}
+                >
+                  <span className="text-2xl mb-1">🚨</span>
+                  <span className="text-xs">
+                    <TranslatableText>
+                      {emergencyMode ? "Exit Emergency" : "Emergency Mode"}
+                    </TranslatableText>
+                  </span>
+                </button>
 
-              {/* SOS Panic Button */}
-              <button
-                onClick={handleSOSPanic}
-                className="p-3 rounded-xl font-medium transition-all duration-300 flex flex-col items-center text-center bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/25 animate-pulse"
-              >
-                <span className="text-2xl mb-1">🆘</span>
-                <span className="text-xs">
-                  <TranslatableText>SOS PANIC</TranslatableText>
-                </span>
-              </button>
+                {/* SOS Panic Button */}
+                <button
+                  onClick={handleSOSPanic}
+                  className="p-3 rounded-xl font-medium transition-all duration-300 flex flex-col items-center text-center bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/25 animate-pulse"
+                >
+                  <span className="text-2xl mb-1">🆘</span>
+                  <span className="text-xs">
+                    <TranslatableText>SOS PANIC</TranslatableText>
+                  </span>
+                </button>
 
-              {/* Alert Family */}
-              <button
-                onClick={handleAlertFamily}
-                className={`p-3 rounded-xl font-medium transition-all duration-300 flex flex-col items-center text-center ${
-                  familyAlerted
-                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                    : 'bg-orange-600 hover:bg-orange-700 text-white'
-                }`}
-              >
-                <span className="text-2xl mb-1">👨‍👩‍👧‍👦</span>
-                <span className="text-xs">
-                  <TranslatableText>{familyAlerted ? 'Family Alerted' : 'Alert Family'}</TranslatableText>
-                </span>
-              </button>
+                {/* Alert Family */}
+                <button
+                  onClick={handleAlertFamily}
+                  className={`p-3 rounded-xl font-medium transition-all duration-300 flex flex-col items-center text-center ${
+                    familyAlerted
+                      ? "bg-green-600 hover:bg-green-700 text-white"
+                      : "bg-orange-600 hover:bg-orange-700 text-white"
+                  }`}
+                >
+                  <span className="text-2xl mb-1">👨‍👩‍👧‍👦</span>
+                  <span className="text-xs">
+                    <TranslatableText>
+                      {familyAlerted ? "Family Alerted" : "Alert Family"}
+                    </TranslatableText>
+                  </span>
+                </button>
 
-              {/* Share Location */}
-              <button
-                onClick={handleShareLocation}
-                className="p-3 rounded-xl font-medium transition-all duration-300 flex flex-col items-center text-center bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <span className="text-2xl mb-1">📍</span>
-                <span className="text-xs">
-                  <TranslatableText>Share Location</TranslatableText>
-                </span>
-              </button>
-            </div>
-
-            {/* Emergency Broadcast Button */}
-            <button
-              onClick={handleEmergencyBroadcast}
-              className="w-full mt-3 p-3 rounded-xl font-medium transition-all duration-300 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white flex items-center justify-center"
-            >
-              <span className="text-lg mr-2">📢</span>
-              <span className="text-sm">
-                <TranslatableText>Emergency Broadcast</TranslatableText>
-              </span>
-            </button>
-
-            {emergencyMode && (
-              <div className="mt-3 p-2 bg-red-900/30 border border-red-400/30 rounded-lg">
-                <p className="text-red-300 text-xs text-center">
-                  <TranslatableText>Emergency mode active. All services prioritized.</TranslatableText>
-                </p>
+                {/* Share Location */}
+                <button
+                  onClick={handleShareLocation}
+                  className="p-3 rounded-xl font-medium transition-all duration-300 flex flex-col items-center text-center bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <span className="text-2xl mb-1">📍</span>
+                  <span className="text-xs">
+                    <TranslatableText>Share Location</TranslatableText>
+                  </span>
+                </button>
               </div>
-            )}
+
+              {/* Emergency Broadcast Button */}
+              <button
+                onClick={handleEmergencyBroadcast}
+                className="w-full mt-3 p-3 rounded-xl font-medium transition-all duration-300 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white flex items-center justify-center"
+              >
+                <span className="text-lg mr-2">📢</span>
+                <span className="text-sm">
+                  <TranslatableText>Emergency Broadcast</TranslatableText>
+                </span>
+              </button>
+
+              {emergencyMode && (
+                <div className="mt-3 p-2 bg-red-900/30 border border-red-400/30 rounded-lg">
+                  <p className="text-red-300 text-xs text-center">
+                    <TranslatableText>
+                      Emergency mode active. All services prioritized.
+                    </TranslatableText>
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-
-
-
-
-
-
-
 
         {/* Full Screen Map Container */}
         <div className="h-screen w-full relative overflow-hidden">
@@ -1737,10 +2029,10 @@ function Relocation() {
                       mapRef.current.setView(userLocation, 12, {
                         animate: true,
                         duration: 0.8,
-                        easeLinearity: 0.25
+                        easeLinearity: 0.25,
                       });
                     }
-                  }
+                  },
                 }}
               >
                 <Popup>
@@ -1803,7 +2095,7 @@ function Relocation() {
                         mapRef.current.setView(zone.coordinates, 8, {
                           animate: true,
                           duration: 1.0,
-                          easeLinearity: 0.25
+                          easeLinearity: 0.25,
                         });
                       }
                       handleZoneClick(zone, userLocation);
@@ -1840,7 +2132,9 @@ function Relocation() {
                                   : "bg-red-400 shadow-lg shadow-red-400/50"
                               }`}
                             ></div>
-                            <span className="text-white font-bold text-lg">{zone.score}%</span>
+                            <span className="text-white font-bold text-lg">
+                              {zone.score}%
+                            </span>
                           </div>
                         </div>
                         <div className="w-full bg-gray-700 rounded-full h-2">
@@ -1852,7 +2146,7 @@ function Relocation() {
                                 ? "bg-gradient-to-r from-yellow-400 to-orange-400"
                                 : "bg-gradient-to-r from-red-400 to-pink-400"
                             }`}
-                            style={{width: `${zone.score}%`}}
+                            style={{ width: `${zone.score}%` }}
                           ></div>
                         </div>
                       </div>
@@ -1862,19 +2156,33 @@ function Relocation() {
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-purple-300 font-medium flex items-center">
                             <span className="text-lg mr-2">👥</span>
-                            <TranslatableText>Current Occupancy</TranslatableText>
+                            <TranslatableText>
+                              Current Occupancy
+                            </TranslatableText>
                           </span>
                           <div className="flex items-center">
-                            <div className={`w-3 h-3 rounded-full mr-2 ${Math.random() > 0.3 ? 'bg-green-400 animate-pulse' : 'bg-red-400 animate-pulse'}`}></div>
+                            <div
+                              className={`w-3 h-3 rounded-full mr-2 ${
+                                Math.random() > 0.3
+                                  ? "bg-green-400 animate-pulse"
+                                  : "bg-red-400 animate-pulse"
+                              }`}
+                            ></div>
                             <span className="text-white font-medium">
-                              {Math.random() > 0.3 ? 'Available' : 'Full'}
+                              {Math.random() > 0.3 ? "Available" : "Full"}
                             </span>
                           </div>
                         </div>
                         <div className="w-full bg-gray-700 rounded-full h-2 mb-1">
                           <div
-                            className={`h-2 rounded-full transition-all duration-500 ${Math.random() > 0.5 ? 'bg-gradient-to-r from-green-400 to-teal-400' : 'bg-gradient-to-r from-yellow-400 to-orange-400'}`}
-                            style={{width: `${Math.floor(Math.random() * 80 + 10)}%`}}
+                            className={`h-2 rounded-full transition-all duration-500 ${
+                              Math.random() > 0.5
+                                ? "bg-gradient-to-r from-green-400 to-teal-400"
+                                : "bg-gradient-to-r from-yellow-400 to-orange-400"
+                            }`}
+                            style={{
+                              width: `${Math.floor(Math.random() * 80 + 10)}%`,
+                            }}
                           ></div>
                         </div>
                         <span className="text-gray-300 text-xs">
@@ -1886,18 +2194,30 @@ function Relocation() {
                       <div className="grid grid-cols-3 gap-2 mb-4">
                         <div className="text-center p-3 bg-gradient-to-b from-green-800/60 to-green-900/60 rounded-lg border border-green-400/30 hover:scale-105 transition-transform duration-200">
                           <div className="text-2xl mb-1">🍽️</div>
-                          <div className="text-xs text-green-300 font-medium">Food</div>
-                          <div className="text-xs text-green-400 font-bold">Available</div>
+                          <div className="text-xs text-green-300 font-medium">
+                            Food
+                          </div>
+                          <div className="text-xs text-green-400 font-bold">
+                            Available
+                          </div>
                         </div>
                         <div className="text-center p-3 bg-gradient-to-b from-blue-800/60 to-blue-900/60 rounded-lg border border-blue-400/30 hover:scale-105 transition-transform duration-200">
                           <div className="text-2xl mb-1">💧</div>
-                          <div className="text-xs text-blue-300 font-medium">Water</div>
-                          <div className="text-xs text-blue-400 font-bold">Available</div>
+                          <div className="text-xs text-blue-300 font-medium">
+                            Water
+                          </div>
+                          <div className="text-xs text-blue-400 font-bold">
+                            Available
+                          </div>
                         </div>
                         <div className="text-center p-3 bg-gradient-to-b from-red-800/60 to-red-900/60 rounded-lg border border-red-400/30 hover:scale-105 transition-transform duration-200">
                           <div className="text-2xl mb-1">🏥</div>
-                          <div className="text-xs text-red-300 font-medium">Medical</div>
-                          <div className="text-xs text-red-400 font-bold">Limited</div>
+                          <div className="text-xs text-red-300 font-medium">
+                            Medical
+                          </div>
+                          <div className="text-xs text-red-400 font-bold">
+                            Limited
+                          </div>
                         </div>
                       </div>
 
@@ -1909,7 +2229,10 @@ function Relocation() {
                             <div>
                               <span className="text-gray-400">Distance:</span>
                               <span className="text-white ml-1 font-medium">
-                                {userLocation ? Math.round(Math.random() * 50 + 5) : '--'} km
+                                {userLocation
+                                  ? Math.round(Math.random() * 50 + 5)
+                                  : "--"}{" "}
+                                km
                               </span>
                             </div>
                           </div>
@@ -1918,7 +2241,10 @@ function Relocation() {
                             <div>
                               <span className="text-gray-400">ETA:</span>
                               <span className="text-white ml-1 font-medium">
-                                {userLocation ? Math.round(Math.random() * 60 + 15) : '--'} min
+                                {userLocation
+                                  ? Math.round(Math.random() * 60 + 15)
+                                  : "--"}{" "}
+                                min
                               </span>
                             </div>
                           </div>
@@ -1938,7 +2264,12 @@ function Relocation() {
                           <TranslatableText>Full Details</TranslatableText>
                         </button>
                         <button
-                          onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${zone.coordinates[0]},${zone.coordinates[1]}`, '_blank')}
+                          onClick={() =>
+                            window.open(
+                              `https://www.google.com/maps/dir/?api=1&destination=${zone.coordinates[0]},${zone.coordinates[1]}`,
+                              "_blank"
+                            )
+                          }
                           className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-lg transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-green-500/25 hover:scale-105 flex items-center justify-center"
                         >
                           <span className="mr-2">🗺️</span>
@@ -1949,7 +2280,7 @@ function Relocation() {
                       {/* Emergency Contact */}
                       <div className="mt-3 text-center">
                         <button
-                          onClick={() => window.open('tel:112', '_self')}
+                          onClick={() => window.open("tel:112", "_self")}
                           className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 px-6 rounded-full text-xs font-medium transition-all duration-300 shadow-lg hover:shadow-red-500/25 hover:scale-105 animate-pulse"
                         >
                           🚨 Emergency: 112
@@ -1969,7 +2300,7 @@ function Relocation() {
                   color: line.color,
                   weight: 3,
                   opacity: 0.7,
-                  dashArray: '5, 10'
+                  dashArray: "5, 10",
                 }}
               />
             ))}
@@ -1984,13 +2315,17 @@ function Relocation() {
                   click: () => {
                     // Center the map on the clicked facility with smooth animation
                     if (mapRef.current) {
-                      mapRef.current.setView(facility.coordinates, mapRef.current.getZoom(), {
-                        animate: true,
-                        duration: 0.8,
-                        easeLinearity: 0.25
-                      });
+                      mapRef.current.setView(
+                        facility.coordinates,
+                        mapRef.current.getZoom(),
+                        {
+                          animate: true,
+                          duration: 0.8,
+                          easeLinearity: 0.25,
+                        }
+                      );
                     }
-                  }
+                  },
                 }}
               >
                 <Popup
@@ -2008,38 +2343,59 @@ function Relocation() {
                     <button
                       onClick={() => mapRef.current?.closePopup()}
                       className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200 hover:scale-110 shadow-lg z-10"
-                      style={{ lineHeight: '1' }}
+                      style={{ lineHeight: "1" }}
                     >
                       ×
                     </button>
 
                     {/* Compact Header */}
                     <div className="flex items-center gap-3 mb-3 pr-8">
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-md ${
-                        facility.color === '#ef4444' ? 'bg-red-500' :
-                        facility.color === '#10b981' ? 'bg-green-500' :
-                        facility.color === '#3b82f6' ? 'bg-blue-500' :
-                        facility.color === '#f59e0b' ? 'bg-amber-500' :
-                        'bg-purple-500'
-                      }`}>
+                      <div
+                        className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-md ${
+                          facility.color === "#ef4444"
+                            ? "bg-red-500"
+                            : facility.color === "#10b981"
+                            ? "bg-green-500"
+                            : facility.color === "#3b82f6"
+                            ? "bg-blue-500"
+                            : facility.color === "#f59e0b"
+                            ? "bg-amber-500"
+                            : "bg-purple-500"
+                        }`}
+                      >
                         <span className="text-xl text-white">
-                          {facility.type === 'hospital' ? '🏥' :
-                           facility.type === 'petrol' ? '⛽' :
-                           facility.type === 'police' ? '🚔' :
-                           facility.type === 'pharmacy' ? '💊' :
-                           facility.type === 'bank' ? '🏦' : '📍'}
+                          {facility.type === "hospital"
+                            ? "🏥"
+                            : facility.type === "petrol"
+                            ? "⛽"
+                            : facility.type === "police"
+                            ? "🚔"
+                            : facility.type === "pharmacy"
+                            ? "💊"
+                            : facility.type === "bank"
+                            ? "🏦"
+                            : "📍"}
                         </span>
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-bold text-gray-900 text-base leading-tight">{facility.name}</h4>
-                        <p className={`text-xs font-medium px-2 py-1 rounded-md inline-block mt-1 ${
-                          facility.color === '#ef4444' ? 'bg-red-100 text-red-700' :
-                          facility.color === '#10b981' ? 'bg-green-100 text-green-700' :
-                          facility.color === '#3b82f6' ? 'bg-blue-100 text-blue-700' :
-                          facility.color === '#f59e0b' ? 'bg-amber-100 text-amber-700' :
-                          'bg-purple-100 text-purple-700'
-                        }`}>
-                          {facility.type.charAt(0).toUpperCase() + facility.type.slice(1)}
+                        <h4 className="font-bold text-gray-900 text-base leading-tight">
+                          {facility.name}
+                        </h4>
+                        <p
+                          className={`text-xs font-medium px-2 py-1 rounded-md inline-block mt-1 ${
+                            facility.color === "#ef4444"
+                              ? "bg-red-100 text-red-700"
+                              : facility.color === "#10b981"
+                              ? "bg-green-100 text-green-700"
+                              : facility.color === "#3b82f6"
+                              ? "bg-blue-100 text-blue-700"
+                              : facility.color === "#f59e0b"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-purple-100 text-purple-700"
+                          }`}
+                        >
+                          {facility.type.charAt(0).toUpperCase() +
+                            facility.type.slice(1)}
                         </p>
                       </div>
                     </div>
@@ -2050,11 +2406,15 @@ function Relocation() {
                         <div className="flex items-center gap-1">
                           <span className="text-blue-600">📍</span>
                           <span className="text-gray-600">Distance:</span>
-                          <span className="font-semibold text-gray-900">{facility.distance} km</span>
+                          <span className="font-semibold text-gray-900">
+                            {facility.distance} km
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="text-green-600">⏱️</span>
-                          <span className="font-semibold text-gray-900">{Math.ceil(parseFloat(facility.distance) * 3)} min</span>
+                          <span className="font-semibold text-gray-900">
+                            {Math.ceil(parseFloat(facility.distance) * 3)} min
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -2062,42 +2422,67 @@ function Relocation() {
                     {/* Key Services - Simplified */}
                     <div className="mb-3">
                       <div className="flex flex-wrap gap-1">
-                        {(facility.type === 'hospital' ? ['Emergency', '24/7'] :
-                          facility.type === 'petrol' ? ['Fuel', 'Service'] :
-                          facility.type === 'police' ? ['Emergency', '24/7'] :
-                          facility.type === 'pharmacy' ? ['Medicine', 'Consultation'] :
-                          ['Banking', 'ATM']).slice(0, 2).map((service, index) => (
-                          <span key={index} className={`text-xs px-2 py-1 rounded-md font-medium ${
-                            facility.color === '#ef4444' ? 'bg-red-50 text-red-700 border border-red-200' :
-                            facility.color === '#10b981' ? 'bg-green-50 text-green-700 border border-green-200' :
-                            facility.color === '#3b82f6' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                            facility.color === '#f59e0b' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                            'bg-purple-50 text-purple-700 border border-purple-200'
-                          }`}>
-                            {service}
-                          </span>
-                        ))}
+                        {(facility.type === "hospital"
+                          ? ["Emergency", "24/7"]
+                          : facility.type === "petrol"
+                          ? ["Fuel", "Service"]
+                          : facility.type === "police"
+                          ? ["Emergency", "24/7"]
+                          : facility.type === "pharmacy"
+                          ? ["Medicine", "Consultation"]
+                          : ["Banking", "ATM"]
+                        )
+                          .slice(0, 2)
+                          .map((service, index) => (
+                            <span
+                              key={index}
+                              className={`text-xs px-2 py-1 rounded-md font-medium ${
+                                facility.color === "#ef4444"
+                                  ? "bg-red-50 text-red-700 border border-red-200"
+                                  : facility.color === "#10b981"
+                                  ? "bg-green-50 text-green-700 border border-green-200"
+                                  : facility.color === "#3b82f6"
+                                  ? "bg-blue-50 text-blue-700 border border-blue-200"
+                                  : facility.color === "#f59e0b"
+                                  ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                  : "bg-purple-50 text-purple-700 border border-purple-200"
+                              }`}
+                            >
+                              {service}
+                            </span>
+                          ))}
                       </div>
                     </div>
 
                     {/* Compact Action Buttons */}
                     <div className="flex gap-2">
-                      {facility.phone !== 'N/A' && (
+                      {facility.phone !== "N/A" && (
                         <button
-                          onClick={() => window.open(`tel:${facility.phone}`, '_self')}
+                          onClick={() =>
+                            window.open(`tel:${facility.phone}`, "_self")
+                          }
                           className={`flex-1 py-2 px-3 rounded-lg text-white text-sm font-medium transition-all duration-200 hover:scale-105 ${
-                            facility.color === '#ef4444' ? 'bg-red-500 hover:bg-red-600' :
-                            facility.color === '#10b981' ? 'bg-green-500 hover:bg-green-600' :
-                            facility.color === '#3b82f6' ? 'bg-blue-500 hover:bg-blue-600' :
-                            facility.color === '#f59e0b' ? 'bg-amber-500 hover:bg-amber-600' :
-                            'bg-purple-500 hover:bg-purple-600'
+                            facility.color === "#ef4444"
+                              ? "bg-red-500 hover:bg-red-600"
+                              : facility.color === "#10b981"
+                              ? "bg-green-500 hover:bg-green-600"
+                              : facility.color === "#3b82f6"
+                              ? "bg-blue-500 hover:bg-blue-600"
+                              : facility.color === "#f59e0b"
+                              ? "bg-amber-500 hover:bg-amber-600"
+                              : "bg-purple-500 hover:bg-purple-600"
                           }`}
                         >
                           📞 Call
                         </button>
                       )}
                       <button
-                        onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${facility.coordinates[0]},${facility.coordinates[1]}`, '_blank')}
+                        onClick={() =>
+                          window.open(
+                            `https://www.google.com/maps/dir/?api=1&destination=${facility.coordinates[0]},${facility.coordinates[1]}`,
+                            "_blank"
+                          )
+                        }
                         className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105"
                       >
                         🗺️ Navigate
@@ -2105,7 +2490,7 @@ function Relocation() {
                     </div>
 
                     {/* Emergency Badge - Compact */}
-                    {facility.type === 'hospital' && (
+                    {facility.type === "hospital" && (
                       <div className="mt-2 text-center">
                         <span className="bg-red-100 text-red-700 px-2 py-1 rounded-md text-xs font-medium">
                           🚨 Emergency
@@ -2132,215 +2517,311 @@ function Relocation() {
 
       {/* Enhanced Emergency Zone Details Popup - Bottom Left */}
       {showBottomPopup && selectedZoneDetails && (
-        <div className="absolute bottom-4 left-4 z-[1000] w-[420px] max-h-[85vh] overflow-y-auto animate-fade-in-up">
+        <div className="absolute bottom-4 left-4 right-4 md:left-4 md:right-auto z-[1000] md:w-[420px] max-h-[80vh] overflow-y-auto animate-fade-in-up">
           <div className="bg-gradient-to-br from-slate-900/98 via-gray-900/98 to-slate-800/98 backdrop-blur-2xl border border-gray-500/50 rounded-2xl shadow-2xl ring-2 ring-white/10">
             {/* Enhanced Header with Gradient */}
-            <div className="bg-gradient-to-r from-blue-600/30 to-purple-600/30 rounded-t-2xl p-5 border-b border-gray-600/50">
+            <div className="bg-gradient-to-r from-blue-600/30 to-purple-600/30 rounded-t-2xl p-3 md:p-5 border-b border-gray-600/50">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
-                  <div className="w-4 h-4 bg-green-400 rounded-full mr-3 animate-pulse shadow-lg shadow-green-400/50"></div>
-                  <h3 className="text-xl font-bold text-white">
-                    <TranslatableText>{selectedZoneDetails.name}</TranslatableText>
+                  <div className="w-3 h-3 md:w-4 md:h-4 bg-green-400 rounded-full mr-2 md:mr-3 animate-pulse shadow-lg shadow-green-400/50"></div>
+                  <h3 className="text-lg md:text-xl font-bold text-white truncate">
+                    <TranslatableText>
+                      {selectedZoneDetails.name}
+                    </TranslatableText>
                   </h3>
                 </div>
                 <button
                   onClick={() => setShowBottomPopup(false)}
-                  className="w-10 h-10 bg-gray-700/80 hover:bg-gray-600 text-gray-300 hover:text-white transition-all duration-300 rounded-full flex items-center justify-center hover:scale-110 shadow-lg"
+                  className="w-8 h-8 md:w-10 md:h-10 bg-gray-700/80 hover:bg-gray-600 text-gray-300 hover:text-white transition-all duration-300 rounded-full flex items-center justify-center hover:scale-110 shadow-lg flex-shrink-0"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-4 h-4 md:w-5 md:h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-blue-300 font-medium">
-                  <TranslatableText>{selectedZoneDetails.state}</TranslatableText>
+                <p className="text-blue-300 font-medium text-sm md:text-base">
+                  <TranslatableText>
+                    {selectedZoneDetails.state}
+                  </TranslatableText>
                 </p>
-                <div className="flex items-center bg-black/30 rounded-full px-3 py-1">
-                  <span className="text-xs text-gray-400 mr-2">Safety Score:</span>
-                  <span className="text-white font-bold">{selectedZoneDetails.score || '95'}%</span>
+                <div className="flex items-center bg-black/30 rounded-full px-2 md:px-3 py-1">
+                  <span className="text-xs text-gray-400 mr-1 md:mr-2">
+                    Safety:
+                  </span>
+                  <span className="text-white font-bold text-xs md:text-sm">
+                    {selectedZoneDetails.score || "95"}%
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Scrollable Content */}
-            <div className="p-5 space-y-4">
-
+            <div className="p-3 md:p-5 space-y-3 md:space-y-4">
               {/* Enhanced Emergency Status */}
-              <div className="bg-gradient-to-r from-red-800/60 to-orange-800/60 border border-red-400/50 rounded-xl p-4 shadow-xl">
-                <div className="flex items-center justify-between mb-3">
+              <div className="bg-gradient-to-r from-red-800/60 to-orange-800/60 border border-red-400/50 rounded-xl p-3 md:p-4 shadow-xl">
+                <div className="flex items-center justify-between mb-2 md:mb-3">
                   <div className="flex items-center">
-                    <span className="text-2xl mr-3">🚨</span>
-                    <span className="text-red-300 font-bold text-lg">
+                    <span className="text-xl md:text-2xl mr-2 md:mr-3">🚨</span>
+                    <span className="text-red-300 font-bold text-base md:text-lg">
                       <TranslatableText>Emergency Status</TranslatableText>
                     </span>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-bold shadow-lg ${
-                    selectedZoneDetails.emergencyLevel === 'Low' ? 'bg-green-500/30 text-green-300 border border-green-400/50' :
-                    selectedZoneDetails.emergencyLevel === 'Medium' ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-400/50' :
-                    'bg-red-500/30 text-red-300 border border-red-400/50'
-                  }`}>
-                    <TranslatableText>{selectedZoneDetails.emergencyLevel} Priority</TranslatableText>
+                  <span
+                    className={`px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-bold shadow-lg ${
+                      selectedZoneDetails.emergencyLevel === "Low"
+                        ? "bg-green-500/30 text-green-300 border border-green-400/50"
+                        : selectedZoneDetails.emergencyLevel === "Medium"
+                        ? "bg-yellow-500/30 text-yellow-300 border border-yellow-400/50"
+                        : "bg-red-500/30 text-red-300 border border-red-400/50"
+                    }`}
+                  >
+                    <TranslatableText>
+                      {selectedZoneDetails.emergencyLevel}
+                    </TranslatableText>
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-black/30 rounded-lg p-3 border border-gray-600/50">
+                <div className="grid grid-cols-2 gap-2 md:gap-4">
+                  <div className="bg-black/30 rounded-lg p-2 md:p-3 border border-gray-600/50">
                     <div className="flex items-center mb-1">
-                      <span className="text-lg mr-2">📍</span>
-                      <span className="text-gray-400 text-sm">Distance</span>
+                      <span className="text-base md:text-lg mr-1 md:mr-2">
+                        📍
+                      </span>
+                      <span className="text-gray-400 text-xs md:text-sm">
+                        Distance
+                      </span>
                     </div>
-                    <span className="text-white font-bold text-lg">{selectedZoneDetails.distance} km</span>
+                    <span className="text-white font-bold text-sm md:text-lg">
+                      {selectedZoneDetails.distance} km
+                    </span>
                   </div>
 
-                  <div className="bg-black/30 rounded-lg p-3 border border-gray-600/50">
+                  <div className="bg-black/30 rounded-lg p-2 md:p-3 border border-gray-600/50">
                     <div className="flex items-center mb-1">
-                      <span className="text-lg mr-2">🌤️</span>
-                      <span className="text-gray-400 text-sm">Weather</span>
+                      <span className="text-base md:text-lg mr-1 md:mr-2">
+                        🌤️
+                      </span>
+                      <span className="text-gray-400 text-xs md:text-sm">
+                        Weather
+                      </span>
                     </div>
-                    <span className="text-white font-bold text-sm">
-                      <TranslatableText>{selectedZoneDetails.weatherCondition}</TranslatableText>
+                    <span className="text-white font-bold text-xs md:text-sm">
+                      <TranslatableText>
+                        {selectedZoneDetails.weatherCondition}
+                      </TranslatableText>
                     </span>
                   </div>
                 </div>
 
-                <div className="mt-3 bg-black/30 rounded-lg p-3 border border-gray-600/50">
+                <div className="mt-2 md:mt-3 bg-black/30 rounded-lg p-2 md:p-3 border border-gray-600/50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <span className="text-lg mr-2">⏱️</span>
-                      <span className="text-gray-400 text-sm">Estimated Arrival</span>
+                      <span className="text-base md:text-lg mr-1 md:mr-2">
+                        ⏱️
+                      </span>
+                      <span className="text-gray-400 text-xs md:text-sm">
+                        ETA
+                      </span>
                     </div>
-                    <span className="text-white font-bold">
-                      {selectedZoneDetails.estimatedArrival ? selectedZoneDetails.estimatedArrival.toLocaleTimeString() : 'Calculating...'}
+                    <span className="text-white font-bold text-xs md:text-base">
+                      {selectedZoneDetails.estimatedArrival
+                        ? selectedZoneDetails.estimatedArrival.toLocaleTimeString()
+                        : "Calculating..."}
                     </span>
                   </div>
                 </div>
               </div>
 
-            {/* Fastest Transport Mode */}
-            <div className="mb-4 p-4 bg-gradient-to-r from-blue-800/80 to-purple-800/80 border border-blue-400/60 rounded-xl shadow-lg">
-              <h4 className="text-blue-300 font-medium mb-2 flex items-center">
-                <span className="text-lg mr-2">{selectedZoneDetails.fastestMode.icon}</span>
-                <TranslatableText>Fastest Route</TranslatableText>
-              </h4>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-white font-medium">
-                    <TranslatableText>{selectedZoneDetails.fastestMode.type}</TranslatableText>
+              {/* Fastest Transport Mode */}
+              <div className="mb-3 md:mb-4 p-3 md:p-4 bg-gradient-to-r from-blue-800/80 to-purple-800/80 border border-blue-400/60 rounded-xl shadow-lg">
+                <h4 className="text-blue-300 font-medium mb-2 flex items-center text-sm md:text-base">
+                  <span className="text-base md:text-lg mr-1 md:mr-2">
+                    {selectedZoneDetails.fastestMode.icon}
                   </span>
-                  <span className="text-blue-300 font-bold">
-                    {selectedZoneDetails.fastestMode.time} min
-                  </span>
-                </div>
-                <p className="text-gray-300 text-sm">
-                  <TranslatableText>{selectedZoneDetails.fastestMode.description}</TranslatableText>
-                </p>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">
-                    <TranslatableText>Emergency Contact:</TranslatableText>
-                  </span>
-                  <button
-                    onClick={() => window.open(`tel:${selectedZoneDetails.fastestMode.emergencyNumber}`, '_self')}
-                    className="text-blue-400 hover:text-blue-300 font-medium"
-                  >
-                    {selectedZoneDetails.fastestMode.emergencyNumber}
-                  </button>
+                  <TranslatableText>Fastest Route</TranslatableText>
+                </h4>
+                <div className="space-y-1 md:space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-medium text-sm md:text-base">
+                      <TranslatableText>
+                        {selectedZoneDetails.fastestMode.type}
+                      </TranslatableText>
+                    </span>
+                    <span className="text-blue-300 font-bold text-sm md:text-base">
+                      {selectedZoneDetails.fastestMode.time} min
+                    </span>
+                  </div>
+                  <p className="text-gray-300 text-xs md:text-sm">
+                    <TranslatableText>
+                      {selectedZoneDetails.fastestMode.description}
+                    </TranslatableText>
+                  </p>
+                  <div className="flex items-center justify-between text-xs md:text-sm">
+                    <span className="text-gray-400">
+                      <TranslatableText>Emergency:</TranslatableText>
+                    </span>
+                    <button
+                      onClick={() =>
+                        window.open(
+                          `tel:${selectedZoneDetails.fastestMode.emergencyNumber}`,
+                          "_self"
+                        )
+                      }
+                      className="text-blue-400 hover:text-blue-300 font-medium"
+                    >
+                      {selectedZoneDetails.fastestMode.emergencyNumber}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* All Transport Options */}
-            <div className="mb-4">
-              <h4 className="text-white font-medium mb-2">
-                <TranslatableText>All Transport Options</TranslatableText>
-              </h4>
-              <div className="space-y-2">
-                {selectedZoneDetails.transportModes.map((mode, index) => (
-                  <div key={index} className={`p-3 rounded-lg border shadow-md ${
-                    mode.availability === 'Available'
-                      ? 'bg-green-800/70 border-green-400/60'
-                      : mode.availability === 'Limited'
-                      ? 'bg-yellow-800/70 border-yellow-400/60'
-                      : 'bg-red-800/70 border-red-400/60'
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <span className="text-lg mr-2">{mode.icon}</span>
-                        <div>
-                          <span className="text-white text-sm font-medium">
-                            <TranslatableText>{mode.type}</TranslatableText>
-                          </span>
-                          <div className="text-xs text-gray-400">
-                            <TranslatableText>{mode.availability}</TranslatableText>
+              {/* All Transport Options */}
+              <div className="mb-3 md:mb-4">
+                <h4 className="text-white font-medium mb-2 text-sm md:text-base">
+                  <TranslatableText>Transport Options</TranslatableText>
+                </h4>
+                <div className="space-y-1 md:space-y-2">
+                  {selectedZoneDetails.transportModes
+                    .slice(0, 3)
+                    .map((mode, index) => (
+                      <div
+                        key={index}
+                        className={`p-2 md:p-3 rounded-lg border shadow-md ${
+                          mode.availability === "Available"
+                            ? "bg-green-800/70 border-green-400/60"
+                            : mode.availability === "Limited"
+                            ? "bg-yellow-800/70 border-yellow-400/60"
+                            : "bg-red-800/70 border-red-400/60"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <span className="text-base md:text-lg mr-1 md:mr-2">
+                              {mode.icon}
+                            </span>
+                            <div>
+                              <span className="text-white text-xs md:text-sm font-medium">
+                                <TranslatableText>{mode.type}</TranslatableText>
+                              </span>
+                              <div className="text-xs text-gray-400">
+                                <TranslatableText>
+                                  {mode.availability}
+                                </TranslatableText>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-white font-medium text-xs md:text-sm">
+                              {mode.time} min
+                            </div>
+                            <button
+                              onClick={() =>
+                                window.open(
+                                  `tel:${mode.emergencyNumber}`,
+                                  "_self"
+                                )
+                              }
+                              className="text-xs text-blue-400 hover:text-blue-300"
+                            >
+                              {mode.emergencyNumber}
+                            </button>
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-white font-medium">{mode.time} min</div>
-                        <button
-                          onClick={() => window.open(`tel:${mode.emergencyNumber}`, '_self')}
-                          className="text-xs text-blue-400 hover:text-blue-300"
-                        >
-                          {mode.emergencyNumber}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                    ))}
+                </div>
               </div>
-            </div>
 
-            {/* Emergency Facilities */}
-            <div className="mb-4">
-              <h4 className="text-white font-medium mb-2">
-                <TranslatableText>Nearby Emergency Facilities</TranslatableText>
-              </h4>
-              <div className="space-y-2">
-                {selectedZoneDetails.emergencyFacilities.map((facility, index) => (
-                  <div key={index} className="p-3 bg-gray-800/70 border border-gray-500/50 rounded-lg shadow-md">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center">
-                        <span className="text-lg mr-2">{facility.icon}</span>
-                        <span className="text-white text-sm font-medium">
-                          <TranslatableText>{facility.name}</TranslatableText>
-                        </span>
+              {/* Emergency Facilities */}
+              <div className="mb-3 md:mb-4">
+                <h4 className="text-white font-medium mb-2 text-sm md:text-base">
+                  <TranslatableText>Emergency Facilities</TranslatableText>
+                </h4>
+                <div className="space-y-1 md:space-y-2">
+                  {selectedZoneDetails.emergencyFacilities
+                    .slice(0, 2)
+                    .map((facility, index) => (
+                      <div
+                        key={index}
+                        className="p-2 md:p-3 bg-gray-800/70 border border-gray-500/50 rounded-lg shadow-md"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center">
+                            <span className="text-base md:text-lg mr-1 md:mr-2">
+                              {facility.icon}
+                            </span>
+                            <span className="text-white text-xs md:text-sm font-medium truncate">
+                              <TranslatableText>
+                                {facility.name}
+                              </TranslatableText>
+                            </span>
+                          </div>
+                          <span className="text-gray-400 text-xs flex-shrink-0 ml-2">
+                            {facility.distance} km
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between ml-5 md:ml-6">
+                          <div className="text-xs text-gray-300">
+                            <TranslatableText>
+                              Cap: {facility.capacity}
+                            </TranslatableText>
+                          </div>
+                          <button
+                            onClick={() =>
+                              window.open(`tel:${facility.contact}`, "_self")
+                            }
+                            className="text-xs text-blue-400 hover:text-blue-300"
+                          >
+                            <TranslatableText>Call</TranslatableText>
+                          </button>
+                        </div>
                       </div>
-                      <span className="text-gray-400 text-xs">{facility.distance} km</span>
-                    </div>
-                    <div className="text-xs text-gray-300 ml-6">
-                      <TranslatableText>Capacity: {facility.capacity}</TranslatableText>
-                    </div>
-                    <button
-                      onClick={() => window.open(`tel:${facility.contact}`, '_self')}
-                      className="text-xs text-blue-400 hover:text-blue-300 ml-6"
-                    >
-                      <TranslatableText>Call Facility</TranslatableText>
-                    </button>
-                  </div>
-                ))}
+                    ))}
+                </div>
               </div>
-            </div>
 
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selectedZoneDetails.coordinates[0]},${selectedZoneDetails.coordinates[1]}`, '_blank')}
-                className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-lg"
-              >
-                <TranslatableText>🗺️ Get Directions</TranslatableText>
-              </button>
-              <button
-                onClick={() => window.open(`tel:${selectedZoneDetails.fastestMode.emergencyNumber}`, '_self')}
-                className="p-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-medium transition-colors shadow-lg"
-              >
-                <TranslatableText>📞 Emergency Call</TranslatableText>
-              </button>
-            </div>
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 gap-2 md:gap-3">
+                <button
+                  onClick={() =>
+                    window.open(
+                      `https://www.google.com/maps/dir/?api=1&destination=${selectedZoneDetails.coordinates[0]},${selectedZoneDetails.coordinates[1]}`,
+                      "_blank"
+                    )
+                  }
+                  className="p-2 md:p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs md:text-sm font-medium transition-colors shadow-lg"
+                >
+                  <TranslatableText>🗺️ Directions</TranslatableText>
+                </button>
+                <button
+                  onClick={() =>
+                    window.open(
+                      `tel:${selectedZoneDetails.fastestMode.emergencyNumber}`,
+                      "_self"
+                    )
+                  }
+                  className="p-2 md:p-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs md:text-sm font-medium transition-colors shadow-lg"
+                >
+                  <TranslatableText>📞 Call</TranslatableText>
+                </button>
+              </div>
 
               {/* Last Updated */}
-              <div className="mt-3 text-xs text-gray-400 text-center">
+              <div className="mt-2 md:mt-3 text-xs text-gray-400 text-center">
                 <TranslatableText>
-                  Last updated: {selectedZoneDetails.lastUpdated.toLocaleTimeString()}
+                  Updated:{" "}
+                  {selectedZoneDetails.lastUpdated.toLocaleTimeString()}
                 </TranslatableText>
               </div>
             </div>
@@ -2350,17 +2831,19 @@ function Relocation() {
 
       {/* Scrollable Content Sections Below Map */}
       <div className="bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 relative z-10">
-
         {/* Emergency Preparedness Section */}
         <section className="py-16 animate-fade-in-up">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-white mb-6 bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
-                <TranslatableText>Emergency Preparedness Guide</TranslatableText>
+                <TranslatableText>
+                  Emergency Preparedness Guide
+                </TranslatableText>
               </h2>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 <TranslatableText>
-                  Essential steps to prepare for emergencies and ensure your family's safety during disasters
+                  Essential steps to prepare for emergencies and ensure your
+                  family's safety during disasters
                 </TranslatableText>
               </p>
             </div>
@@ -2379,19 +2862,27 @@ function Relocation() {
                 <ul className="space-y-2 text-gray-300 text-sm">
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
-                    <TranslatableText>Water (1 gallon per person per day)</TranslatableText>
+                    <TranslatableText>
+                      Water (1 gallon per person per day)
+                    </TranslatableText>
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
-                    <TranslatableText>Non-perishable food (3-day supply)</TranslatableText>
+                    <TranslatableText>
+                      Non-perishable food (3-day supply)
+                    </TranslatableText>
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
-                    <TranslatableText>First aid kit and medications</TranslatableText>
+                    <TranslatableText>
+                      First aid kit and medications
+                    </TranslatableText>
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
-                    <TranslatableText>Flashlight and extra batteries</TranslatableText>
+                    <TranslatableText>
+                      Flashlight and extra batteries
+                    </TranslatableText>
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
@@ -2417,19 +2908,27 @@ function Relocation() {
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
-                    <TranslatableText>Meeting points for family</TranslatableText>
+                    <TranslatableText>
+                      Meeting points for family
+                    </TranslatableText>
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
-                    <TranslatableText>Out-of-state contact person</TranslatableText>
+                    <TranslatableText>
+                      Out-of-state contact person
+                    </TranslatableText>
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
-                    <TranslatableText>Social media emergency groups</TranslatableText>
+                    <TranslatableText>
+                      Social media emergency groups
+                    </TranslatableText>
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
-                    <TranslatableText>Backup communication methods</TranslatableText>
+                    <TranslatableText>
+                      Backup communication methods
+                    </TranslatableText>
                   </li>
                 </ul>
               </div>
@@ -2455,7 +2954,9 @@ function Relocation() {
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-teal-400 rounded-full mr-3"></span>
-                    <TranslatableText>Bank account information</TranslatableText>
+                    <TranslatableText>
+                      Bank account information
+                    </TranslatableText>
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-teal-400 rounded-full mr-3"></span>
@@ -2463,7 +2964,9 @@ function Relocation() {
                   </li>
                   <li className="flex items-center">
                     <span className="w-2 h-2 bg-teal-400 rounded-full mr-3"></span>
-                    <TranslatableText>Property deeds/rental agreements</TranslatableText>
+                    <TranslatableText>
+                      Property deeds/rental agreements
+                    </TranslatableText>
                   </li>
                 </ul>
               </div>
@@ -2480,7 +2983,8 @@ function Relocation() {
               </h2>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 <TranslatableText>
-                  Connect with emergency services and get real-time updates on available resources
+                  Connect with emergency services and get real-time updates on
+                  available resources
                 </TranslatableText>
               </p>
             </div>
@@ -2488,7 +2992,7 @@ function Relocation() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Police Services */}
               <div
-                onClick={() => handleEmergencyCall('Police Services', '100')}
+                onClick={() => handleEmergencyCall("Police Services", "100")}
                 className="bg-red-900/20 backdrop-blur-xl border border-red-400/30 rounded-2xl p-6 text-center hover:bg-red-900/30 transition-all duration-300 group cursor-pointer"
               >
                 <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -2508,7 +3012,7 @@ function Relocation() {
 
               {/* Fire Department */}
               <div
-                onClick={() => handleEmergencyCall('Fire Department', '101')}
+                onClick={() => handleEmergencyCall("Fire Department", "101")}
                 className="bg-orange-900/20 backdrop-blur-xl border border-orange-400/30 rounded-2xl p-6 text-center hover:bg-orange-900/30 transition-all duration-300 group cursor-pointer"
               >
                 <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -2528,7 +3032,7 @@ function Relocation() {
 
               {/* Medical Services */}
               <div
-                onClick={() => handleEmergencyCall('Medical Emergency', '108')}
+                onClick={() => handleEmergencyCall("Medical Emergency", "108")}
                 className="bg-green-900/20 backdrop-blur-xl border border-green-400/30 rounded-2xl p-6 text-center hover:bg-green-900/30 transition-all duration-300 group cursor-pointer"
               >
                 <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -2548,7 +3052,9 @@ function Relocation() {
 
               {/* Disaster Management */}
               <div
-                onClick={() => handleEmergencyCall('Disaster Management', '1070')}
+                onClick={() =>
+                  handleEmergencyCall("Disaster Management", "1070")
+                }
                 className="bg-blue-900/20 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-6 text-center hover:bg-blue-900/30 transition-all duration-300 group cursor-pointer"
               >
                 <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -2574,11 +3080,14 @@ function Relocation() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-white mb-6 bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                <TranslatableText>Safe Zone Network Statistics</TranslatableText>
+                <TranslatableText>
+                  Safe Zone Network Statistics
+                </TranslatableText>
               </h2>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 <TranslatableText>
-                  Real-time data on our nationwide network of safe zones and emergency facilities
+                  Real-time data on our nationwide network of safe zones and
+                  emergency facilities
                 </TranslatableText>
               </p>
             </div>
@@ -2608,7 +3117,9 @@ function Relocation() {
                   <TranslatableText>Available Capacity</TranslatableText>
                 </div>
                 <div className="text-gray-400 text-xs">
-                  <TranslatableText>People can be accommodated</TranslatableText>
+                  <TranslatableText>
+                    People can be accommodated
+                  </TranslatableText>
                 </div>
               </div>
 
@@ -2648,11 +3159,14 @@ function Relocation() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-white mb-6 bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                <TranslatableText>Emergency Transportation Hub</TranslatableText>
+                <TranslatableText>
+                  Emergency Transportation Hub
+                </TranslatableText>
               </h2>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 <TranslatableText>
-                  Access real-time transportation options and book emergency evacuation services
+                  Access real-time transportation options and book emergency
+                  evacuation services
                 </TranslatableText>
               </p>
             </div>
@@ -2675,19 +3189,25 @@ function Relocation() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Available Aircraft:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Available Aircraft:</TranslatableText>
+                    </span>
                     <span className="text-green-400 font-medium">12</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Response Time:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Response Time:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">15-30 min</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Capacity:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Capacity:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">4-20 people</span>
                   </div>
                   <button
-                    onClick={() => handleTransportRequest('Air')}
+                    onClick={() => handleTransportRequest("Air")}
                     className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium"
                   >
                     <TranslatableText>Request Air Evacuation</TranslatableText>
@@ -2712,22 +3232,30 @@ function Relocation() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Available Vehicles:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Available Vehicles:</TranslatableText>
+                    </span>
                     <span className="text-green-400 font-medium">156</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Response Time:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Response Time:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">5-15 min</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Capacity:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Capacity:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">20-50 people</span>
                   </div>
                   <button
-                    onClick={() => handleTransportRequest('Ground')}
+                    onClick={() => handleTransportRequest("Ground")}
                     className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium"
                   >
-                    <TranslatableText>Request Ground Transport</TranslatableText>
+                    <TranslatableText>
+                      Request Ground Transport
+                    </TranslatableText>
                   </button>
                 </div>
               </div>
@@ -2749,19 +3277,27 @@ function Relocation() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Available Boats:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Available Boats:</TranslatableText>
+                    </span>
                     <span className="text-green-400 font-medium">34</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Response Time:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Response Time:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">10-25 min</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Capacity:</TranslatableText></span>
-                    <span className="text-white font-medium">10-100 people</span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Capacity:</TranslatableText>
+                    </span>
+                    <span className="text-white font-medium">
+                      10-100 people
+                    </span>
                   </div>
                   <button
-                    onClick={() => handleTransportRequest('Water')}
+                    onClick={() => handleTransportRequest("Water")}
                     className="w-full mt-4 bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium"
                   >
                     <TranslatableText>Request Water Transport</TranslatableText>
@@ -2781,7 +3317,8 @@ function Relocation() {
               </h2>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 <TranslatableText>
-                  Find essential resources and supplies available at emergency centers near you
+                  Find essential resources and supplies available at emergency
+                  centers near you
                 </TranslatableText>
               </p>
             </div>
@@ -2797,11 +3334,15 @@ function Relocation() {
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-300"><TranslatableText>Centers:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Centers:</TranslatableText>
+                    </span>
                     <span className="text-orange-400 font-medium">247</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-300"><TranslatableText>Meals/Day:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Meals/Day:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">50K+</span>
                   </div>
                   <div className="flex items-center justify-center text-green-400 text-xs mt-3">
@@ -2821,11 +3362,15 @@ function Relocation() {
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-300"><TranslatableText>Centers:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Centers:</TranslatableText>
+                    </span>
                     <span className="text-green-400 font-medium">189</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-300"><TranslatableText>Stock Level:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Stock Level:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">85%</span>
                   </div>
                   <div className="flex items-center justify-center text-green-400 text-xs mt-3">
@@ -2845,11 +3390,15 @@ function Relocation() {
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-300"><TranslatableText>Centers:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Centers:</TranslatableText>
+                    </span>
                     <span className="text-blue-400 font-medium">312</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-300"><TranslatableText>Capacity:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Capacity:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">2M L</span>
                   </div>
                   <div className="flex items-center justify-center text-green-400 text-xs mt-3">
@@ -2869,11 +3418,15 @@ function Relocation() {
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-300"><TranslatableText>Centers:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Centers:</TranslatableText>
+                    </span>
                     <span className="text-purple-400 font-medium">156</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-300"><TranslatableText>Occupancy:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Occupancy:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">67%</span>
                   </div>
                   <div className="flex items-center justify-center text-yellow-400 text-xs mt-3">
@@ -2895,7 +3448,8 @@ function Relocation() {
               </h2>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 <TranslatableText>
-                  Connect with volunteers, share resources, and coordinate with your community during emergencies
+                  Connect with volunteers, share resources, and coordinate with
+                  your community during emergencies
                 </TranslatableText>
               </p>
             </div>
@@ -2918,15 +3472,21 @@ function Relocation() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Active Volunteers:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Active Volunteers:</TranslatableText>
+                    </span>
                     <span className="text-green-400 font-medium">1,247</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Response Rate:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Response Rate:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">94%</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Avg Response:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Avg Response:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">8 min</span>
                   </div>
                   <button
@@ -2955,15 +3515,21 @@ function Relocation() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Shared Items:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Shared Items:</TranslatableText>
+                    </span>
                     <span className="text-green-400 font-medium">3,456</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Active Sharers:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Active Sharers:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">892</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Success Rate:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Success Rate:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">96%</span>
                   </div>
                   <button
@@ -2992,15 +3558,21 @@ function Relocation() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Active Groups:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Active Groups:</TranslatableText>
+                    </span>
                     <span className="text-green-400 font-medium">156</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Messages Today:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Messages Today:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">2,847</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-300"><TranslatableText>Response Time:</TranslatableText></span>
+                    <span className="text-gray-300">
+                      <TranslatableText>Response Time:</TranslatableText>
+                    </span>
                     <span className="text-white font-medium">2 min</span>
                   </div>
                   <button
@@ -3020,11 +3592,14 @@ function Relocation() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-white mb-6 bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
-                <TranslatableText>Live Emergency Alerts & Updates</TranslatableText>
+                <TranslatableText>
+                  Live Emergency Alerts & Updates
+                </TranslatableText>
               </h2>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 <TranslatableText>
-                  Stay informed with real-time emergency alerts, weather updates, and safety notifications
+                  Stay informed with real-time emergency alerts, weather
+                  updates, and safety notifications
                 </TranslatableText>
               </p>
             </div>
@@ -3040,27 +3615,43 @@ function Relocation() {
                   <div className="flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                     <span className="ml-3 text-gray-300">
-                      <TranslatableText>Loading emergency alerts...</TranslatableText>
+                      <TranslatableText>
+                        Loading emergency alerts...
+                      </TranslatableText>
                     </span>
                   </div>
                 ) : emergencyAlerts.length > 0 ? (
                   <div className="space-y-4">
-                    {(showAllAlerts ? emergencyAlerts : emergencyAlerts.slice(0, 5)).map((alert) => (
-                      <div key={alert.id} className={`bg-${alert.color}-900/20 border border-${alert.color}-400/30 rounded-lg p-4`}>
+                    {(showAllAlerts
+                      ? emergencyAlerts
+                      : emergencyAlerts.slice(0, 5)
+                    ).map((alert) => (
+                      <div
+                        key={alert.id}
+                        className={`bg-${alert.color}-900/20 border border-${alert.color}-400/30 rounded-lg p-4`}
+                      >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center">
                             <span className="text-lg mr-2">{alert.icon}</span>
-                            <span className={`text-${alert.color}-300 font-medium`}>
+                            <span
+                              className={`text-${alert.color}-300 font-medium`}
+                            >
                               <TranslatableText>{alert.type}</TranslatableText>
                             </span>
                           </div>
-                          <span className="text-xs text-gray-400">{alert.timeAgo}</span>
+                          <span className="text-xs text-gray-400">
+                            {alert.timeAgo}
+                          </span>
                         </div>
                         <p className="text-gray-300 text-sm">
-                          <TranslatableText>{alert.description}</TranslatableText>
+                          <TranslatableText>
+                            {alert.description}
+                          </TranslatableText>
                         </p>
                         <div className={`mt-2 text-xs text-${alert.color}-400`}>
-                          <TranslatableText>Affected: {alert.affectedAreas.join(', ')}</TranslatableText>
+                          <TranslatableText>
+                            Affected: {alert.affectedAreas.join(", ")}
+                          </TranslatableText>
                         </div>
                       </div>
                     ))}
@@ -3073,9 +3664,10 @@ function Relocation() {
                         >
                           <TranslatableText>
                             {showAllAlerts
-                              ? 'Show fewer alerts ↑'
-                              : `View ${emergencyAlerts.length - 5} more alerts →`
-                            }
+                              ? "Show fewer alerts ↑"
+                              : `View ${
+                                  emergencyAlerts.length - 5
+                                } more alerts →`}
                           </TranslatableText>
                         </button>
                       </div>
@@ -3085,10 +3677,14 @@ function Relocation() {
                   <div className="text-center py-8">
                     <div className="text-4xl mb-4">✅</div>
                     <p className="text-gray-300">
-                      <TranslatableText>No active emergency alerts at this time.</TranslatableText>
+                      <TranslatableText>
+                        No active emergency alerts at this time.
+                      </TranslatableText>
                     </p>
                     <p className="text-gray-400 text-sm mt-2">
-                      <TranslatableText>All monitored areas are currently safe.</TranslatableText>
+                      <TranslatableText>
+                        All monitored areas are currently safe.
+                      </TranslatableText>
                     </p>
                   </div>
                 )}
@@ -3105,12 +3701,17 @@ function Relocation() {
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center">
                         <span className="text-lg mr-2">✅</span>
-                        <span className="text-green-300 font-medium">Safety Tip</span>
+                        <span className="text-green-300 font-medium">
+                          Safety Tip
+                        </span>
                       </div>
                       <span className="text-xs text-gray-400">5 min ago</span>
                     </div>
                     <p className="text-gray-300 text-sm">
-                      <TranslatableText>Keep emergency kit ready with 3-day supply of water, food, and medications.</TranslatableText>
+                      <TranslatableText>
+                        Keep emergency kit ready with 3-day supply of water,
+                        food, and medications.
+                      </TranslatableText>
                     </p>
                   </div>
 
@@ -3118,12 +3719,17 @@ function Relocation() {
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center">
                         <span className="text-lg mr-2">📱</span>
-                        <span className="text-blue-300 font-medium">App Update</span>
+                        <span className="text-blue-300 font-medium">
+                          App Update
+                        </span>
                       </div>
                       <span className="text-xs text-gray-400">30 min ago</span>
                     </div>
                     <p className="text-gray-300 text-sm">
-                      <TranslatableText>New offline map feature available. Download maps for your area now.</TranslatableText>
+                      <TranslatableText>
+                        New offline map feature available. Download maps for
+                        your area now.
+                      </TranslatableText>
                     </p>
                   </div>
 
@@ -3131,12 +3737,17 @@ function Relocation() {
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center">
                         <span className="text-lg mr-2">🏥</span>
-                        <span className="text-purple-300 font-medium">Health Advisory</span>
+                        <span className="text-purple-300 font-medium">
+                          Health Advisory
+                        </span>
                       </div>
                       <span className="text-xs text-gray-400">2 hours ago</span>
                     </div>
                     <p className="text-gray-300 text-sm">
-                      <TranslatableText>Ensure you have sufficient medications and know the location of nearest hospitals.</TranslatableText>
+                      <TranslatableText>
+                        Ensure you have sufficient medications and know the
+                        location of nearest hospitals.
+                      </TranslatableText>
                     </p>
                   </div>
 
@@ -3144,7 +3755,9 @@ function Relocation() {
                     onClick={handleAlertSubscription}
                     className="w-full mt-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-lg transition-all duration-300 font-medium"
                   >
-                    <TranslatableText>Subscribe to Emergency Alerts</TranslatableText>
+                    <TranslatableText>
+                      Subscribe to Emergency Alerts
+                    </TranslatableText>
                   </button>
                 </div>
               </div>

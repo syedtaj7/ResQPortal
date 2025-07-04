@@ -199,7 +199,7 @@ const ChatBot = () => {
   return (
     <>
       <motion.button
-        className="fixed bottom-6 left-6 ml-48 bg-yellow-400 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-40"
+        className="fixed bottom-6 left-6 ml-0 md:ml-48 bg-yellow-400 text-white p-3 md:p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-40"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
@@ -225,10 +225,10 @@ const ChatBot = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-24 left-6 w-96 bg-gray-900 rounded-lg shadow-xl border border-gray-800 z-50"
+            className="fixed bottom-16 md:bottom-24 left-2 md:left-6 w-[calc(100vw-1rem)] max-w-sm md:w-96 bg-gray-900 rounded-lg shadow-xl border border-gray-800 z-50"
           >
-            <div className="flex items-center justify-between p-4 border-b border-gray-800">
-              <h3 className="text-lg font-semibold text-white">
+            <div className="flex items-center justify-between p-3 md:p-4 border-b border-gray-800">
+              <h3 className="text-base md:text-lg font-semibold text-white">
                 <TranslatableText>Disaster Support</TranslatableText>
               </h3>
               <button
@@ -236,7 +236,7 @@ const ChatBot = () => {
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 md:w-5 md:h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -251,7 +251,7 @@ const ChatBot = () => {
               </button>
             </div>
 
-            <div className="h-96 overflow-y-auto p-4 space-y-4">
+            <div className="h-64 md:h-96 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
               {messages.map((message, index) => (
                 <motion.div
                   key={index}
@@ -262,7 +262,7 @@ const ChatBot = () => {
                   }`}
                 >
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
+                    className={`max-w-[85%] md:max-w-[80%] p-2 md:p-3 rounded-lg text-sm md:text-base ${
                       message.type === "user"
                         ? "bg-blue-600 text-white"
                         : "bg-gray-800 text-gray-300"
@@ -283,12 +283,12 @@ const ChatBot = () => {
                   </div>
 
                   {message.type === "bot" && message.suggestions && (
-                    <div className="mt-2 flex flex-wrap gap-2">
+                    <div className="mt-2 flex flex-wrap gap-1 md:gap-2">
                       {message.suggestions.map((suggestion, idx) => (
                         <button
                           key={idx}
                           onClick={() => handleSuggestionClick(suggestion)}
-                          className="text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full transition-colors"
+                          className="text-xs md:text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 md:px-3 py-1 md:py-1.5 rounded-full transition-colors"
                         >
                           <TranslatableText>{suggestion.text}</TranslatableText>
                         </button>
@@ -313,7 +313,7 @@ const ChatBot = () => {
 
             <form
               onSubmit={handleSubmit}
-              className="p-4 border-t border-gray-800"
+              className="p-3 md:p-4 border-t border-gray-800"
             >
               <div className="flex items-center space-x-2">
                 <input
@@ -321,14 +321,14 @@ const ChatBot = () => {
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="Ask about disasters..." // HTML attributes can't use React components directly
-                  className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 bg-gray-800 text-white rounded-lg px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="bg-blue-600 text-white p-1.5 md:p-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <svg
-                    className="w-5 h-5"
+                    className="w-4 h-4 md:w-5 md:h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

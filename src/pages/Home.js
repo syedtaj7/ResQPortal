@@ -1,10 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Polygon,
-  useMap,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import React from "react";
 
@@ -329,26 +324,30 @@ const fetchOpenWeatherData = async (locations) => {
                 };
 
                 // Enhanced flash flood detection criteria
-                const isFlashFloodRisk = forecastConditions.rain > 20 ||
-                                       (forecastConditions.rain > 10 && forecastConditions.humidity > 90) ||
-                                       (forecastConditions.rain > 15 && forecastConditions.pressure < 1000);
+                const isFlashFloodRisk =
+                  forecastConditions.rain > 20 ||
+                  (forecastConditions.rain > 10 &&
+                    forecastConditions.humidity > 90) ||
+                  (forecastConditions.rain > 15 &&
+                    forecastConditions.pressure < 1000);
 
                 // Enhanced severe weather detection
-                const isSevereWeather = forecastConditions.temp > 40 ||
-                                      forecastConditions.temp < 10 ||
-                                      forecastConditions.windSpeed > 62 ||
-                                      forecastConditions.rain > 25 ||
-                                      forecastConditions.pressure < 980 ||
-                                      forecastConditions.description.includes("extreme") ||
-                                      forecastConditions.description.includes("tornado") ||
-                                      forecastConditions.description.includes("hurricane") ||
-                                      forecastConditions.description.includes("storm") ||
-                                      forecastConditions.description.includes("thunderstorm");
+                const isSevereWeather =
+                  forecastConditions.temp > 40 ||
+                  forecastConditions.temp < 10 ||
+                  forecastConditions.windSpeed > 62 ||
+                  forecastConditions.rain > 25 ||
+                  forecastConditions.pressure < 980 ||
+                  forecastConditions.description.includes("extreme") ||
+                  forecastConditions.description.includes("tornado") ||
+                  forecastConditions.description.includes("hurricane") ||
+                  forecastConditions.description.includes("storm") ||
+                  forecastConditions.description.includes("thunderstorm");
 
                 return isFlashFloodRisk || isSevereWeather;
               })
               .map((item) => {
-                const rain3h = (item.rain?.["3h"] || 0);
+                const rain3h = item.rain?.["3h"] || 0;
                 const rainPerHour = rain3h / 3;
                 const time = new Date(item.dt * 1000);
 
@@ -365,7 +364,9 @@ const fetchOpenWeatherData = async (locations) => {
                 } else if (rainPerHour > 15) {
                   warningType = "🌧️ Heavy Rain Alert";
                   severity = "moderate";
-                } else if (item.weather[0].main.toLowerCase().includes("storm")) {
+                } else if (
+                  item.weather[0].main.toLowerCase().includes("storm")
+                ) {
                   warningType = "⛈️ Severe Storm Warning";
                   severity = "high";
                 }
@@ -381,7 +382,12 @@ const fetchOpenWeatherData = async (locations) => {
                   humidity: item.main.humidity,
                   warningType,
                   severity,
-                  floodRisk: rainPerHour > 15 ? "HIGH" : rainPerHour > 10 ? "MODERATE" : "LOW"
+                  floodRisk:
+                    rainPerHour > 15
+                      ? "HIGH"
+                      : rainPerHour > 10
+                      ? "MODERATE"
+                      : "LOW",
                 };
               });
             // Get local predictions
@@ -389,7 +395,11 @@ const fetchOpenWeatherData = async (locations) => {
             localPredictions.push(...predictions);
 
             // Create specific flash flood alerts
-            const floodAlerts = createFlashFloodAlerts(conditions, forecastWarnings, location);
+            const floodAlerts = createFlashFloodAlerts(
+              conditions,
+              forecastWarnings,
+              location
+            );
 
             if (
               warnings.length > 0 ||
@@ -413,24 +423,53 @@ const fetchOpenWeatherData = async (locations) => {
                   `💨 Wind Speed: ${conditions.windSpeed.toFixed(1)} km/h\n` +
                   `📊 Pressure: ${conditions.pressure} hPa\n` +
                   `💦 Humidity: ${conditions.humidity}%\n` +
-                  `👁️ Visibility: ${(conditions.visibility / 1000).toFixed(1)} km\n\n` +
-
+                  `👁️ Visibility: ${(conditions.visibility / 1000).toFixed(
+                    1
+                  )} km\n\n` +
                   `🚨 ACTIVE WARNINGS:\n${warnings.join("\n")}\n\n` +
-
-                  (conditions.rain > 10 ?
-                    `🌊 FLOOD RISK ASSESSMENT:\n` +
-                    `Risk Level: ${conditions.rain > 50 ? "🔴 EXTREME" : conditions.rain > 25 ? "🟠 HIGH" : "🟡 MODERATE"}\n` +
-                    `Flood Potential: ${conditions.rain > 50 ? "Flash flooding imminent" : conditions.rain > 25 ? "Flash flooding likely" : "Localized flooding possible"}\n` +
-                    `Action Required: ${conditions.rain > 50 ? "IMMEDIATE EVACUATION" : conditions.rain > 25 ? "PREPARE TO EVACUATE" : "MONITOR CONDITIONS"}\n\n`
+                  (conditions.rain > 10
+                    ? `🌊 FLOOD RISK ASSESSMENT:\n` +
+                      `Risk Level: ${
+                        conditions.rain > 50
+                          ? "🔴 EXTREME"
+                          : conditions.rain > 25
+                          ? "🟠 HIGH"
+                          : "🟡 MODERATE"
+                      }\n` +
+                      `Flood Potential: ${
+                        conditions.rain > 50
+                          ? "Flash flooding imminent"
+                          : conditions.rain > 25
+                          ? "Flash flooding likely"
+                          : "Localized flooding possible"
+                      }\n` +
+                      `Action Required: ${
+                        conditions.rain > 50
+                          ? "IMMEDIATE EVACUATION"
+                          : conditions.rain > 25
+                          ? "PREPARE TO EVACUATE"
+                          : "MONITOR CONDITIONS"
+                      }\n\n`
                     : "") +
-
                   (forecastWarnings.length > 0
                     ? `📅 FORECAST WARNINGS (Next 48 Hours):\n${forecastWarnings
                         .map((w) => {
-                          const timeStr = w.time.toLocaleDateString() + " " + w.time.toLocaleTimeString();
-                          const floodInfo = w.rain > 15 ? ` | 🌊 ${w.floodRisk} FLOOD RISK` : "";
-                          return `${timeStr}: ${w.warningType}\n` +
-                                 `   ${w.conditions} | ${w.temp.toFixed(1)}°C | ${w.windSpeed.toFixed(1)} km/h | ${w.rain.toFixed(1)}mm/h${floodInfo}`;
+                          const timeStr =
+                            w.time.toLocaleDateString() +
+                            " " +
+                            w.time.toLocaleTimeString();
+                          const floodInfo =
+                            w.rain > 15
+                              ? ` | 🌊 ${w.floodRisk} FLOOD RISK`
+                              : "";
+                          return (
+                            `${timeStr}: ${w.warningType}\n` +
+                            `   ${w.conditions} | ${w.temp.toFixed(
+                              1
+                            )}°C | ${w.windSpeed.toFixed(
+                              1
+                            )} km/h | ${w.rain.toFixed(1)}mm/h${floodInfo}`
+                          );
                         })
                         .join("\n")}`
                     : ""),
@@ -439,7 +478,7 @@ const fetchOpenWeatherData = async (locations) => {
               });
 
               // Add specific flash flood alerts as separate entries
-              floodAlerts.forEach(alert => {
+              floodAlerts.forEach((alert) => {
                 weatherData.push(alert);
               });
             }
@@ -449,17 +488,30 @@ const fetchOpenWeatherData = async (locations) => {
               warnings: warnings.length,
               severity,
               floodAlerts: floodAlerts.length,
-              forecastWarnings: forecastWarnings.length
+              forecastWarnings: forecastWarnings.length,
             });
 
             // Special logging for flash flood conditions
             if (conditions.rain > 10) {
               console.log(`🌊 FLOOD MONITORING - ${location}:`, {
                 currentRainfall: `${conditions.rain}mm/h`,
-                floodRisk: conditions.rain > 50 ? "EXTREME" : conditions.rain > 25 ? "HIGH" : "MODERATE",
+                floodRisk:
+                  conditions.rain > 50
+                    ? "EXTREME"
+                    : conditions.rain > 25
+                    ? "HIGH"
+                    : "MODERATE",
                 alertsGenerated: floodAlerts.length,
-                forecastRisk: forecastWarnings.filter(w => w.rain > 15).length > 0 ? "YES" : "NO",
-                emergencyLevel: conditions.rain > 75 ? "CRITICAL" : conditions.rain > 50 ? "HIGH" : "MODERATE"
+                forecastRisk:
+                  forecastWarnings.filter((w) => w.rain > 15).length > 0
+                    ? "YES"
+                    : "NO",
+                emergencyLevel:
+                  conditions.rain > 75
+                    ? "CRITICAL"
+                    : conditions.rain > 50
+                    ? "HIGH"
+                    : "MODERATE",
               });
             }
           }
@@ -485,8 +537,12 @@ const analyzeWeatherData = (conditions) => {
   // Enhanced Flash Flood Detection
   if (conditions.rain > 75) {
     severity = "high";
-    warnings.push("🌊 FLASH FLOOD EMERGENCY - Extremely Heavy Rainfall (>75mm/h)");
-    warnings.push("⚠️ Immediate Evacuation Required - Life-threatening flooding");
+    warnings.push(
+      "🌊 FLASH FLOOD EMERGENCY - Extremely Heavy Rainfall (>75mm/h)"
+    );
+    warnings.push(
+      "⚠️ Immediate Evacuation Required - Life-threatening flooding"
+    );
   } else if (conditions.rain > 50) {
     severity = "high";
     warnings.push("🌊 Flash Flood Warning - Very Heavy Rainfall (50-75mm/h)");
@@ -503,13 +559,17 @@ const analyzeWeatherData = (conditions) => {
   // Enhanced Rainfall Pattern Analysis
   if (conditions.rain > 20 && conditions.humidity > 85) {
     severity = severity === "low" ? "moderate" : severity;
-    warnings.push("💧 Sustained Heavy Rainfall - Increased flood risk due to high humidity");
+    warnings.push(
+      "💧 Sustained Heavy Rainfall - Increased flood risk due to high humidity"
+    );
   }
 
   // Pressure-based flood prediction
   if (conditions.rain > 15 && conditions.pressure < 1000) {
     severity = severity === "low" ? "moderate" : severity;
-    warnings.push("🌀 Low Pressure System - Enhanced rainfall and flood potential");
+    warnings.push(
+      "🌀 Low Pressure System - Enhanced rainfall and flood potential"
+    );
   }
 
   // Wind + Rain = Severe Storm Conditions
@@ -544,16 +604,24 @@ const analyzeWeatherData = (conditions) => {
   }
 
   // Fog with potential for flash flooding
-  if (conditions.visibility < 500 && conditions.humidity > 95 && conditions.rain > 5) {
+  if (
+    conditions.visibility < 500 &&
+    conditions.humidity > 95 &&
+    conditions.rain > 5
+  ) {
     severity = severity === "low" ? "moderate" : severity;
-    warnings.push("🌫️ Dense Fog with Rain - Reduced visibility during flooding");
+    warnings.push(
+      "🌫️ Dense Fog with Rain - Reduced visibility during flooding"
+    );
   }
 
   // Heat Index Check
   const heatIndex = calculateHeatIndex(conditions.temp, conditions.humidity);
   if (heatIndex > 54) {
     severity = "high";
-    warnings.push("🔥 Extreme Heat Danger - Heat Stroke Risk (Heat Index >54°C)");
+    warnings.push(
+      "🔥 Extreme Heat Danger - Heat Stroke Risk (Heat Index >54°C)"
+    );
   } else if (heatIndex > 41) {
     severity = severity === "low" ? "moderate" : severity;
     warnings.push("🌡️ Heat Advisory - Heat Exhaustion Risk (Heat Index >41°C)");
@@ -571,8 +639,15 @@ const analyzeWeatherData = (conditions) => {
     console.log(`🌊 FLOOD DETECTION for ${conditions.location}:`, {
       rainfall: `${conditions.rain}mm/h`,
       severity,
-      floodRisk: conditions.rain > 50 ? "EXTREME" : conditions.rain > 25 ? "HIGH" : "MODERATE",
-      warnings: warnings.filter(w => w.includes("🌊") || w.includes("🌧️") || w.includes("🌦️"))
+      floodRisk:
+        conditions.rain > 50
+          ? "EXTREME"
+          : conditions.rain > 25
+          ? "HIGH"
+          : "MODERATE",
+      warnings: warnings.filter(
+        (w) => w.includes("🌊") || w.includes("🌧️") || w.includes("🌦️")
+      ),
     });
   }
 
@@ -590,7 +665,7 @@ const getComprehensiveWeatherWarning = (disaster) => {
       warnings: [],
       forecast: [],
       description: "",
-      hasRealWarnings: false
+      hasRealWarnings: false,
     };
   }
 
@@ -611,16 +686,20 @@ const getComprehensiveWeatherWarning = (disaster) => {
       windSpeed: windMatch ? parseFloat(windMatch[1]) : 0,
       visibility: visibilityMatch ? parseFloat(visibilityMatch[1]) : 10,
       humidity: humidityMatch ? parseInt(humidityMatch[1]) : 50,
-      pressure: pressureMatch ? parseInt(pressureMatch[1]) : 1013
+      pressure: pressureMatch ? parseInt(pressureMatch[1]) : 1013,
     };
   };
 
   // Extract forecast information from details
   const extractForecastData = (text) => {
-    const forecastSection = text.match(/📅 forecast warnings \(next 48 hours\):(.*?)(?=\n\n|$)/is);
+    const forecastSection = text.match(
+      /📅 forecast warnings \(next 48 hours\):(.*?)(?=\n\n|$)/is
+    );
     if (!forecastSection) return [];
 
-    const forecastLines = forecastSection[1].split('\n').filter(line => line.trim());
+    const forecastLines = forecastSection[1]
+      .split("\n")
+      .filter((line) => line.trim());
     const forecasts = [];
 
     for (let i = 0; i < forecastLines.length; i += 2) {
@@ -628,8 +707,12 @@ const getComprehensiveWeatherWarning = (disaster) => {
       const detailLine = forecastLines[i + 1];
 
       if (timeLine && detailLine) {
-        const timeMatch = timeLine.match(/(\d{1,2}\/\d{1,2}\/\d{4}.*?\d{1,2}:\d{2}:\d{2}.*?):/);
-        const conditionMatch = detailLine.match(/(.+?)\s*\|\s*(\d+\.?\d*)°c\s*\|\s*(\d+\.?\d*)\s*km\/h\s*\|\s*(\d+\.?\d*)mm\/h/i);
+        const timeMatch = timeLine.match(
+          /(\d{1,2}\/\d{1,2}\/\d{4}.*?\d{1,2}:\d{2}:\d{2}.*?):/
+        );
+        const conditionMatch = detailLine.match(
+          /(.+?)\s*\|\s*(\d+\.?\d*)°c\s*\|\s*(\d+\.?\d*)\s*km\/h\s*\|\s*(\d+\.?\d*)mm\/h/i
+        );
 
         if (timeMatch && conditionMatch) {
           forecasts.push({
@@ -637,7 +720,7 @@ const getComprehensiveWeatherWarning = (disaster) => {
             condition: conditionMatch[1].trim(),
             temperature: parseFloat(conditionMatch[2]),
             windSpeed: parseFloat(conditionMatch[3]),
-            rainfall: parseFloat(conditionMatch[4])
+            rainfall: parseFloat(conditionMatch[4]),
           });
         }
       }
@@ -658,18 +741,25 @@ const getComprehensiveWeatherWarning = (disaster) => {
   // REAL-TIME WARNING ANALYSIS - Only show warnings when actual conditions warrant them
 
   // CRITICAL FLOOD WARNINGS (Only if actual rainfall is significant)
-  if (weatherData.rainfall > 75 || details.includes('flash flood emergency')) {
+  if (weatherData.rainfall > 75 || details.includes("flash flood emergency")) {
     primaryWarning = "🚨 FLASH FLOOD EMERGENCY";
-    activeWarnings.push(`🌊 EXTREME RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`);
+    activeWarnings.push(
+      `🌊 EXTREME RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`
+    );
     activeWarnings.push("⚠️ IMMEDIATE EVACUATION REQUIRED");
     activeWarnings.push("🚨 LIFE-THREATENING FLOODING");
     warningIcon = "🌊";
     severityLevel = "high";
     warningColor = "red";
     hasRealWarnings = true;
-  } else if (weatherData.rainfall > 50 || details.includes('flash flood warning')) {
+  } else if (
+    weatherData.rainfall > 50 ||
+    details.includes("flash flood warning")
+  ) {
     primaryWarning = "🌊 FLASH FLOOD WARNING";
-    activeWarnings.push(`🌧️ VERY HEAVY RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`);
+    activeWarnings.push(
+      `🌧️ VERY HEAVY RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`
+    );
     activeWarnings.push("⚠️ AVOID LOW-LYING AREAS");
     activeWarnings.push("🚨 PREPARE FOR EVACUATION");
     warningIcon = "🌊";
@@ -678,7 +768,9 @@ const getComprehensiveWeatherWarning = (disaster) => {
     hasRealWarnings = true;
   } else if (weatherData.rainfall > 25) {
     primaryWarning = "🌧️ HEAVY RAIN WARNING";
-    activeWarnings.push(`💧 HEAVY RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`);
+    activeWarnings.push(
+      `💧 HEAVY RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`
+    );
     activeWarnings.push("⚠️ FLOOD RISK - MONITOR CONDITIONS");
     warningIcon = "🌧️";
     severityLevel = "moderate";
@@ -686,7 +778,9 @@ const getComprehensiveWeatherWarning = (disaster) => {
     hasRealWarnings = true;
   } else if (weatherData.rainfall > 10) {
     primaryWarning = "🌦️ MODERATE RAIN ALERT";
-    activeWarnings.push(`💧 MODERATE RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`);
+    activeWarnings.push(
+      `💧 MODERATE RAINFALL: ${weatherData.rainfall.toFixed(1)} mm/h`
+    );
     activeWarnings.push("⚠️ WATCH FOR LOCALIZED FLOODING");
     warningIcon = "🌦️";
     severityLevel = "moderate";
@@ -702,18 +796,25 @@ const getComprehensiveWeatherWarning = (disaster) => {
       severityLevel = "high";
       warningColor = "red";
     }
-    activeWarnings.push(`🌡️ EXTREME TEMPERATURE: ${weatherData.temperature.toFixed(1)}°C`);
+    activeWarnings.push(
+      `🌡️ EXTREME TEMPERATURE: ${weatherData.temperature.toFixed(1)}°C`
+    );
     activeWarnings.push("🚨 HEAT STROKE RISK - STAY INDOORS");
     activeWarnings.push("💧 DRINK WATER FREQUENTLY");
     hasRealWarnings = true;
-  } else if (weatherData.temperature !== null && weatherData.temperature >= 40) {
+  } else if (
+    weatherData.temperature !== null &&
+    weatherData.temperature >= 40
+  ) {
     if (!primaryWarning) {
       primaryWarning = "🔥 HEAT WAVE WARNING";
       warningIcon = "🔥";
       severityLevel = "high";
       warningColor = "orange";
     }
-    activeWarnings.push(`🌡️ HIGH TEMPERATURE: ${weatherData.temperature.toFixed(1)}°C`);
+    activeWarnings.push(
+      `🌡️ HIGH TEMPERATURE: ${weatherData.temperature.toFixed(1)}°C`
+    );
     activeWarnings.push("⚠️ HEAT EXHAUSTION RISK");
     activeWarnings.push("🏠 LIMIT OUTDOOR ACTIVITIES");
     hasRealWarnings = true;
@@ -724,18 +825,25 @@ const getComprehensiveWeatherWarning = (disaster) => {
       severityLevel = "high";
       warningColor = "blue";
     }
-    activeWarnings.push(`🧊 EXTREME COLD: ${weatherData.temperature.toFixed(1)}°C`);
+    activeWarnings.push(
+      `🧊 EXTREME COLD: ${weatherData.temperature.toFixed(1)}°C`
+    );
     activeWarnings.push("🚨 FROSTBITE RISK - STAY WARM");
     activeWarnings.push("🏠 AVOID PROLONGED EXPOSURE");
     hasRealWarnings = true;
-  } else if (weatherData.temperature !== null && weatherData.temperature <= 10) {
+  } else if (
+    weatherData.temperature !== null &&
+    weatherData.temperature <= 10
+  ) {
     if (!primaryWarning) {
       primaryWarning = "🧊 COLD WAVE ALERT";
       warningIcon = "❄️";
       severityLevel = "moderate";
       warningColor = "blue";
     }
-    activeWarnings.push(`❄️ COLD TEMPERATURE: ${weatherData.temperature.toFixed(1)}°C`);
+    activeWarnings.push(
+      `❄️ COLD TEMPERATURE: ${weatherData.temperature.toFixed(1)}°C`
+    );
     activeWarnings.push("⚠️ DRESS WARMLY");
     hasRealWarnings = true;
   }
@@ -748,7 +856,9 @@ const getComprehensiveWeatherWarning = (disaster) => {
       severityLevel = "high";
       warningColor = "red";
     }
-    activeWarnings.push(`🌪️ SEVERE WINDS: ${weatherData.windSpeed.toFixed(1)} km/h`);
+    activeWarnings.push(
+      `🌪️ SEVERE WINDS: ${weatherData.windSpeed.toFixed(1)} km/h`
+    );
     activeWarnings.push("🚨 STRUCTURAL DAMAGE POSSIBLE");
     activeWarnings.push("🏠 STAY INDOORS - AVOID TRAVEL");
     hasRealWarnings = true;
@@ -759,7 +869,9 @@ const getComprehensiveWeatherWarning = (disaster) => {
       severityLevel = "moderate";
       warningColor = "orange";
     }
-    activeWarnings.push(`💨 HIGH WINDS: ${weatherData.windSpeed.toFixed(1)} km/h`);
+    activeWarnings.push(
+      `💨 HIGH WINDS: ${weatherData.windSpeed.toFixed(1)} km/h`
+    );
     activeWarnings.push("⚠️ SECURE LOOSE OBJECTS");
     hasRealWarnings = true;
   }
@@ -785,7 +897,9 @@ const getComprehensiveWeatherWarning = (disaster) => {
       severityLevel = "high";
       warningColor = "brown";
     }
-    activeWarnings.push(`👁️ EXTREMELY LOW VISIBILITY: ${weatherData.visibility.toFixed(1)} km`);
+    activeWarnings.push(
+      `👁️ EXTREMELY LOW VISIBILITY: ${weatherData.visibility.toFixed(1)} km`
+    );
     activeWarnings.push("🚨 AVOID TRAVEL - STAY INDOORS");
     hasRealWarnings = true;
   } else if (weatherData.visibility < 0.5 && weatherData.humidity > 95) {
@@ -795,7 +909,9 @@ const getComprehensiveWeatherWarning = (disaster) => {
       severityLevel = "moderate";
       warningColor = "gray";
     }
-    activeWarnings.push(`👁️ DENSE FOG: ${weatherData.visibility.toFixed(1)} km visibility`);
+    activeWarnings.push(
+      `👁️ DENSE FOG: ${weatherData.visibility.toFixed(1)} km visibility`
+    );
     activeWarnings.push("🚗 DRIVE CAREFULLY - USE FOG LIGHTS");
     hasRealWarnings = true;
   }
@@ -810,7 +926,7 @@ const getComprehensiveWeatherWarning = (disaster) => {
   // Only show warnings if there are actual real weather conditions that warrant them
   if (!hasRealWarnings) {
     // Check if there are any text-based warnings for specific events
-    if (details.includes('cyclone') || details.includes('hurricane')) {
+    if (details.includes("cyclone") || details.includes("hurricane")) {
       primaryWarning = "🌀 CYCLONE WARNING";
       warningIcon = "🌀";
       severityLevel = "high";
@@ -818,7 +934,10 @@ const getComprehensiveWeatherWarning = (disaster) => {
       activeWarnings.push("CYCLONIC CONDITIONS");
       activeWarnings.push("EXTREME WEATHER SYSTEM");
       hasRealWarnings = true;
-    } else if (details.includes('flash flood emergency') || details.includes('flood warning')) {
+    } else if (
+      details.includes("flash flood emergency") ||
+      details.includes("flood warning")
+    ) {
       // These are handled above, but ensure we catch text-based flood warnings
       hasRealWarnings = true;
     } else {
@@ -838,14 +957,14 @@ const getComprehensiveWeatherWarning = (disaster) => {
     color: warningColor,
     warnings: activeWarnings,
     forecast: forecastData,
-    description: hasRealWarnings ?
-      `${activeWarnings.length} active warning${activeWarnings.length !== 1 ? 's' : ''}` :
-      "Live monitoring - No active warnings",
-    hasRealWarnings: hasRealWarnings
+    description: hasRealWarnings
+      ? `${activeWarnings.length} active warning${
+          activeWarnings.length !== 1 ? "s" : ""
+        }`
+      : "Live monitoring - No active warnings",
+    hasRealWarnings: hasRealWarnings,
   };
 };
-
-
 
 // Add these helper functions
 const calculateHeatIndex = (temp, humidity) => {
@@ -1150,7 +1269,7 @@ const predictLocalDisasters = (weatherData) => {
       details: `🚨 EXTREME FLASH FLOOD RISK: ${floodRiskFactors.details}`,
       emergencyLevel: "CRITICAL",
       icon: "🌊",
-      actionRequired: "IMMEDIATE EVACUATION"
+      actionRequired: "IMMEDIATE EVACUATION",
     });
   } else if (floodRiskFactors.riskLevel === "HIGH") {
     predictions.push({
@@ -1160,7 +1279,7 @@ const predictLocalDisasters = (weatherData) => {
       details: `⚠️ HIGH FLASH FLOOD RISK: ${floodRiskFactors.details}`,
       emergencyLevel: "HIGH",
       icon: "🌊",
-      actionRequired: "PREPARE FOR EVACUATION"
+      actionRequired: "PREPARE FOR EVACUATION",
     });
   } else if (floodRiskFactors.riskLevel === "MODERATE") {
     predictions.push({
@@ -1170,15 +1289,20 @@ const predictLocalDisasters = (weatherData) => {
       details: `🌧️ MODERATE FLOOD RISK: ${floodRiskFactors.details}`,
       emergencyLevel: "MODERATE",
       icon: "🌦️",
-      actionRequired: "MONITOR CONDITIONS"
+      actionRequired: "MONITOR CONDITIONS",
     });
   }
 
   // 🌀 Enhanced Cyclone Detection
   if (weatherData.rain > 30 && weatherData.windSpeed > 25) {
-    const cycloneIntensity = weatherData.rain > 75 && weatherData.windSpeed > 100 ? "SUPER CYCLONE" :
-                           weatherData.rain > 50 && weatherData.windSpeed > 75 ? "VERY SEVERE" :
-                           weatherData.rain > 35 && weatherData.windSpeed > 50 ? "SEVERE" : "CYCLONIC STORM";
+    const cycloneIntensity =
+      weatherData.rain > 75 && weatherData.windSpeed > 100
+        ? "SUPER CYCLONE"
+        : weatherData.rain > 50 && weatherData.windSpeed > 75
+        ? "VERY SEVERE"
+        : weatherData.rain > 35 && weatherData.windSpeed > 50
+        ? "SEVERE"
+        : "CYCLONIC STORM";
 
     predictions.push({
       type: "Cyclone",
@@ -1186,7 +1310,7 @@ const predictLocalDisasters = (weatherData) => {
       probability: 0.8,
       details: `🌀 ${cycloneIntensity}: Rain ${weatherData.rain}mm/h, Wind ${weatherData.windSpeed}km/h`,
       icon: "🌀",
-      emergencyLevel: weatherData.rain > 50 ? "HIGH" : "MODERATE"
+      emergencyLevel: weatherData.rain > 50 ? "HIGH" : "MODERATE",
     });
   }
 
@@ -1198,7 +1322,7 @@ const predictLocalDisasters = (weatherData) => {
       probability: 0.9,
       details: `🌡️ Extreme temperature ${weatherData.temp}°C - Heat stroke risk`,
       icon: "🔥",
-      emergencyLevel: weatherData.temp > 45 ? "HIGH" : "MODERATE"
+      emergencyLevel: weatherData.temp > 45 ? "HIGH" : "MODERATE",
     });
   }
 
@@ -1210,14 +1334,18 @@ const predictLocalDisasters = (weatherData) => {
       probability: 0.9,
       details: `🧊 Severe cold ${weatherData.temp}°C - Hypothermia risk`,
       icon: "❄️",
-      emergencyLevel: weatherData.temp < 0 ? "HIGH" : "MODERATE"
+      emergencyLevel: weatherData.temp < 0 ? "HIGH" : "MODERATE",
     });
   }
 
   // 🏔️ Enhanced Landslide Risk (for hilly areas)
   if (weatherData.rain > 25 && hillStations.includes(location)) {
-    const landslideRisk = weatherData.rain > 60 ? "EXTREME" :
-                         weatherData.rain > 40 ? "HIGH" : "MODERATE";
+    const landslideRisk =
+      weatherData.rain > 60
+        ? "EXTREME"
+        : weatherData.rain > 40
+        ? "HIGH"
+        : "MODERATE";
 
     predictions.push({
       type: "Landslide",
@@ -1225,7 +1353,7 @@ const predictLocalDisasters = (weatherData) => {
       probability: 0.75,
       details: `⛰️ ${landslideRisk} LANDSLIDE RISK: ${weatherData.rain}mm/h rainfall in hilly terrain`,
       icon: "🏔️",
-      emergencyLevel: weatherData.rain > 40 ? "HIGH" : "MODERATE"
+      emergencyLevel: weatherData.rain > 40 ? "HIGH" : "MODERATE",
     });
   }
 
@@ -1237,7 +1365,7 @@ const predictLocalDisasters = (weatherData) => {
       probability: 0.8,
       details: `⛈️ Severe thunderstorm: ${weatherData.clouds}% cloud cover, ${weatherData.windSpeed}km/h winds`,
       icon: "⛈️",
-      emergencyLevel: weatherData.windSpeed > 30 ? "HIGH" : "MODERATE"
+      emergencyLevel: weatherData.windSpeed > 30 ? "HIGH" : "MODERATE",
     });
   }
 
@@ -1249,7 +1377,7 @@ const predictLocalDisasters = (weatherData) => {
       probability: 0.9,
       details: `🌫️ Dense fog: ${weatherData.visibility}m visibility, ${weatherData.humidity}% humidity`,
       icon: "🌫️",
-      emergencyLevel: weatherData.visibility < 500 ? "HIGH" : "MODERATE"
+      emergencyLevel: weatherData.visibility < 500 ? "HIGH" : "MODERATE",
     });
   }
 
@@ -1261,7 +1389,7 @@ const predictLocalDisasters = (weatherData) => {
       probability: 0.7,
       details: `🌵 Drought conditions: ${weatherData.humidity}% humidity, ${weatherData.temp}°C temperature`,
       icon: "🌵",
-      emergencyLevel: "MODERATE"
+      emergencyLevel: "MODERATE",
     });
   }
 
@@ -1317,9 +1445,23 @@ const calculateFloodRisk = (weatherData, location) => {
 
   // Location-specific factors
   const floodProneAreas = [
-    "mumbai", "chennai", "kolkata", "guwahati", "patna", "varanasi",
-    "jammu", "srinagar", "kochi", "mangalore", "puducherry", "puri",
-    "digha", "chilika", "haldia", "daman", "alibag"
+    "mumbai",
+    "chennai",
+    "kolkata",
+    "guwahati",
+    "patna",
+    "varanasi",
+    "jammu",
+    "srinagar",
+    "kochi",
+    "mangalore",
+    "puducherry",
+    "puri",
+    "digha",
+    "chilika",
+    "haldia",
+    "daman",
+    "alibag",
   ];
 
   if (floodProneAreas.includes(location)) {
@@ -1329,8 +1471,17 @@ const calculateFloodRisk = (weatherData, location) => {
 
   // Coastal areas (storm surge risk)
   const coastalAreas = [
-    "mumbai", "chennai", "kochi", "visakhapatnam", "mangalore",
-    "puducherry", "puri", "digha", "porbandar", "diu", "karwar"
+    "mumbai",
+    "chennai",
+    "kochi",
+    "visakhapatnam",
+    "mangalore",
+    "puducherry",
+    "puri",
+    "digha",
+    "porbandar",
+    "diu",
+    "karwar",
   ];
 
   if (coastalAreas.includes(location) && weatherData.windSpeed > 40) {
@@ -1364,9 +1515,14 @@ const createFlashFloodAlerts = (conditions, forecastWarnings, location) => {
 
   // Current conditions flash flood alert
   if (conditions.rain > 25) {
-    const alertLevel = conditions.rain > 75 ? "EMERGENCY" :
-                      conditions.rain > 50 ? "WARNING" :
-                      conditions.rain > 25 ? "WATCH" : "ADVISORY";
+    const alertLevel =
+      conditions.rain > 75
+        ? "EMERGENCY"
+        : conditions.rain > 50
+        ? "WARNING"
+        : conditions.rain > 25
+        ? "WATCH"
+        : "ADVISORY";
 
     alerts.push({
       id: `flood-current-${location}-${Date.now()}`,
@@ -1375,23 +1531,36 @@ const createFlashFloodAlerts = (conditions, forecastWarnings, location) => {
       severity: conditions.rain > 50 ? "high" : "moderate",
       type: "Flash Flood",
       date: new Date().toISOString(),
-      details: `🚨 CURRENT FLASH FLOOD ${alertLevel}\n` +
-               `Location: ${locationName}\n` +
-               `Rainfall Rate: ${conditions.rain.toFixed(1)} mm/h\n` +
-               `Risk Level: ${conditions.rain > 75 ? "EXTREME" : conditions.rain > 50 ? "HIGH" : "MODERATE"}\n` +
-               `Action: ${conditions.rain > 75 ? "EVACUATE IMMEDIATELY" : conditions.rain > 50 ? "PREPARE TO EVACUATE" : "AVOID LOW AREAS"}\n` +
-               `Conditions: ${conditions.description}\n` +
-               `Pressure: ${conditions.pressure} hPa\n` +
-               `Humidity: ${conditions.humidity}%`,
+      details:
+        `🚨 CURRENT FLASH FLOOD ${alertLevel}\n` +
+        `Location: ${locationName}\n` +
+        `Rainfall Rate: ${conditions.rain.toFixed(1)} mm/h\n` +
+        `Risk Level: ${
+          conditions.rain > 75
+            ? "EXTREME"
+            : conditions.rain > 50
+            ? "HIGH"
+            : "MODERATE"
+        }\n` +
+        `Action: ${
+          conditions.rain > 75
+            ? "EVACUATE IMMEDIATELY"
+            : conditions.rain > 50
+            ? "PREPARE TO EVACUATE"
+            : "AVOID LOW AREAS"
+        }\n` +
+        `Conditions: ${conditions.description}\n` +
+        `Pressure: ${conditions.pressure} hPa\n` +
+        `Humidity: ${conditions.humidity}%`,
       source: "OpenWeather Flash Flood Detection",
       url: "https://openweathermap.org/",
       emergencyLevel: alertLevel,
-      icon: "🌊"
+      icon: "🌊",
     });
   }
 
   // Forecast-based flash flood alerts
-  const severeFloodForecasts = forecastWarnings.filter(w => w.rain > 20);
+  const severeFloodForecasts = forecastWarnings.filter((w) => w.rain > 20);
   if (severeFloodForecasts.length > 0) {
     const maxRainForecast = severeFloodForecasts.reduce((max, current) =>
       current.rain > max.rain ? current : max
@@ -1404,18 +1573,21 @@ const createFlashFloodAlerts = (conditions, forecastWarnings, location) => {
       severity: maxRainForecast.rain > 50 ? "high" : "moderate",
       type: "Flash Flood",
       date: maxRainForecast.time.toISOString(),
-      details: `📅 UPCOMING FLASH FLOOD RISK\n` +
-               `Location: ${locationName}\n` +
-               `Expected Time: ${maxRainForecast.time.toLocaleString()}\n` +
-               `Forecast Rainfall: ${maxRainForecast.rain.toFixed(1)} mm/h\n` +
-               `Risk Level: ${maxRainForecast.floodRisk}\n` +
-               `Warning Type: ${maxRainForecast.warningType}\n` +
-               `Preparation Time: ${Math.round((maxRainForecast.time - new Date()) / (1000 * 60 * 60))} hours\n` +
-               `Action Required: PREPARE EMERGENCY SUPPLIES AND EVACUATION PLAN`,
+      details:
+        `📅 UPCOMING FLASH FLOOD RISK\n` +
+        `Location: ${locationName}\n` +
+        `Expected Time: ${maxRainForecast.time.toLocaleString()}\n` +
+        `Forecast Rainfall: ${maxRainForecast.rain.toFixed(1)} mm/h\n` +
+        `Risk Level: ${maxRainForecast.floodRisk}\n` +
+        `Warning Type: ${maxRainForecast.warningType}\n` +
+        `Preparation Time: ${Math.round(
+          (maxRainForecast.time - new Date()) / (1000 * 60 * 60)
+        )} hours\n` +
+        `Action Required: PREPARE EMERGENCY SUPPLIES AND EVACUATION PLAN`,
       source: "OpenWeather Flood Forecast",
       url: "https://openweathermap.org/",
       emergencyLevel: maxRainForecast.severity === "high" ? "WARNING" : "WATCH",
-      icon: "🌊"
+      icon: "🌊",
     });
   }
 
@@ -1533,19 +1705,28 @@ function Home() {
   const [locationPermission, setLocationPermission] = useState(null);
   const [showDetailedPopup, setShowDetailedPopup] = useState(false);
   const [selectedDisasterGroup, setSelectedDisasterGroup] = useState(null);
-  const [severityFilter, setSeverityFilter] = useState('high'); // Default to show only critical warnings
+  const [severityFilter, setSeverityFilter] = useState("high"); // Default to show only critical warnings
+  const [showStatsPanel, setShowStatsPanel] = useState(false); // Default hidden on mobile
+  const [showSearchBar, setShowSearchBar] = useState(false); // Default hidden on mobile
 
   // Remove the notification comment and related code
 
   const filterDisasters = useCallback(
     (searchTerm, severity = severityFilter) => {
-      console.log("Filtering disasters with term:", searchTerm, "severity:", severity);
+      console.log(
+        "Filtering disasters with term:",
+        searchTerm,
+        "severity:",
+        severity
+      );
 
       let filtered = disasters;
 
       // First filter by severity
-      if (severity !== 'all') {
-        filtered = filtered.filter(disaster => disaster.severity === severity);
+      if (severity !== "all") {
+        filtered = filtered.filter(
+          (disaster) => disaster.severity === severity
+        );
       }
 
       // Then filter by search term if provided
@@ -1569,7 +1750,9 @@ function Home() {
           });
 
           // Check all other fields
-          const titleMatch = disaster.title?.toLowerCase().includes(searchLower);
+          const titleMatch = disaster.title
+            ?.toLowerCase()
+            .includes(searchLower);
           const typeMatch = disaster.type?.toLowerCase().includes(searchLower);
           const severityMatch = disaster.severity
             ?.toLowerCase()
@@ -1615,7 +1798,8 @@ function Home() {
   // Update the LocationSuggestions component to clear suggestions after selection
   const LocationSuggestions = ({ searchTerm, onSelect }) => {
     const [isVisible, setIsVisible] = useState(true);
-    const suggestionsRef = useRef(null);    useOutsideClick(suggestionsRef, () => setIsVisible(false));    // Reset visibility when search term changes
+    const suggestionsRef = useRef(null);
+    useOutsideClick(suggestionsRef, () => setIsVisible(false)); // Reset visibility when search term changes
     useEffect(() => {
       setIsVisible(true);
     }, [searchTerm]);
@@ -1752,7 +1936,9 @@ function Home() {
       setMapDisasters(allDisasters);
       setDisasters(allDisasters);
       // Apply default severity filter (high) when data loads
-      const highSeverityDisasters = allDisasters.filter(disaster => disaster.severity === 'high');
+      const highSeverityDisasters = allDisasters.filter(
+        (disaster) => disaster.severity === "high"
+      );
       setFilteredDisasters(highSeverityDisasters);
     } catch (error) {
       console.error("Error fetching disaster data:", error);
@@ -1786,28 +1972,28 @@ function Home() {
   // Geolocation function
   const requestUserLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setLocationPermission('not-supported');
-      console.log('Geolocation is not supported by this browser.');
+      setLocationPermission("not-supported");
+      console.log("Geolocation is not supported by this browser.");
       return;
     }
 
-    setLocationPermission('requesting');
+    setLocationPermission("requesting");
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         const userCoords = [latitude, longitude];
         setUserLocation(userCoords);
-        setLocationPermission('granted');
+        setLocationPermission("granted");
 
         // Automatically zoom to user location
         handleZoom(userCoords, 10);
 
-        console.log('User location detected:', userCoords);
+        console.log("User location detected:", userCoords);
       },
       (error) => {
-        setLocationPermission('denied');
-        console.error('Error getting user location:', error);
+        setLocationPermission("denied");
+        console.error("Error getting user location:", error);
 
         // Fallback to default India center
         setUserLocation(null);
@@ -1815,7 +2001,7 @@ function Home() {
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 300000 // 5 minutes
+        maximumAge: 300000, // 5 minutes
       }
     );
   }, [handleZoom]);
@@ -1827,8 +2013,8 @@ function Home() {
 
   // Function to extract alert reason from disaster details
   const getAlertReason = (disaster) => {
-    const details = disaster.details?.toLowerCase() || '';
-    const title = disaster.title?.toLowerCase() || '';
+    const details = disaster.details?.toLowerCase() || "";
+    const title = disaster.title?.toLowerCase() || "";
 
     // Extract actual weather values to determine accurate reasons
     const rainfallMatch = details.match(/rainfall:\s*(\d+\.?\d*)\s*mm\/h/i);
@@ -1846,10 +2032,16 @@ function Home() {
     const visibility = visibilityMatch ? parseFloat(visibilityMatch[1]) : 10;
 
     // PRIORITY 1: Flash Flood Emergencies (only if actual heavy rainfall)
-    if (rainfall > 75 || (details.includes('flash flood emergency') && rainfall > 25)) {
+    if (
+      rainfall > 75 ||
+      (details.includes("flash flood emergency") && rainfall > 25)
+    ) {
       return `Flash Flood Emergency - ${rainfall.toFixed(1)}mm/h`;
     }
-    if (rainfall > 50 || (details.includes('flash flood warning') && rainfall > 15)) {
+    if (
+      rainfall > 50 ||
+      (details.includes("flash flood warning") && rainfall > 15)
+    ) {
       return `Flash Flood Warning - ${rainfall.toFixed(1)}mm/h`;
     }
     if (rainfall > 25) {
@@ -1895,20 +2087,24 @@ function Home() {
 
     // PRIORITY 6: Multi-factor Storm Warnings
     if (rainfall > 15 && windSpeed > 40) {
-      return `Severe Thunderstorm - Rain: ${rainfall.toFixed(1)}mm/h, Wind: ${windSpeed.toFixed(1)}km/h`;
+      return `Severe Thunderstorm - Rain: ${rainfall.toFixed(
+        1
+      )}mm/h, Wind: ${windSpeed.toFixed(1)}km/h`;
     }
 
     // PRIORITY 7: Text-based specific warnings (when no numerical data)
-    if (details.includes('cyclone') || title.includes('cyclone')) {
-      return 'Cyclone Warning';
+    if (details.includes("cyclone") || title.includes("cyclone")) {
+      return "Cyclone Warning";
     }
-    if (details.includes('thunderstorm') || details.includes('severe storm')) {
-      return 'Severe Thunderstorm';
+    if (details.includes("thunderstorm") || details.includes("severe storm")) {
+      return "Severe Thunderstorm";
     }
 
     // Earthquake reasons
-    if (disaster.type === 'Earthquake') {
-      const magMatch = details.match(/magnitude:\s*(\d+\.?\d*)/i) || title.match(/m(\d+\.?\d*)/i);
+    if (disaster.type === "Earthquake") {
+      const magMatch =
+        details.match(/magnitude:\s*(\d+\.?\d*)/i) ||
+        title.match(/m(\d+\.?\d*)/i);
       if (magMatch) {
         const magnitude = magMatch[1];
         if (parseFloat(magnitude) >= 6.0) {
@@ -1918,29 +2114,29 @@ function Home() {
         }
         return `Earthquake - M${magnitude}`;
       }
-      return 'Earthquake Alert';
+      return "Earthquake Alert";
     }
 
     // Landslide reasons
-    if (disaster.type === 'Landslide Warning') {
-      return 'Landslide Risk';
+    if (disaster.type === "Landslide Warning") {
+      return "Landslide Risk";
     }
 
     // Air quality reasons
-    if (disaster.type === 'Air Quality Warning') {
-      if (details.includes('very poor') || details.includes('severe')) {
-        return 'Severe Air Pollution';
+    if (disaster.type === "Air Quality Warning") {
+      if (details.includes("very poor") || details.includes("severe")) {
+        return "Severe Air Pollution";
       }
-      return 'Poor Air Quality';
+      return "Poor Air Quality";
     }
 
     // Flood reasons
-    if (disaster.type === 'Flash Flood' || details.includes('flood')) {
-      return 'Flood Warning';
+    if (disaster.type === "Flash Flood" || details.includes("flood")) {
+      return "Flood Warning";
     }
 
     // PRIORITY 8: No significant weather data - check for general conditions
-    if (disaster.type === 'Weather Warning') {
+    if (disaster.type === "Weather Warning") {
       // If it's a weather warning but no significant conditions, check for general weather
       if (temperature !== null && temperature > 35) {
         return `High Temperature - ${temperature.toFixed(1)}°C`;
@@ -1961,43 +2157,65 @@ function Home() {
         return `Low Pressure - ${pressure}hPa`;
       }
       // If no significant weather conditions at all
-      return 'Weather Monitoring';
+      return "Weather Monitoring";
     }
 
     // Default based on disaster type for non-weather disasters
     switch (disaster.type) {
-      case 'Earthquake':
-        return 'Seismic Activity';
-      case 'Landslide Warning':
-        return 'Landslide Risk';
-      case 'Air Quality Warning':
-        return 'Air Pollution Alert';
-      case 'Flash Flood':
-        return 'Flooding Emergency';
+      case "Earthquake":
+        return "Seismic Activity";
+      case "Landslide Warning":
+        return "Landslide Risk";
+      case "Air Quality Warning":
+        return "Air Pollution Alert";
+      case "Flash Flood":
+        return "Flooding Emergency";
       default:
-        return 'Emergency Alert';
+        return "Emergency Alert";
     }
   };
 
   const { darkMode } = useTheme();
   return (
-    <div className={`min-h-screen ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+    <div
+      className={`min-h-screen ${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+      }`}
+    >
       <Header transparent={true} />
 
       {/* Main Content */}
       <main className="relative">
         {/* Location Permission Notification */}
-        {locationPermission === 'requesting' && (
-          <div className="absolute top-4 right-4 left-4 md:left-auto z-[1001] animate-fade-in-down">
-            <div className={`${darkMode ? "bg-blue-900/90 border-blue-700" : "bg-blue-100/90 border-blue-300"} backdrop-blur-sm border rounded-lg p-4 shadow-lg max-w-sm mx-auto md:mx-0`}>
+        {locationPermission === "requesting" && (
+          <div className="fixed top-4 right-4 left-4 md:left-auto z-[9999] animate-fade-in-down">
+            <div
+              className={`${
+                darkMode
+                  ? "bg-blue-900/90 border-blue-700"
+                  : "bg-blue-100/90 border-blue-300"
+              } backdrop-blur-sm border rounded-lg p-4 shadow-lg max-w-sm mx-auto md:mx-0`}
+            >
               <div className="flex items-center space-x-3">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
                 <div>
-                  <p className={`text-sm font-medium ${darkMode ? "text-blue-100" : "text-blue-900"}`}>
-                    <TranslatableText>Requesting Location Access</TranslatableText>
+                  <p
+                    className={`text-sm font-medium ${
+                      darkMode ? "text-blue-100" : "text-blue-900"
+                    }`}
+                  >
+                    <TranslatableText>
+                      Requesting Location Access
+                    </TranslatableText>
                   </p>
-                  <p className={`text-xs ${darkMode ? "text-blue-200" : "text-blue-700"}`}>
-                    <TranslatableText>Please allow location access to show disasters near you</TranslatableText>
+                  <p
+                    className={`text-xs ${
+                      darkMode ? "text-blue-200" : "text-blue-700"
+                    }`}
+                  >
+                    <TranslatableText>
+                      Please allow location access to show disasters near you
+                    </TranslatableText>
                   </p>
                 </div>
               </div>
@@ -2005,19 +2223,46 @@ function Home() {
           </div>
         )}
 
-        {locationPermission === 'denied' && (
-          <div className="absolute top-4 right-4 left-4 md:left-auto z-[1001] animate-fade-in-down">
-            <div className={`${darkMode ? "bg-yellow-900/90 border-yellow-700" : "bg-yellow-100/90 border-yellow-300"} backdrop-blur-sm border rounded-lg p-4 shadow-lg max-w-sm mx-auto md:mx-0`}>
+        {locationPermission === "denied" && (
+          <div className="fixed top-4 right-4 left-4 md:left-auto z-[9999] animate-fade-in-down">
+            <div
+              className={`${
+                darkMode
+                  ? "bg-yellow-900/90 border-yellow-700"
+                  : "bg-yellow-100/90 border-yellow-300"
+              } backdrop-blur-sm border rounded-lg p-4 shadow-lg max-w-sm mx-auto md:mx-0`}
+            >
               <div className="flex items-start space-x-3">
-                <svg className="w-5 h-5 text-yellow-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-5 h-5 text-yellow-500 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <div className="flex-1">
-                  <p className={`text-sm font-medium ${darkMode ? "text-yellow-100" : "text-yellow-900"}`}>
+                  <p
+                    className={`text-sm font-medium ${
+                      darkMode ? "text-yellow-100" : "text-yellow-900"
+                    }`}
+                  >
                     <TranslatableText>Location Access Denied</TranslatableText>
                   </p>
-                  <p className={`text-xs ${darkMode ? "text-yellow-200" : "text-yellow-700"} mb-2`}>
-                    <TranslatableText>Enable location access in your browser settings for personalized disaster alerts</TranslatableText>
+                  <p
+                    className={`text-xs ${
+                      darkMode ? "text-yellow-200" : "text-yellow-700"
+                    } mb-2`}
+                  >
+                    <TranslatableText>
+                      Enable location access in your browser settings for
+                      personalized disaster alerts
+                    </TranslatableText>
                   </p>
                   <button
                     onClick={requestUserLocation}
@@ -2032,7 +2277,11 @@ function Home() {
         )}
 
         {/* Search Bar - Responsive positioning */}
-        <div className="absolute top-20 md:top-32 left-4 right-4 md:right-auto z-[1000] md:w-80 animate-fade-in-down">
+        <div
+          className={`absolute top-20 md:top-32 left-4 right-4 md:right-auto z-[1000] md:w-80 animate-fade-in-down transition-all duration-300 ${
+            showSearchBar ? "block" : "hidden md:block"
+          }`}
+        >
           <div className="relative transform transition-all duration-300 hover:scale-105">
             <input
               type="text"
@@ -2093,20 +2342,72 @@ function Home() {
           />
         </div>
 
+        {/* Search Toggle Button - Mobile Only */}
+        <div className="absolute top-20 right-4 z-[1001] md:hidden">
+          <button
+            onClick={() => setShowSearchBar(!showSearchBar)}
+            className={`w-12 h-12 ${
+              darkMode ? "bg-gray-800/95" : "bg-white/95"
+            } backdrop-blur-md rounded-xl shadow-lg border ${
+              darkMode ? "border-gray-700" : "border-gray-200"
+            } flex items-center justify-center transition-all duration-300 hover:scale-105`}
+          >
+            <span className="text-xl">{showSearchBar ? "✕" : "🔍"}</span>
+          </button>
+        </div>
+
+        {/* Statistics Toggle Button - Mobile Only */}
+        <div className="absolute top-36 right-4 z-[1001] md:hidden">
+          <button
+            onClick={() => setShowStatsPanel(!showStatsPanel)}
+            className={`w-12 h-12 ${
+              darkMode ? "bg-gray-800/95" : "bg-white/95"
+            } backdrop-blur-md rounded-xl shadow-lg border ${
+              darkMode ? "border-gray-700" : "border-gray-200"
+            } flex items-center justify-center transition-all duration-300 hover:scale-105`}
+          >
+            <span className="text-xl">{showStatsPanel ? "✕" : "📊"}</span>
+          </button>
+        </div>
+
         {/* Statistics Container - Top Right positioning */}
-        <div className="absolute top-32 md:top-40 right-4 left-4 md:left-auto z-[1000] md:w-80 animate-fade-in-down">
-          <div className={`${darkMode ? "bg-gray-800/95" : "bg-white/95"} backdrop-blur-md rounded-2xl shadow-2xl border ${darkMode ? "border-gray-700" : "border-gray-200"} overflow-hidden`}>
+        <div
+          className={`absolute top-52 md:top-40 right-4 left-4 md:left-auto z-[1000] md:w-80 animate-fade-in-down transition-all duration-300 ${
+            showStatsPanel ? "block" : "hidden md:block"
+          }`}
+        >
+          <div
+            className={`${
+              darkMode ? "bg-gray-800/95" : "bg-white/95"
+            } backdrop-blur-md rounded-2xl shadow-2xl border ${
+              darkMode ? "border-gray-700" : "border-gray-200"
+            } overflow-hidden`}
+          >
             {/* Header */}
-            <div className={`${darkMode ? "bg-gray-700/50" : "bg-gray-50/50"} px-4 py-3 border-b ${darkMode ? "border-gray-600" : "border-gray-200"}`}>
+            <div
+              className={`${
+                darkMode ? "bg-gray-700/50" : "bg-gray-50/50"
+              } px-4 py-3 border-b ${
+                darkMode ? "border-gray-600" : "border-gray-200"
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
                   <span className="text-white text-lg">📊</span>
                 </div>
                 <div>
-                  <h3 className={`font-bold text-sm ${darkMode ? "text-white" : "text-gray-900"}`}>
+                  <h3
+                    className={`font-bold text-sm ${
+                      darkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     <TranslatableText>Disaster Statistics</TranslatableText>
                   </h3>
-                  <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                  <p
+                    className={`text-xs ${
+                      darkMode ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
                     <TranslatableText>Live monitoring data</TranslatableText>
                   </p>
                 </div>
@@ -2117,26 +2418,54 @@ function Home() {
             <div className="p-4 space-y-4">
               {/* Total Disasters */}
               <div className="grid grid-cols-2 gap-3">
-                <div className={`${darkMode ? "bg-gray-700/50" : "bg-blue-50"} rounded-xl p-3 border ${darkMode ? "border-gray-600" : "border-blue-200"}`}>
+                <div
+                  className={`${
+                    darkMode ? "bg-gray-700/50" : "bg-blue-50"
+                  } rounded-xl p-3 border ${
+                    darkMode ? "border-gray-600" : "border-blue-200"
+                  }`}
+                >
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-blue-500 text-lg">🌍</span>
-                    <span className={`text-xs font-medium ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                    <span
+                      className={`text-xs font-medium ${
+                        darkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
                       <TranslatableText>Total Disasters</TranslatableText>
                     </span>
                   </div>
-                  <p className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
+                  <p
+                    className={`text-2xl font-bold ${
+                      darkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     {disasters.length}
                   </p>
                 </div>
 
-                <div className={`${darkMode ? "bg-gray-700/50" : "bg-green-50"} rounded-xl p-3 border ${darkMode ? "border-gray-600" : "border-green-200"}`}>
+                <div
+                  className={`${
+                    darkMode ? "bg-gray-700/50" : "bg-green-50"
+                  } rounded-xl p-3 border ${
+                    darkMode ? "border-gray-600" : "border-green-200"
+                  }`}
+                >
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-green-500 text-lg">📋</span>
-                    <span className={`text-xs font-medium ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                    <span
+                      className={`text-xs font-medium ${
+                        darkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
                       <TranslatableText>Filtered Results</TranslatableText>
                     </span>
                   </div>
-                  <p className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
+                  <p
+                    className={`text-2xl font-bold ${
+                      darkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     {filteredDisasters.length}
                   </p>
                 </div>
@@ -2144,7 +2473,11 @@ function Home() {
 
               {/* Severity Breakdown */}
               <div className="space-y-2">
-                <h4 className={`text-xs font-semibold ${darkMode ? "text-gray-300" : "text-gray-700"} mb-2`}>
+                <h4
+                  className={`text-xs font-semibold ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
+                >
                   <TranslatableText>Severity Breakdown</TranslatableText>
                 </h4>
 
@@ -2152,12 +2485,20 @@ function Home() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <span className={`text-xs ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                    <span
+                      className={`text-xs ${
+                        darkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
                       <TranslatableText>Critical</TranslatableText>
                     </span>
                   </div>
-                  <span className={`text-sm font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
-                    {disasters.filter(d => d.severity === 'high').length}
+                  <span
+                    className={`text-sm font-bold ${
+                      darkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {disasters.filter((d) => d.severity === "high").length}
                   </span>
                 </div>
 
@@ -2165,12 +2506,20 @@ function Home() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <span className={`text-xs ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                    <span
+                      className={`text-xs ${
+                        darkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
                       <TranslatableText>Moderate</TranslatableText>
                     </span>
                   </div>
-                  <span className={`text-sm font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
-                    {disasters.filter(d => d.severity === 'moderate').length}
+                  <span
+                    className={`text-sm font-bold ${
+                      darkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {disasters.filter((d) => d.severity === "moderate").length}
                   </span>
                 </div>
 
@@ -2178,19 +2527,31 @@ function Home() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className={`text-xs ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                    <span
+                      className={`text-xs ${
+                        darkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
                       <TranslatableText>Low</TranslatableText>
                     </span>
                   </div>
-                  <span className={`text-sm font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
-                    {disasters.filter(d => d.severity === 'low').length}
+                  <span
+                    className={`text-sm font-bold ${
+                      darkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {disasters.filter((d) => d.severity === "low").length}
                   </span>
                 </div>
               </div>
 
               {/* Disaster Types */}
               <div className="space-y-2">
-                <h4 className={`text-xs font-semibold ${darkMode ? "text-gray-300" : "text-gray-700"} mb-2`}>
+                <h4
+                  className={`text-xs font-semibold ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  } mb-2`}
+                >
                   <TranslatableText>Active Types</TranslatableText>
                 </h4>
 
@@ -2199,48 +2560,96 @@ function Home() {
                     acc[disaster.type] = (acc[disaster.type] || 0) + 1;
                     return acc;
                   }, {})
-                ).slice(0, 4).map(([type, count]) => (
-                  <div key={type} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs">
-                        {type === 'Weather Warning' ? '🌦️' :
-                         type === 'Earthquake' ? '🏔️' :
-                         type === 'Flash Flood' ? '🌊' :
-                         type === 'Landslide Warning' ? '⛰️' :
-                         type === 'Air Quality Warning' ? '💨' : '⚠️'}
-                      </span>
-                      <span className={`text-xs ${darkMode ? "text-gray-300" : "text-gray-600"} truncate`}>
-                        <TranslatableText>{type}</TranslatableText>
+                )
+                  .slice(0, 4)
+                  .map(([type, count]) => (
+                    <div
+                      key={type}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs">
+                          {type === "Weather Warning"
+                            ? "🌦️"
+                            : type === "Earthquake"
+                            ? "🏔️"
+                            : type === "Flash Flood"
+                            ? "🌊"
+                            : type === "Landslide Warning"
+                            ? "⛰️"
+                            : type === "Air Quality Warning"
+                            ? "💨"
+                            : "⚠️"}
+                        </span>
+                        <span
+                          className={`text-xs ${
+                            darkMode ? "text-gray-300" : "text-gray-600"
+                          } truncate`}
+                        >
+                          <TranslatableText>{type}</TranslatableText>
+                        </span>
+                      </div>
+                      <span
+                        className={`text-sm font-bold ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        {count}
                       </span>
                     </div>
-                    <span className={`text-sm font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
-                      {count}
-                    </span>
-                  </div>
-                ))}
+                  ))}
               </div>
 
               {/* Current Filter Status */}
-              {severityFilter !== 'all' && (
-                <div className={`${darkMode ? "bg-blue-900/30" : "bg-blue-50"} rounded-lg p-3 border ${darkMode ? "border-blue-700" : "border-blue-200"}`}>
+              {severityFilter !== "all" && (
+                <div
+                  className={`${
+                    darkMode ? "bg-blue-900/30" : "bg-blue-50"
+                  } rounded-lg p-3 border ${
+                    darkMode ? "border-blue-700" : "border-blue-200"
+                  }`}
+                >
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-blue-500 text-sm">🔍</span>
-                    <span className={`text-xs font-medium ${darkMode ? "text-blue-300" : "text-blue-700"}`}>
+                    <span
+                      className={`text-xs font-medium ${
+                        darkMode ? "text-blue-300" : "text-blue-700"
+                      }`}
+                    >
                       <TranslatableText>Active Filter</TranslatableText>
                     </span>
                   </div>
-                  <p className={`text-xs ${darkMode ? "text-blue-200" : "text-blue-600"}`}>
+                  <p
+                    className={`text-xs ${
+                      darkMode ? "text-blue-200" : "text-blue-600"
+                    }`}
+                  >
                     <TranslatableText>
-                      Showing {severityFilter === 'high' ? 'Critical' : severityFilter === 'moderate' ? 'Moderate' : 'Low'} severity only
+                      Showing{" "}
+                      {severityFilter === "high"
+                        ? "Critical"
+                        : severityFilter === "moderate"
+                        ? "Moderate"
+                        : "Low"}{" "}
+                      severity only
                     </TranslatableText>
                   </p>
                 </div>
               )}
 
               {/* Last Updated */}
-              <div className={`text-center pt-2 border-t ${darkMode ? "border-gray-600" : "border-gray-200"}`}>
-                <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-                  <TranslatableText>Last updated:</TranslatableText> {new Date().toLocaleTimeString()}
+              <div
+                className={`text-center pt-2 border-t ${
+                  darkMode ? "border-gray-600" : "border-gray-200"
+                }`}
+              >
+                <p
+                  className={`text-xs ${
+                    darkMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
+                  <TranslatableText>Last updated:</TranslatableText>{" "}
+                  {new Date().toLocaleTimeString()}
                 </p>
               </div>
             </div>
@@ -2313,36 +2722,80 @@ function Home() {
 
                       // Removed unused getAllWarnings function
 
+                      // Get comprehensive warning information
+                      const warningInfo =
+                        getComprehensiveWeatherWarning(mainDisaster);
+                      const warningColorMap = {
+                        red: {
+                          bg: "bg-red-100",
+                          text: "text-red-800",
+                          border: "border-red-300",
+                          dot: "bg-red-500",
+                        },
+                        orange: {
+                          bg: "bg-orange-100",
+                          text: "text-orange-800",
+                          border: "border-orange-300",
+                          dot: "bg-orange-500",
+                        },
+                        yellow: {
+                          bg: "bg-yellow-100",
+                          text: "text-yellow-800",
+                          border: "border-yellow-300",
+                          dot: "bg-yellow-500",
+                        },
+                        blue: {
+                          bg: "bg-blue-100",
+                          text: "text-blue-800",
+                          border: "border-blue-300",
+                          dot: "bg-blue-500",
+                        },
+                        purple: {
+                          bg: "bg-purple-100",
+                          text: "text-purple-800",
+                          border: "border-purple-300",
+                          dot: "bg-purple-500",
+                        },
+                        gray: {
+                          bg: "bg-gray-100",
+                          text: "text-gray-800",
+                          border: "border-gray-300",
+                          dot: "bg-gray-500",
+                        },
+                        brown: {
+                          bg: "bg-amber-100",
+                          text: "text-amber-800",
+                          border: "border-amber-300",
+                          dot: "bg-amber-600",
+                        },
+                      };
+                      const colorScheme =
+                        warningColorMap[warningInfo.color] ||
+                        warningColorMap["blue"];
 
-
-
-
-                          // Get comprehensive warning information
-                          const warningInfo = getComprehensiveWeatherWarning(mainDisaster);
-                          const warningColorMap = {
-                            'red': { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-300', dot: 'bg-red-500' },
-                            'orange': { bg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-300', dot: 'bg-orange-500' },
-                            'yellow': { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-300', dot: 'bg-yellow-500' },
-                            'blue': { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-300', dot: 'bg-blue-500' },
-                            'purple': { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-300', dot: 'bg-purple-500' },
-                            'gray': { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-300', dot: 'bg-gray-500' },
-                            'brown': { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-300', dot: 'bg-amber-600' }
-                          };
-                          const colorScheme = warningColorMap[warningInfo.color] || warningColorMap['blue'];
-
-                          const tooltipContent = `
+                      const tooltipContent = `
                             <div class="bg-white backdrop-blur-xl border border-gray-300 rounded-2xl shadow-2xl p-4 min-w-[300px] max-w-[380px]">
                               <!-- Enhanced Header with Warning Icon -->
                               <div class="flex items-center gap-3 mb-3">
-                                <div class="w-12 h-12 ${colorScheme.bg} rounded-full flex items-center justify-center border ${colorScheme.border} shadow-lg">
-                                  <span class="text-2xl">${warningInfo.icon}</span>
+                                <div class="w-12 h-12 ${
+                                  colorScheme.bg
+                                } rounded-full flex items-center justify-center border ${
+                        colorScheme.border
+                      } shadow-lg">
+                                  <span class="text-2xl">${
+                                    warningInfo.icon
+                                  }</span>
                                 </div>
                                 <div class="flex-1">
                                   <h3 class="font-bold text-gray-900 text-sm leading-tight mb-1">
                                     ${warningInfo.title}
                                   </h3>
                                   <div class="flex items-center gap-2">
-                                    <span class="px-2 py-0.5 rounded-full text-xs font-bold ${colorScheme.bg} ${colorScheme.text} border ${colorScheme.border}">
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-bold ${
+                                      colorScheme.bg
+                                    } ${colorScheme.text} border ${
+                        colorScheme.border
+                      }">
                                       ${warningInfo.severity.toUpperCase()} ALERT
                                     </span>
                                     <span class="text-xs text-gray-600">
@@ -2353,18 +2806,56 @@ function Home() {
                               </div>
 
                               <!-- Prominent Warning Display -->
-                              <div class="bg-gradient-to-r ${colorScheme.bg} rounded-xl p-4 border ${colorScheme.border} mb-3 shadow-sm">
+                              <div class="bg-gradient-to-r ${
+                                colorScheme.bg
+                              } rounded-xl p-4 border ${
+                        colorScheme.border
+                      } mb-3 shadow-sm">
                                 <div class="flex items-center gap-2 mb-2">
-                                  <span class="w-2 h-2 ${colorScheme.dot} rounded-full animate-pulse"></span>
-                                  <p class="font-bold ${colorScheme.text} text-sm">ACTIVE WARNINGS</p>
+                                  <span class="w-2 h-2 ${
+                                    colorScheme.dot
+                                  } rounded-full animate-pulse"></span>
+                                  <p class="font-bold ${
+                                    colorScheme.text
+                                  } text-sm">ACTIVE WARNINGS</p>
                                 </div>
                                 <div class="space-y-1.5 max-h-32 overflow-y-auto">
-                                  ${warningInfo.warnings.map(warning => `
+                                  ${warningInfo.warnings
+                                    .map(
+                                      (warning) => `
                                     <div class="flex items-start gap-2">
-                                      <span class="text-lg mt-0.5">${warning.includes('EMERGENCY') || warning.includes('EXTREME') ? '🚨' : warning.includes('WARNING') || warning.includes('ALERT') ? '⚠️' : warning.includes('FLOOD') || warning.includes('RAINFALL') ? '🌊' : warning.includes('HEAT') || warning.includes('TEMPERATURE') ? '🔥' : warning.includes('COLD') || warning.includes('FROST') ? '❄️' : warning.includes('WIND') ? '💨' : '⚡'}</span>
-                                      <span class="text-sm ${colorScheme.text} font-medium leading-relaxed">${warning.replace(/^[🚨⚠️🌊🔥❄️💨⚡🌡️💧🏠🚗👁️📊🌀🌩️🌪️🌫️🧊\s]*/, '').trim()}</span>
+                                      <span class="text-lg mt-0.5">${
+                                        warning.includes("EMERGENCY") ||
+                                        warning.includes("EXTREME")
+                                          ? "🚨"
+                                          : warning.includes("WARNING") ||
+                                            warning.includes("ALERT")
+                                          ? "⚠️"
+                                          : warning.includes("FLOOD") ||
+                                            warning.includes("RAINFALL")
+                                          ? "🌊"
+                                          : warning.includes("HEAT") ||
+                                            warning.includes("TEMPERATURE")
+                                          ? "🔥"
+                                          : warning.includes("COLD") ||
+                                            warning.includes("FROST")
+                                          ? "❄️"
+                                          : warning.includes("WIND")
+                                          ? "💨"
+                                          : "⚡"
+                                      }</span>
+                                      <span class="text-sm ${
+                                        colorScheme.text
+                                      } font-medium leading-relaxed">${warning
+                                        .replace(
+                                          /^[🚨⚠️🌊🔥❄️💨⚡🌡️💧🏠🚗👁️📊🌀🌩️🌪️🌫️🧊\s]*/,
+                                          ""
+                                        )
+                                        .trim()}</span>
                                     </div>
-                                  `).join('')}
+                                  `
+                                    )
+                                    .join("")}
                                 </div>
                               </div>
 
@@ -2376,331 +2867,598 @@ function Home() {
                                 </div>
                                 <div class="text-right">
                                   <p class="text-xs text-gray-500">Click for emergency details</p>
-                                  <p class="text-xs font-medium ${colorScheme.text}">${warningInfo.description}</p>
+                                  <p class="text-xs font-medium ${
+                                    colorScheme.text
+                                  }">${warningInfo.description}</p>
                                 </div>
                               </div>
                             </div>
                           `;
 
-                          layer
-                            .bindTooltip(tooltipContent, {
-                              permanent: false,
-                              direction: "top",
-                              className: "modern-disaster-tooltip",
-                              offset: [0, -15],
-                              opacity: 1,
-                              interactive: false,
-                            })
-                            .openTooltip();
-                        },
-                        mouseout: (e) => {
-                          const layer = e.target;
-                          layer.setStyle({
-                            fillOpacity: 0.2,
-                          });
-                          layer.unbindTooltip();
-                        },
-                        click: (e) => {
-                          const layer = e.target;
-                          const bounds = layer.getBounds();
-                          const center = bounds.getCenter();
-                          if (center) {
-                            handleZoom([center.lat, center.lng], 10);
-                          }
-                          // Show detailed popup in bottom left
-                          setSelectedDisasterGroup(disasterGroup);
-                          setShowDetailedPopup(true);
-                        },
-                      }}
-                    >
+                      layer
+                        .bindTooltip(tooltipContent, {
+                          permanent: false,
+                          direction: "top",
+                          className: "modern-disaster-tooltip",
+                          offset: [0, -15],
+                          opacity: 1,
+                          interactive: false,
+                        })
+                        .openTooltip();
+                    },
+                    mouseout: (e) => {
+                      const layer = e.target;
+                      layer.setStyle({
+                        fillOpacity: 0.2,
+                      });
+                      layer.unbindTooltip();
+                    },
+                    click: (e) => {
+                      const layer = e.target;
+                      const bounds = layer.getBounds();
+                      const center = bounds.getCenter();
+                      if (center) {
+                        handleZoom([center.lat, center.lng], 10);
+                      }
+                      // Show detailed popup in bottom left
+                      setSelectedDisasterGroup(disasterGroup);
+                      setShowDetailedPopup(true);
+                    },
+                  }}
+                ></Polygon>
+              );
+            })}
+            <Legend />
+            <MapController location={location} />
+          </MapContainer>
 
-                    </Polygon>
-                  );                })}                
-                <Legend />
-                <MapController location={location} />
-              </MapContainer>
+          {/* Enhanced Bottom Right Detailed Popup - Responsive */}
+          {showDetailedPopup && selectedDisasterGroup && (
+            <div className="absolute bottom-4 right-4 left-4 md:left-auto z-[1000] md:w-[480px] max-h-[85vh] overflow-y-auto animate-fade-in-up">
+              <div className="bg-white backdrop-blur-xl border border-gray-300 rounded-2xl shadow-2xl ring-1 ring-gray-200 overflow-hidden">
+                {(() => {
+                  const mainWarningInfo = getComprehensiveWeatherWarning(
+                    selectedDisasterGroup[0]
+                  );
+                  const warningColorMap = {
+                    red: {
+                      bg: "bg-red-50",
+                      headerBg: "bg-red-100",
+                      text: "text-red-800",
+                      border: "border-red-300",
+                      dot: "bg-red-500",
+                      icon: "bg-red-200",
+                    },
+                    orange: {
+                      bg: "bg-orange-50",
+                      headerBg: "bg-orange-100",
+                      text: "text-orange-800",
+                      border: "border-orange-300",
+                      dot: "bg-orange-500",
+                      icon: "bg-orange-200",
+                    },
+                    yellow: {
+                      bg: "bg-yellow-50",
+                      headerBg: "bg-yellow-100",
+                      text: "text-yellow-800",
+                      border: "border-yellow-300",
+                      dot: "bg-yellow-500",
+                      icon: "bg-yellow-200",
+                    },
+                    blue: {
+                      bg: "bg-blue-50",
+                      headerBg: "bg-blue-100",
+                      text: "text-blue-800",
+                      border: "border-blue-300",
+                      dot: "bg-blue-500",
+                      icon: "bg-blue-200",
+                    },
+                    purple: {
+                      bg: "bg-purple-50",
+                      headerBg: "bg-purple-100",
+                      text: "text-purple-800",
+                      border: "border-purple-300",
+                      dot: "bg-purple-500",
+                      icon: "bg-purple-200",
+                    },
+                    gray: {
+                      bg: "bg-gray-50",
+                      headerBg: "bg-gray-100",
+                      text: "text-gray-800",
+                      border: "border-gray-300",
+                      dot: "bg-gray-500",
+                      icon: "bg-gray-200",
+                    },
+                    brown: {
+                      bg: "bg-amber-50",
+                      headerBg: "bg-amber-100",
+                      text: "text-amber-800",
+                      border: "border-amber-300",
+                      dot: "bg-amber-600",
+                      icon: "bg-amber-200",
+                    },
+                  };
+                  const colorScheme =
+                    warningColorMap[mainWarningInfo.color] ||
+                    warningColorMap["blue"];
 
-              {/* Enhanced Bottom Right Detailed Popup - Responsive */}
-              {showDetailedPopup && selectedDisasterGroup && (
-                <div className="absolute bottom-4 right-4 left-4 md:left-auto z-[1000] md:w-[480px] max-h-[85vh] overflow-y-auto animate-fade-in-up">
-                  <div className="bg-white backdrop-blur-xl border border-gray-300 rounded-2xl shadow-2xl ring-1 ring-gray-200 overflow-hidden">
-                    {(() => {
-                      const mainWarningInfo = getComprehensiveWeatherWarning(selectedDisasterGroup[0]);
-                      const warningColorMap = {
-                        'red': { bg: 'bg-red-50', headerBg: 'bg-red-100', text: 'text-red-800', border: 'border-red-300', dot: 'bg-red-500', icon: 'bg-red-200' },
-                        'orange': { bg: 'bg-orange-50', headerBg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-300', dot: 'bg-orange-500', icon: 'bg-orange-200' },
-                        'yellow': { bg: 'bg-yellow-50', headerBg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-300', dot: 'bg-yellow-500', icon: 'bg-yellow-200' },
-                        'blue': { bg: 'bg-blue-50', headerBg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-300', dot: 'bg-blue-500', icon: 'bg-blue-200' },
-                        'purple': { bg: 'bg-purple-50', headerBg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-300', dot: 'bg-purple-500', icon: 'bg-purple-200' },
-                        'gray': { bg: 'bg-gray-50', headerBg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-300', dot: 'bg-gray-500', icon: 'bg-gray-200' },
-                        'brown': { bg: 'bg-amber-50', headerBg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-300', dot: 'bg-amber-600', icon: 'bg-amber-200' }
-                      };
-                      const colorScheme = warningColorMap[mainWarningInfo.color] || warningColorMap['blue'];
-
-                      return (
-                        <>
-                          {/* Enhanced Header with Warning Colors */}
-                          <div className={`bg-gradient-to-r ${colorScheme.headerBg} to-white p-5 border-b ${colorScheme.border}`}>
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-4">
-                                <div className={`w-14 h-14 ${colorScheme.icon} rounded-2xl flex items-center justify-center border ${colorScheme.border} shadow-lg`}>
-                                  <span className="text-3xl">{mainWarningInfo.icon}</span>
-                                </div>
-                                <div>
-                                  <h3 className="font-bold text-xl text-gray-900 mb-1">
-                                    {mainWarningInfo.title}
-                                  </h3>
-                                  <div className="flex items-center gap-3">
-                                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${colorScheme.bg} ${colorScheme.text} border ${colorScheme.border}`}>
-                                      {mainWarningInfo.severity.toUpperCase()} ALERT
-                                    </span>
-                                    <span className="text-sm text-gray-600">
-                                      {selectedDisasterGroup.length} Active Alert{selectedDisasterGroup.length !== 1 ? 's' : ''}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                              <button
-                                onClick={() => setShowDetailedPopup(false)}
-                                className="w-10 h-10 bg-white hover:bg-gray-100 text-gray-600 hover:text-gray-800 transition-colors rounded-full flex items-center justify-center shadow-md border border-gray-300"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              </button>
+                  return (
+                    <>
+                      {/* Enhanced Header with Warning Colors */}
+                      <div
+                        className={`bg-gradient-to-r ${colorScheme.headerBg} to-white p-5 border-b ${colorScheme.border}`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-4">
+                            <div
+                              className={`w-14 h-14 ${colorScheme.icon} rounded-2xl flex items-center justify-center border ${colorScheme.border} shadow-lg`}
+                            >
+                              <span className="text-3xl">
+                                {mainWarningInfo.icon}
+                              </span>
                             </div>
-
-                            {/* Critical Warning Banner */}
-                            {mainWarningInfo.severity === 'high' && (
-                              <div className="bg-red-100 border border-red-300 rounded-lg p-3 mb-3">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-red-600 text-lg">🚨</span>
-                                  <p className="font-bold text-red-800 text-sm">CRITICAL WEATHER EMERGENCY</p>
-                                </div>
-                                <p className="text-red-700 text-xs mt-1">Immediate action required - Follow emergency protocols</p>
-                              </div>
-                            )}
-
-                            <div className="flex items-center justify-between text-sm">
-                              <div className="flex items-center gap-2">
-                                <span className={`w-2 h-2 ${colorScheme.dot} rounded-full animate-pulse`}></span>
-                                <span className="font-medium text-gray-700">LIVE MONITORING</span>
-                              </div>
-                              <div className="flex items-center text-gray-500">
-                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Updated: {new Date().toLocaleTimeString()}
+                            <div>
+                              <h3 className="font-bold text-xl text-gray-900 mb-1">
+                                {mainWarningInfo.title}
+                              </h3>
+                              <div className="flex items-center gap-3">
+                                <span
+                                  className={`px-3 py-1 rounded-full text-sm font-bold ${colorScheme.bg} ${colorScheme.text} border ${colorScheme.border}`}
+                                >
+                                  {mainWarningInfo.severity.toUpperCase()} ALERT
+                                </span>
+                                <span className="text-sm text-gray-600">
+                                  {selectedDisasterGroup.length} Active Alert
+                                  {selectedDisasterGroup.length !== 1
+                                    ? "s"
+                                    : ""}
+                                </span>
                               </div>
                             </div>
                           </div>
-                        </>
-                      );
-                    })()}
-
-                    {/* Enhanced Content Section */}
-                    <div className="p-5 space-y-5 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                      {selectedDisasterGroup.map((disaster, index) => {
-                        const warningInfo = getComprehensiveWeatherWarning(disaster);
-                        const warningColorMap = {
-                          'red': { bg: 'bg-red-50', text: 'text-red-800', border: 'border-red-300', dot: 'bg-red-500', icon: 'bg-red-100', button: 'bg-red-600 hover:bg-red-700' },
-                          'orange': { bg: 'bg-orange-50', text: 'text-orange-800', border: 'border-orange-300', dot: 'bg-orange-500', icon: 'bg-orange-100', button: 'bg-orange-600 hover:bg-orange-700' },
-                          'yellow': { bg: 'bg-yellow-50', text: 'text-yellow-800', border: 'border-yellow-300', dot: 'bg-yellow-500', icon: 'bg-yellow-100', button: 'bg-yellow-600 hover:bg-yellow-700' },
-                          'blue': { bg: 'bg-blue-50', text: 'text-blue-800', border: 'border-blue-300', dot: 'bg-blue-500', icon: 'bg-blue-100', button: 'bg-blue-600 hover:bg-blue-700' },
-                          'purple': { bg: 'bg-purple-50', text: 'text-purple-800', border: 'border-purple-300', dot: 'bg-purple-500', icon: 'bg-purple-100', button: 'bg-purple-600 hover:bg-purple-700' },
-                          'gray': { bg: 'bg-gray-50', text: 'text-gray-800', border: 'border-gray-300', dot: 'bg-gray-500', icon: 'bg-gray-100', button: 'bg-gray-600 hover:bg-gray-700' },
-                          'brown': { bg: 'bg-amber-50', text: 'text-amber-800', border: 'border-amber-300', dot: 'bg-amber-600', icon: 'bg-amber-100', button: 'bg-amber-600 hover:bg-amber-700' }
-                        };
-                        const colorScheme = warningColorMap[warningInfo.color] || warningColorMap['blue'];
-
-                        return (
-                          <div
-                            key={disaster.id || index}
-                            className={`${colorScheme.bg} rounded-2xl p-5 border ${colorScheme.border} shadow-lg`}
+                          <button
+                            onClick={() => setShowDetailedPopup(false)}
+                            className="w-10 h-10 bg-white hover:bg-gray-100 text-gray-600 hover:text-gray-800 transition-colors rounded-full flex items-center justify-center shadow-md border border-gray-300"
                           >
-                            {/* Enhanced Disaster Header */}
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-4">
-                                <div className={`w-12 h-12 ${colorScheme.icon} rounded-xl flex items-center justify-center border ${colorScheme.border} shadow-md`}>
-                                  <span className="text-2xl">{warningInfo.icon}</span>
-                                </div>
-                                <div>
-                                  <h4 className="font-bold text-gray-900 text-lg mb-1">
-                                    <TranslatableText>{warningInfo.title}</TranslatableText>
-                                  </h4>
-                                  <div className="flex items-center gap-2">
-                                    <span className={`w-2 h-2 ${colorScheme.dot} rounded-full animate-pulse`}></span>
-                                    <span className="text-sm text-gray-600">{warningInfo.description}</span>
-                                  </div>
-                                </div>
-                              </div>
-                              <span className={`px-4 py-2 rounded-full text-sm font-bold ${colorScheme.bg} ${colorScheme.text} border ${colorScheme.border} shadow-sm`}>
-                                <TranslatableText>{warningInfo.severity.toUpperCase()}</TranslatableText>
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+
+                        {/* Critical Warning Banner */}
+                        {mainWarningInfo.severity === "high" && (
+                          <div className="bg-red-100 border border-red-300 rounded-lg p-3 mb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-red-600 text-lg">🚨</span>
+                              <p className="font-bold text-red-800 text-sm">
+                                CRITICAL WEATHER EMERGENCY
+                              </p>
+                            </div>
+                            <p className="text-red-700 text-xs mt-1">
+                              Immediate action required - Follow emergency
+                              protocols
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`w-2 h-2 ${colorScheme.dot} rounded-full animate-pulse`}
+                            ></span>
+                            <span className="font-medium text-gray-700">
+                              LIVE MONITORING
+                            </span>
+                          </div>
+                          <div className="flex items-center text-gray-500">
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            Updated: {new Date().toLocaleTimeString()}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+
+                {/* Enhanced Content Section */}
+                <div className="p-5 space-y-5 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                  {selectedDisasterGroup.map((disaster, index) => {
+                    const warningInfo =
+                      getComprehensiveWeatherWarning(disaster);
+                    const warningColorMap = {
+                      red: {
+                        bg: "bg-red-50",
+                        text: "text-red-800",
+                        border: "border-red-300",
+                        dot: "bg-red-500",
+                        icon: "bg-red-100",
+                        button: "bg-red-600 hover:bg-red-700",
+                      },
+                      orange: {
+                        bg: "bg-orange-50",
+                        text: "text-orange-800",
+                        border: "border-orange-300",
+                        dot: "bg-orange-500",
+                        icon: "bg-orange-100",
+                        button: "bg-orange-600 hover:bg-orange-700",
+                      },
+                      yellow: {
+                        bg: "bg-yellow-50",
+                        text: "text-yellow-800",
+                        border: "border-yellow-300",
+                        dot: "bg-yellow-500",
+                        icon: "bg-yellow-100",
+                        button: "bg-yellow-600 hover:bg-yellow-700",
+                      },
+                      blue: {
+                        bg: "bg-blue-50",
+                        text: "text-blue-800",
+                        border: "border-blue-300",
+                        dot: "bg-blue-500",
+                        icon: "bg-blue-100",
+                        button: "bg-blue-600 hover:bg-blue-700",
+                      },
+                      purple: {
+                        bg: "bg-purple-50",
+                        text: "text-purple-800",
+                        border: "border-purple-300",
+                        dot: "bg-purple-500",
+                        icon: "bg-purple-100",
+                        button: "bg-purple-600 hover:bg-purple-700",
+                      },
+                      gray: {
+                        bg: "bg-gray-50",
+                        text: "text-gray-800",
+                        border: "border-gray-300",
+                        dot: "bg-gray-500",
+                        icon: "bg-gray-100",
+                        button: "bg-gray-600 hover:bg-gray-700",
+                      },
+                      brown: {
+                        bg: "bg-amber-50",
+                        text: "text-amber-800",
+                        border: "border-amber-300",
+                        dot: "bg-amber-600",
+                        icon: "bg-amber-100",
+                        button: "bg-amber-600 hover:bg-amber-700",
+                      },
+                    };
+                    const colorScheme =
+                      warningColorMap[warningInfo.color] ||
+                      warningColorMap["blue"];
+
+                    return (
+                      <div
+                        key={disaster.id || index}
+                        className={`${colorScheme.bg} rounded-2xl p-5 border ${colorScheme.border} shadow-lg`}
+                      >
+                        {/* Enhanced Disaster Header */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-4">
+                            <div
+                              className={`w-12 h-12 ${colorScheme.icon} rounded-xl flex items-center justify-center border ${colorScheme.border} shadow-md`}
+                            >
+                              <span className="text-2xl">
+                                {warningInfo.icon}
                               </span>
                             </div>
-
-                            {/* Prominent Warning List */}
-                            {warningInfo.warnings.length > 0 && (
-                              <div className="bg-white rounded-xl p-4 border border-gray-200 mb-4 shadow-sm">
-                                <div className="flex items-center gap-2 mb-3">
-                                  <span className="text-lg">🚨</span>
-                                  <h5 className="font-bold text-gray-900 text-sm">ACTIVE WARNINGS</h5>
-                                </div>
-                                <div className="space-y-2">
-                                  {warningInfo.warnings.map((warning, wIndex) => (
-                                    <div key={wIndex} className="flex items-start gap-3 p-2 bg-gray-50 rounded-lg">
-                                      <span className="text-lg mt-0.5">
-                                        {warning.includes('EMERGENCY') || warning.includes('EXTREME') ? '🚨' :
-                                         warning.includes('WARNING') || warning.includes('ALERT') ? '⚠️' :
-                                         warning.includes('FLOOD') || warning.includes('RAINFALL') ? '🌊' :
-                                         warning.includes('HEAT') || warning.includes('TEMPERATURE') ? '🔥' :
-                                         warning.includes('COLD') || warning.includes('FROST') ? '❄️' :
-                                         warning.includes('WIND') ? '💨' : '⚡'}
-                                      </span>
-                                      <span className="text-sm text-gray-800 font-medium leading-relaxed">
-                                        <TranslatableText>
-                                          {warning.replace(/^[🚨⚠️🌊🔥❄️💨⚡🌡️💧🏠🚗👁️📊🌀🌩️🌪️🌫️🧊\s]*/, '').trim()}
-                                        </TranslatableText>
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
+                            <div>
+                              <h4 className="font-bold text-gray-900 text-lg mb-1">
+                                <TranslatableText>
+                                  {warningInfo.title}
+                                </TranslatableText>
+                              </h4>
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`w-2 h-2 ${colorScheme.dot} rounded-full animate-pulse`}
+                                ></span>
+                                <span className="text-sm text-gray-600">
+                                  {warningInfo.description}
+                                </span>
                               </div>
-                            )}
+                            </div>
+                          </div>
+                          <span
+                            className={`px-4 py-2 rounded-full text-sm font-bold ${colorScheme.bg} ${colorScheme.text} border ${colorScheme.border} shadow-sm`}
+                          >
+                            <TranslatableText>
+                              {warningInfo.severity.toUpperCase()}
+                            </TranslatableText>
+                          </span>
+                        </div>
 
-                            {/* Forecast Details Section */}
-                            {warningInfo.forecast && warningInfo.forecast.length > 0 && (
-                              <div className="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200 shadow-sm">
-                                <div className="flex items-center gap-2 mb-3">
-                                  <span className="text-lg">📅</span>
-                                  <h6 className="font-bold text-blue-900 text-sm">48-HOUR FORECAST</h6>
+                        {/* Prominent Warning List */}
+                        {warningInfo.warnings.length > 0 && (
+                          <div className="bg-white rounded-xl p-4 border border-gray-200 mb-4 shadow-sm">
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-lg">🚨</span>
+                              <h5 className="font-bold text-gray-900 text-sm">
+                                ACTIVE WARNINGS
+                              </h5>
+                            </div>
+                            <div className="space-y-2">
+                              {warningInfo.warnings.map((warning, wIndex) => (
+                                <div
+                                  key={wIndex}
+                                  className="flex items-start gap-3 p-2 bg-gray-50 rounded-lg"
+                                >
+                                  <span className="text-lg mt-0.5">
+                                    {warning.includes("EMERGENCY") ||
+                                    warning.includes("EXTREME")
+                                      ? "🚨"
+                                      : warning.includes("WARNING") ||
+                                        warning.includes("ALERT")
+                                      ? "⚠️"
+                                      : warning.includes("FLOOD") ||
+                                        warning.includes("RAINFALL")
+                                      ? "🌊"
+                                      : warning.includes("HEAT") ||
+                                        warning.includes("TEMPERATURE")
+                                      ? "🔥"
+                                      : warning.includes("COLD") ||
+                                        warning.includes("FROST")
+                                      ? "❄️"
+                                      : warning.includes("WIND")
+                                      ? "💨"
+                                      : "⚡"}
+                                  </span>
+                                  <span className="text-sm text-gray-800 font-medium leading-relaxed">
+                                    <TranslatableText>
+                                      {warning
+                                        .replace(
+                                          /^[🚨⚠️🌊🔥❄️💨⚡🌡️💧🏠🚗👁️📊🌀🌩️🌪️🌫️🧊\s]*/,
+                                          ""
+                                        )
+                                        .trim()}
+                                    </TranslatableText>
+                                  </span>
                                 </div>
-                                <div className="space-y-3 max-h-32 overflow-y-auto">
-                                  {warningInfo.forecast.slice(0, 6).map((forecast, fIndex) => (
-                                    <div key={fIndex} className="bg-white rounded-lg p-3 border border-blue-200">
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Forecast Details Section */}
+                        {warningInfo.forecast &&
+                          warningInfo.forecast.length > 0 && (
+                            <div className="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200 shadow-sm">
+                              <div className="flex items-center gap-2 mb-3">
+                                <span className="text-lg">📅</span>
+                                <h6 className="font-bold text-blue-900 text-sm">
+                                  48-HOUR FORECAST
+                                </h6>
+                              </div>
+                              <div className="space-y-3 max-h-32 overflow-y-auto">
+                                {warningInfo.forecast
+                                  .slice(0, 6)
+                                  .map((forecast, fIndex) => (
+                                    <div
+                                      key={fIndex}
+                                      className="bg-white rounded-lg p-3 border border-blue-200"
+                                    >
                                       <div className="flex items-center justify-between mb-2">
-                                        <span className="font-medium text-blue-900 text-xs">{forecast.time}</span>
+                                        <span className="font-medium text-blue-900 text-xs">
+                                          {forecast.time}
+                                        </span>
                                         <div className="flex items-center gap-2">
-                                          {forecast.rainfall > 10 && <span className="text-blue-600">🌧️</span>}
-                                          {forecast.temperature > 35 && <span className="text-red-600">🔥</span>}
-                                          {forecast.windSpeed > 40 && <span className="text-gray-600">💨</span>}
+                                          {forecast.rainfall > 10 && (
+                                            <span className="text-blue-600">
+                                              🌧️
+                                            </span>
+                                          )}
+                                          {forecast.temperature > 35 && (
+                                            <span className="text-red-600">
+                                              🔥
+                                            </span>
+                                          )}
+                                          {forecast.windSpeed > 40 && (
+                                            <span className="text-gray-600">
+                                              💨
+                                            </span>
+                                          )}
                                         </div>
                                       </div>
                                       <div className="grid grid-cols-3 gap-2 text-xs">
                                         <div className="text-center">
                                           <p className="text-gray-500">Temp</p>
-                                          <p className="font-medium text-gray-800">{forecast.temperature.toFixed(1)}°C</p>
+                                          <p className="font-medium text-gray-800">
+                                            {forecast.temperature.toFixed(1)}°C
+                                          </p>
                                         </div>
                                         <div className="text-center">
                                           <p className="text-gray-500">Rain</p>
-                                          <p className="font-medium text-blue-600">{forecast.rainfall.toFixed(1)}mm/h</p>
+                                          <p className="font-medium text-blue-600">
+                                            {forecast.rainfall.toFixed(1)}mm/h
+                                          </p>
                                         </div>
                                         <div className="text-center">
                                           <p className="text-gray-500">Wind</p>
-                                          <p className="font-medium text-gray-600">{forecast.windSpeed.toFixed(1)}km/h</p>
+                                          <p className="font-medium text-gray-600">
+                                            {forecast.windSpeed.toFixed(1)}km/h
+                                          </p>
                                         </div>
                                       </div>
                                       <p className="text-xs text-gray-600 mt-2 italic">
-                                        <TranslatableText>{forecast.condition}</TranslatableText>
+                                        <TranslatableText>
+                                          {forecast.condition}
+                                        </TranslatableText>
                                       </p>
                                     </div>
                                   ))}
-                                </div>
                               </div>
-                            )}
+                            </div>
+                          )}
 
-                            {/* Disaster Details */}
-                            <div className="mb-4 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-sm">📋</span>
-                                <h6 className="font-semibold text-gray-900 text-sm">DETAILED INFORMATION</h6>
-                              </div>
-                              <p className="text-gray-700 text-sm leading-relaxed">
-                                <TranslatableText>{disaster.details}</TranslatableText>
+                        {/* Disaster Details */}
+                        <div className="mb-4 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm">📋</span>
+                            <h6 className="font-semibold text-gray-900 text-sm">
+                              DETAILED INFORMATION
+                            </h6>
+                          </div>
+                          <p className="text-gray-700 text-sm leading-relaxed">
+                            <TranslatableText>
+                              {disaster.details}
+                            </TranslatableText>
+                          </p>
+                        </div>
+
+                        {/* Enhanced Action Buttons */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <a
+                            href={`/mitigation?type=${encodeURIComponent(
+                              disaster.type
+                            )}`}
+                            className={`${colorScheme.button} text-white py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105`}
+                          >
+                            <span className="text-lg">🛡️</span>
+                            <div className="text-center">
+                              <p>
+                                <TranslatableText>
+                                  Safety Guide
+                                </TranslatableText>
+                              </p>
+                              <p className="text-xs opacity-90">
+                                <TranslatableText>
+                                  View Precautions
+                                </TranslatableText>
                               </p>
                             </div>
-
-                            {/* Enhanced Action Buttons */}
-                            <div className="grid grid-cols-2 gap-4">
-                              <a
-                                href={`/mitigation?type=${encodeURIComponent(disaster.type)}`}
-                                className={`${colorScheme.button} text-white py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105`}
-                              >
-                                <span className="text-lg">🛡️</span>
-                                <div className="text-center">
-                                  <p><TranslatableText>Safety Guide</TranslatableText></p>
-                                  <p className="text-xs opacity-90"><TranslatableText>View Precautions</TranslatableText></p>
-                                </div>
-                              </a>
-                              <button
-                                onClick={() => window.open('tel:112', '_self')}
-                                className="bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 animate-pulse"
-                              >
-                                <span className="text-lg">🚨</span>
-                                <div className="text-center">
-                                  <p><TranslatableText>Emergency Call</TranslatableText></p>
-                                  <p className="text-xs opacity-90"><TranslatableText>Call 112 Now</TranslatableText></p>
-                                </div>
-                              </button>
+                          </a>
+                          <button
+                            onClick={() => window.open("tel:112", "_self")}
+                            className="bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 animate-pulse"
+                          >
+                            <span className="text-lg">🚨</span>
+                            <div className="text-center">
+                              <p>
+                                <TranslatableText>
+                                  Emergency Call
+                                </TranslatableText>
+                              </p>
+                              <p className="text-xs opacity-90">
+                                <TranslatableText>
+                                  Call 112 Now
+                                </TranslatableText>
+                              </p>
                             </div>
+                          </button>
+                        </div>
 
-                            {/* Footer */}
-                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
-                              <time className="text-xs text-gray-500">
-                                {new Date(disaster.date).toLocaleDateString("en-IN", {
-                                  day: "numeric",
-                                  month: "short",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </time>
-                              <a
-                                href={disaster.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-700 text-xs font-medium flex items-center gap-1"
-                              >
-                                <TranslatableText>Full Report</TranslatableText>
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                </svg>
-                              </a>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                        {/* Footer */}
+                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                          <time className="text-xs text-gray-500">
+                            {new Date(disaster.date).toLocaleDateString(
+                              "en-IN",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </time>
+                          <a
+                            href={disaster.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-700 text-xs font-medium flex items-center gap-1"
+                          >
+                            <TranslatableText>Full Report</TranslatableText>
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                              />
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
+              </div>
             </div>
+          )}
+        </div>
 
-            {/* Updates Container Below Map */}
-            <div className={`${darkMode ? "bg-gray-900" : "bg-gray-50"} py-12 animate-fade-in-up`}>
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Updates Container Below Map */}
+        <div
+          className={`${
+            darkMode ? "bg-gray-900" : "bg-gray-50"
+          } py-12 animate-fade-in-up`}
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Header */}
             <div className="text-center mb-12 animate-fade-in">
-              <h2 className={`text-4xl font-bold ${darkMode ? "text-white" : "text-gray-900"} mb-4`}>
+              <h2
+                className={`text-4xl font-bold ${
+                  darkMode ? "text-white" : "text-gray-900"
+                } mb-4`}
+              >
                 <TranslatableText>
-                  {severityFilter === 'high' ? 'Critical Disaster Alerts' :
-                   severityFilter === 'moderate' ? 'Moderate Disaster Updates' :
-                   severityFilter === 'low' ? 'Low Priority Updates' :
-                   'Latest Disaster Updates'}
+                  {severityFilter === "high"
+                    ? "Critical Disaster Alerts"
+                    : severityFilter === "moderate"
+                    ? "Moderate Disaster Updates"
+                    : severityFilter === "low"
+                    ? "Low Priority Updates"
+                    : "Latest Disaster Updates"}
                 </TranslatableText>
               </h2>
-              <p className={`text-lg ${darkMode ? "text-gray-300" : "text-gray-600"} max-w-3xl mx-auto`}>
+              <p
+                className={`text-lg ${
+                  darkMode ? "text-gray-300" : "text-gray-600"
+                } max-w-3xl mx-auto`}
+              >
                 <TranslatableText>
-                  {severityFilter === 'high' ? 'Immediate attention required - Critical emergency alerts and high-severity disasters' :
-                   severityFilter === 'moderate' ? 'Important updates requiring monitoring and preparation' :
-                   severityFilter === 'low' ? 'General advisories and low-priority weather updates' :
-                   'Stay informed with real-time disaster reports and emergency alerts across India'}
+                  {severityFilter === "high"
+                    ? "Immediate attention required - Critical emergency alerts and high-severity disasters"
+                    : severityFilter === "moderate"
+                    ? "Important updates requiring monitoring and preparation"
+                    : severityFilter === "low"
+                    ? "General advisories and low-priority weather updates"
+                    : "Stay informed with real-time disaster reports and emergency alerts across India"}
                 </TranslatableText>
               </p>
-              {severityFilter === 'high' && (
+              {severityFilter === "high" && (
                 <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-red-100 border border-red-300 rounded-lg">
                   <span className="text-red-600 text-lg">🚨</span>
                   <span className="text-red-800 font-medium text-sm">
-                    <TranslatableText>Showing only critical warnings requiring immediate action</TranslatableText>
+                    <TranslatableText>
+                      Showing only critical warnings requiring immediate action
+                    </TranslatableText>
                   </span>
                 </div>
               )}
@@ -2708,52 +3466,113 @@ function Home() {
 
             {/* Search and Filter Section */}
             <div className="mb-8 animate-slide-in-left">
-              <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
-                {/* Search Input */}
-                <div className="relative flex-1 max-w-md">
-                  <input
-                    type="text"
-                    placeholder="Search disasters..."
-                    value={search}
-                    className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
-                      darkMode
-                        ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
-                        : "bg-white border-gray-300 text-black placeholder-gray-500"
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 focus:scale-105`}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      filterDisasters(e.target.value, severityFilter);
-                    }}
-                  />
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
-                    </svg>
+              {/* Mobile Toggle Button for Search/Filter */}
+              <div className="md:hidden mb-4">
+                <button
+                  onClick={() => setShowSearchBar(!showSearchBar)}
+                  className={`w-full flex items-center justify-between p-3 ${
+                    darkMode
+                      ? "bg-gray-800/95 border-gray-700 text-white"
+                      : "bg-white/95 border-gray-200 text-gray-900"
+                  } backdrop-blur-md rounded-lg shadow-lg border transition-all duration-300 hover:scale-105`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">🔍</span>
+                    <span className="font-medium">
+                      <TranslatableText>Search & Filter</TranslatableText>
+                    </span>
                   </div>
-                </div>
+                  <span
+                    className="text-xl transform transition-transform duration-300"
+                    style={{
+                      transform: showSearchBar
+                        ? "rotate(180deg)"
+                        : "rotate(0deg)",
+                    }}
+                  >
+                    ⌄
+                  </span>
+                </button>
+              </div>
 
-                {/* Severity Filter */}
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+              <div
+                className={`${
+                  showSearchBar ? "block" : "hidden md:block"
+                } transition-all duration-300`}
+              >
+                <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+                  {/* Search Input */}
+                  <div className="relative flex-1 max-w-md">
+                    <input
+                      type="text"
+                      placeholder="Search disasters..."
+                      value={search}
+                      className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                        darkMode
+                          ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                          : "bg-white border-gray-300 text-black placeholder-gray-500"
+                      } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 focus:scale-105`}
+                      onChange={(e) => {
+                        setSearch(e.target.value);
+                        filterDisasters(e.target.value, severityFilter);
+                      }}
+                    />
+                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Severity Filter */}
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 w-full">
+                    <span
+                      className={`text-sm font-medium ${
+                        darkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
                       <TranslatableText>Filter by Severity:</TranslatableText>
                     </span>
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-2 lg:flex gap-2 w-full lg:w-auto">
                       {[
-                        { value: 'high', label: 'Critical', color: 'bg-red-500 hover:bg-red-600', textColor: 'text-white', icon: '🚨' },
-                        { value: 'moderate', label: 'Moderate', color: 'bg-yellow-500 hover:bg-yellow-600', textColor: 'text-white', icon: '⚠️' },
-                        { value: 'low', label: 'Low', color: 'bg-green-500 hover:bg-green-600', textColor: 'text-white', icon: '📊' },
-                        { value: 'all', label: 'All', color: 'bg-gray-500 hover:bg-gray-600', textColor: 'text-white', icon: '📋' }
+                        {
+                          value: "high",
+                          label: "Critical",
+                          color: "bg-red-500 hover:bg-red-600",
+                          textColor: "text-white",
+                          icon: "🚨",
+                        },
+                        {
+                          value: "moderate",
+                          label: "Moderate",
+                          color: "bg-yellow-500 hover:bg-yellow-600",
+                          textColor: "text-white",
+                          icon: "⚠️",
+                        },
+                        {
+                          value: "low",
+                          label: "Low",
+                          color: "bg-green-500 hover:bg-green-600",
+                          textColor: "text-white",
+                          icon: "📊",
+                        },
+                        {
+                          value: "all",
+                          label: "All",
+                          color: "bg-gray-500 hover:bg-gray-600",
+                          textColor: "text-white",
+                          icon: "📋",
+                        },
                       ].map((filter) => (
                         <button
                           key={filter.value}
@@ -2761,7 +3580,7 @@ function Home() {
                             setSeverityFilter(filter.value);
                             filterDisasters(search, filter.value);
                           }}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2 ${
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-1.5 min-w-0 ${
                             severityFilter === filter.value
                               ? `${filter.color} ${filter.textColor} shadow-lg`
                               : darkMode
@@ -2775,23 +3594,34 @@ function Home() {
                       ))}
                     </div>
                   </div>
-                </div>
 
-                {/* Results Count */}
-                <div className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"} text-center lg:text-right`}>
-                  <div className="flex flex-col gap-1">
-                    <span className="font-medium">
-                      <TranslatableText>
-                        Showing {filteredDisasters.length} of {disasters.length} reports
-                      </TranslatableText>
-                    </span>
-                    {severityFilter !== 'all' && (
-                      <span className="text-xs opacity-75">
+                  {/* Results Count */}
+                  <div
+                    className={`text-sm ${
+                      darkMode ? "text-gray-300" : "text-gray-600"
+                    } text-center lg:text-right`}
+                  >
+                    <div className="flex flex-col gap-1">
+                      <span className="font-medium">
                         <TranslatableText>
-                          Filtered by: {severityFilter === 'high' ? 'Critical' : severityFilter === 'moderate' ? 'Moderate' : 'Low'} severity
+                          Showing {filteredDisasters.length} of{" "}
+                          {disasters.length} reports
                         </TranslatableText>
                       </span>
-                    )}
+                      {severityFilter !== "all" && (
+                        <span className="text-xs opacity-75">
+                          <TranslatableText>
+                            Filtered by:{" "}
+                            {severityFilter === "high"
+                              ? "Critical"
+                              : severityFilter === "moderate"
+                              ? "Moderate"
+                              : "Low"}{" "}
+                            severity
+                          </TranslatableText>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2828,224 +3658,321 @@ function Home() {
               ) : filteredDisasters.length > 0 ? (
                 (() => {
                   // Group disasters by severity for better organization
-                  const groupedDisasters = filteredDisasters.reduce((groups, disaster) => {
-                    const severity = disaster.severity;
-                    if (!groups[severity]) groups[severity] = [];
-                    groups[severity].push(disaster);
-                    return groups;
-                  }, {});
+                  const groupedDisasters = filteredDisasters.reduce(
+                    (groups, disaster) => {
+                      const severity = disaster.severity;
+                      if (!groups[severity]) groups[severity] = [];
+                      groups[severity].push(disaster);
+                      return groups;
+                    },
+                    {}
+                  );
 
-                  const severityOrder = ['high', 'moderate', 'low'];
+                  const severityOrder = ["high", "moderate", "low"];
                   const severityLabels = {
                     high: {
-                      label: 'Critical Emergency Alerts',
-                      icon: '🚨',
-                      color: 'red',
-                      bgGradient: 'from-red-800 to-red-900',
-                      textColor: 'text-white',
-                      borderColor: 'border-red-800',
-                      cardBg: 'bg-white',
-                      cardBorder: 'border-red-500',
-                      cardText: 'text-gray-900'
+                      label: "Critical Emergency Alerts",
+                      icon: "🚨",
+                      color: "red",
+                      bgGradient: "from-red-800 to-red-900",
+                      textColor: "text-white",
+                      borderColor: "border-red-800",
+                      cardBg: "bg-white",
+                      cardBorder: "border-red-500",
+                      cardText: "text-gray-900",
                     },
                     moderate: {
-                      label: 'Important Warnings',
-                      icon: '⚠️',
-                      color: 'amber',
-                      bgGradient: 'from-amber-600 to-amber-700',
-                      textColor: 'text-white',
-                      borderColor: 'border-amber-600',
-                      cardBg: 'bg-white',
-                      cardBorder: 'border-amber-500',
-                      cardText: 'text-gray-900'
+                      label: "Important Warnings",
+                      icon: "⚠️",
+                      color: "amber",
+                      bgGradient: "from-amber-600 to-amber-700",
+                      textColor: "text-white",
+                      borderColor: "border-amber-600",
+                      cardBg: "bg-white",
+                      cardBorder: "border-amber-500",
+                      cardText: "text-gray-900",
                     },
                     low: {
-                      label: 'General Advisories',
-                      icon: '📢',
-                      color: 'blue',
-                      bgGradient: 'from-blue-700 to-blue-800',
-                      textColor: 'text-white',
-                      borderColor: 'border-blue-700',
-                      cardBg: 'bg-white',
-                      cardBorder: 'border-blue-500',
-                      cardText: 'text-gray-900'
-                    }
+                      label: "General Advisories",
+                      icon: "📢",
+                      color: "blue",
+                      bgGradient: "from-blue-700 to-blue-800",
+                      textColor: "text-white",
+                      borderColor: "border-blue-700",
+                      cardBg: "bg-white",
+                      cardBorder: "border-blue-500",
+                      cardText: "text-gray-900",
+                    },
                   };
 
-                  return severityOrder.map(severity => {
-                    if (!groupedDisasters[severity] || groupedDisasters[severity].length === 0) return null;
+                  return severityOrder
+                    .map((severity) => {
+                      if (
+                        !groupedDisasters[severity] ||
+                        groupedDisasters[severity].length === 0
+                      )
+                        return null;
 
-                    const severityInfo = severityLabels[severity];
-                    const disasters = groupedDisasters[severity];
+                      const severityInfo = severityLabels[severity];
+                      const disasters = groupedDisasters[severity];
 
-                    return (
-                      <div key={severity} className="space-y-6">
-                        {/* Category Header */}
-                        <div className={`bg-gradient-to-r ${severityInfo.bgGradient} rounded-xl p-6 ${severityInfo.borderColor} border-2 shadow-2xl`}>
-                          <div className="flex items-center gap-4">
-                            <div className={`w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-lg`}>
-                              <span className="text-3xl">{severityInfo.icon}</span>
-                            </div>
-                            <div className="flex-1">
-                              <h3 className={`text-2xl font-bold ${severityInfo.textColor} mb-2 drop-shadow-sm`}>
-                                <TranslatableText>{severityInfo.label}</TranslatableText>
-                              </h3>
-                              <div className="flex items-center gap-4">
-                                <span className={`px-4 py-2 bg-white text-gray-900 rounded-full text-sm font-bold shadow-md`}>
-                                  {disasters.length} Active Alert{disasters.length !== 1 ? 's' : ''}
+                      return (
+                        <div key={severity} className="space-y-6">
+                          {/* Category Header */}
+                          <div
+                            className={`bg-gradient-to-r ${severityInfo.bgGradient} rounded-xl p-6 ${severityInfo.borderColor} border-2 shadow-2xl`}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div
+                                className={`w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-lg`}
+                              >
+                                <span className="text-3xl">
+                                  {severityInfo.icon}
                                 </span>
-                                {severity === 'high' && (
-                                  <div className="flex items-center gap-2 animate-pulse">
-                                    <div className="w-3 h-3 bg-yellow-300 rounded-full shadow-sm"></div>
-                                    <span className="text-white font-bold text-sm drop-shadow-sm">
-                                      <TranslatableText>Immediate Action Required</TranslatableText>
-                                    </span>
-                                  </div>
-                                )}
+                              </div>
+                              <div className="flex-1">
+                                <h3
+                                  className={`text-2xl font-bold ${severityInfo.textColor} mb-2 drop-shadow-sm`}
+                                >
+                                  <TranslatableText>
+                                    {severityInfo.label}
+                                  </TranslatableText>
+                                </h3>
+                                <div className="flex items-center gap-4">
+                                  <span
+                                    className={`px-4 py-2 bg-white text-gray-900 rounded-full text-sm font-bold shadow-md`}
+                                  >
+                                    {disasters.length} Active Alert
+                                    {disasters.length !== 1 ? "s" : ""}
+                                  </span>
+                                  {severity === "high" && (
+                                    <div className="flex items-center gap-2 animate-pulse">
+                                      <div className="w-3 h-3 bg-yellow-300 rounded-full shadow-sm"></div>
+                                      <span className="text-white font-bold text-sm drop-shadow-sm">
+                                        <TranslatableText>
+                                          Immediate Action Required
+                                        </TranslatableText>
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Disaster Cards Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                          {disasters.map((disaster, index) => {
-                            const typeColors = disasterTypeColors[disaster.type] || disasterTypeColors.default;
-                            const alertReason = getAlertReason(disaster);
+                          {/* Disaster Cards Grid */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                            {disasters.map((disaster, index) => {
+                              const alertReason = getAlertReason(disaster);
 
-                            return (
-                              <div
-                                key={`${disaster.id}-${index}`}
-                                className={`group relative bg-white text-gray-900 rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] animate-fade-in-up border-l-4 ${
-                                  disaster.severity === "high"
-                                    ? "border-l-red-600 border border-red-200 hover:border-red-300 hover:shadow-red-100"
-                                    : disaster.severity === "moderate"
-                                    ? "border-l-amber-500 border border-amber-200 hover:border-amber-300 hover:shadow-amber-100"
-                                    : "border-l-blue-600 border border-blue-200 hover:border-blue-300 hover:shadow-blue-100"
-                                } overflow-hidden`}
-                                style={{ animationDelay: `${index * 150}ms` }}
-                              >
-                                {/* Severity Indicator */}
-                                <div className={`absolute top-4 right-4 w-4 h-4 rounded-full ${
-                                  disaster.severity === "high" ? "bg-red-600 animate-pulse shadow-red-300" :
-                                  disaster.severity === "moderate" ? "bg-amber-500 shadow-amber-300" : "bg-blue-600 shadow-blue-300"
-                                } shadow-lg`}></div>
+                              return (
+                                <div
+                                  key={`${disaster.id}-${index}`}
+                                  className={`group relative bg-white text-gray-900 rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] animate-fade-in-up border-l-4 ${
+                                    disaster.severity === "high"
+                                      ? "border-l-red-600 border border-red-200 hover:border-red-300 hover:shadow-red-100"
+                                      : disaster.severity === "moderate"
+                                      ? "border-l-amber-500 border border-amber-200 hover:border-amber-300 hover:shadow-amber-100"
+                                      : "border-l-blue-600 border border-blue-200 hover:border-blue-300 hover:shadow-blue-100"
+                                  } overflow-hidden`}
+                                  style={{ animationDelay: `${index * 150}ms` }}
+                                >
+                                  {/* Severity Indicator */}
+                                  <div
+                                    className={`absolute top-4 right-4 w-4 h-4 rounded-full ${
+                                      disaster.severity === "high"
+                                        ? "bg-red-600 animate-pulse shadow-red-300"
+                                        : disaster.severity === "moderate"
+                                        ? "bg-amber-500 shadow-amber-300"
+                                        : "bg-blue-600 shadow-blue-300"
+                                    } shadow-lg`}
+                                  ></div>
 
-                                {/* Enhanced Header with Icon */}
-                                <div className="flex items-start gap-4 mb-4">
-                                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-lg ${
-                                    disaster.severity === "high" ? "bg-red-600" :
-                                    disaster.severity === "moderate" ? "bg-amber-500" : "bg-blue-600"
-                                  }`}>
-                                    <span className="text-2xl text-white">
-                                      {disaster.type === "Weather Warning" ? "🌦️" :
-                                       disaster.type === "Earthquake" ? "🏔️" :
-                                       disaster.type === "Flash Flood" ? "🌊" :
-                                       disaster.type === "Landslide Warning" ? "⛰️" :
-                                       disaster.type === "Air Quality Warning" ? "💨" : "⚠️"}
-                                    </span>
-                                  </div>
-                                  <div className="flex-1">
-                                    <h3 className={`font-bold text-lg text-gray-900 mb-2 group-hover:text-blue-700 transition-colors`}>
-                                      <TranslatableText>{disaster.title}</TranslatableText>
-                                    </h3>
-
-                                    {/* Enhanced Tags */}
-                                    <div className="flex flex-wrap items-center gap-2 mb-3">
-                                      <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${
-                                        disaster.severity === "high" ? "bg-red-50 text-red-900 border border-red-200" :
-                                        disaster.severity === "moderate" ? "bg-amber-50 text-amber-900 border border-amber-200" :
-                                        "bg-blue-50 text-blue-900 border border-blue-200"
-                                      }`}>
-                                        <TranslatableText>{disaster.type}</TranslatableText>
-                                      </span>
-                                      <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm text-white ${
+                                  {/* Enhanced Header with Icon */}
+                                  <div className="flex items-start gap-4 mb-4">
+                                    <div
+                                      className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-lg ${
                                         disaster.severity === "high"
                                           ? "bg-red-600"
                                           : disaster.severity === "moderate"
                                           ? "bg-amber-500"
                                           : "bg-blue-600"
-                                      }`}>
-                                        <TranslatableText>{disaster.severity.toUpperCase()}</TranslatableText>
+                                      }`}
+                                    >
+                                      <span className="text-2xl text-white">
+                                        {disaster.type === "Weather Warning"
+                                          ? "🌦️"
+                                          : disaster.type === "Earthquake"
+                                          ? "🏔️"
+                                          : disaster.type === "Flash Flood"
+                                          ? "🌊"
+                                          : disaster.type ===
+                                            "Landslide Warning"
+                                          ? "⛰️"
+                                          : disaster.type ===
+                                            "Air Quality Warning"
+                                          ? "💨"
+                                          : "⚠️"}
                                       </span>
-                                      {disaster.severity === 'high' && (
-                                        <span className="px-3 py-1.5 bg-red-700 text-white rounded-lg text-xs font-bold animate-pulse shadow-lg">
-                                          🚨 URGENT
+                                    </div>
+                                    <div className="flex-1">
+                                      <h3
+                                        className={`font-bold text-lg text-gray-900 mb-2 group-hover:text-blue-700 transition-colors`}
+                                      >
+                                        <TranslatableText>
+                                          {disaster.title}
+                                        </TranslatableText>
+                                      </h3>
+
+                                      {/* Enhanced Tags */}
+                                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                                        <span
+                                          className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${
+                                            disaster.severity === "high"
+                                              ? "bg-red-50 text-red-900 border border-red-200"
+                                              : disaster.severity === "moderate"
+                                              ? "bg-amber-50 text-amber-900 border border-amber-200"
+                                              : "bg-blue-50 text-blue-900 border border-blue-200"
+                                          }`}
+                                        >
+                                          <TranslatableText>
+                                            {disaster.type}
+                                          </TranslatableText>
                                         </span>
-                                      )}
+                                        <span
+                                          className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm text-white ${
+                                            disaster.severity === "high"
+                                              ? "bg-red-600"
+                                              : disaster.severity === "moderate"
+                                              ? "bg-amber-500"
+                                              : "bg-blue-600"
+                                          }`}
+                                        >
+                                          <TranslatableText>
+                                            {disaster.severity.toUpperCase()}
+                                          </TranslatableText>
+                                        </span>
+                                        {disaster.severity === "high" && (
+                                          <span className="px-3 py-1.5 bg-red-700 text-white rounded-lg text-xs font-bold animate-pulse shadow-lg">
+                                            🚨 URGENT
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
 
-                                {/* Enhanced Alert Reason for Critical Disasters */}
-                                {disaster.severity === 'high' && (
-                                  <div className="mb-4 p-4 bg-red-700 text-white border-l-4 border-red-900 rounded-lg shadow-xl">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="text-yellow-300 text-lg">🚨</span>
-                                      <span className="font-bold text-white text-sm tracking-wide">
-                                        <TranslatableText>CRITICAL ALERT REASON:</TranslatableText>
-                                      </span>
+                                  {/* Enhanced Alert Reason for Critical Disasters */}
+                                  {disaster.severity === "high" && (
+                                    <div className="mb-4 p-4 bg-red-700 text-white border-l-4 border-red-900 rounded-lg shadow-xl">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-yellow-300 text-lg">
+                                          🚨
+                                        </span>
+                                        <span className="font-bold text-white text-sm tracking-wide">
+                                          <TranslatableText>
+                                            CRITICAL ALERT REASON:
+                                          </TranslatableText>
+                                        </span>
+                                      </div>
+                                      <p className="font-semibold text-white text-base leading-relaxed">
+                                        <TranslatableText>
+                                          {alertReason}
+                                        </TranslatableText>
+                                      </p>
                                     </div>
-                                    <p className="font-semibold text-white text-base leading-relaxed">
-                                      <TranslatableText>{alertReason}</TranslatableText>
+                                  )}
+
+                                  {/* Enhanced Description */}
+                                  <div className="mb-4">
+                                    <p className="text-sm text-gray-700 leading-relaxed line-clamp-3">
+                                      <TranslatableText>
+                                        {disaster.details}
+                                      </TranslatableText>
                                     </p>
                                   </div>
-                                )}
 
-                                {/* Enhanced Description */}
-                                <div className="mb-4">
-                                  <p className="text-sm text-gray-700 leading-relaxed line-clamp-3">
-                                    <TranslatableText>{disaster.details}</TranslatableText>
-                                  </p>
-                                </div>
-
-                                {/* Enhanced Footer */}
-                                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                                  <div className="flex items-center gap-2">
-                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <time className="text-xs text-gray-600 font-medium">
-                                      {new Date(disaster.date).toLocaleDateString("en-IN", {
-                                        year: "numeric",
-                                        month: "short",
-                                        day: "numeric",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      })}
-                                    </time>
+                                  {/* Enhanced Footer */}
+                                  <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                                    <div className="flex items-center gap-2">
+                                      <svg
+                                        className="w-4 h-4 text-gray-500"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                      </svg>
+                                      <time className="text-xs text-gray-600 font-medium">
+                                        {new Date(
+                                          disaster.date
+                                        ).toLocaleDateString("en-IN", {
+                                          year: "numeric",
+                                          month: "short",
+                                          day: "numeric",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })}
+                                      </time>
+                                    </div>
+                                    <a
+                                      href={disaster.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 text-white ${
+                                        disaster.severity === "high"
+                                          ? "bg-red-600 hover:bg-red-700"
+                                          : disaster.severity === "moderate"
+                                          ? "bg-amber-600 hover:bg-amber-700"
+                                          : "bg-blue-600 hover:bg-blue-700"
+                                      }`}
+                                    >
+                                      <TranslatableText>
+                                        View Details
+                                      </TranslatableText>
+                                      <svg
+                                        className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                        />
+                                      </svg>
+                                    </a>
                                   </div>
-                                  <a
-                                    href={disaster.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 text-white ${
-                                      disaster.severity === "high" ? "bg-red-600 hover:bg-red-700" :
-                                      disaster.severity === "moderate" ? "bg-amber-600 hover:bg-amber-700" :
-                                      "bg-blue-600 hover:bg-blue-700"
-                                    }`}
-                                  >
-                                    <TranslatableText>View Details</TranslatableText>
-                                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                    </svg>
-                                  </a>
                                 </div>
-                              </div>
-                            );
-                          })}
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  }).filter(Boolean);
+                      );
+                    })
+                    .filter(Boolean);
                 })()
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <div className={`${darkMode ? "text-gray-400" : "text-gray-500"} text-lg`}>
+                  <div
+                    className={`${
+                      darkMode ? "text-gray-400" : "text-gray-500"
+                    } text-lg`}
+                  >
                     {search.trim() ? (
-                      <TranslatableText>No disasters found for this search</TranslatableText>
+                      <TranslatableText>
+                        No disasters found for this search
+                      </TranslatableText>
                     ) : (
-                      <TranslatableText>No recent disaster reports found</TranslatableText>
+                      <TranslatableText>
+                        No recent disaster reports found
+                      </TranslatableText>
                     )}
                   </div>
                 </div>
@@ -3054,7 +3981,7 @@ function Home() {
           </div>
         </div>
       </main>
-      
+
       {/* Footer */}
       <Footer />
     </div>

@@ -149,7 +149,7 @@ const DetailModal = ({ state, onClose }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 overflow-y-auto"
+      className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-[9999] overflow-y-auto"
       onClick={onClose}
     >
       <motion.div
@@ -167,7 +167,7 @@ const DetailModal = ({ state, onClose }) => {
               darkMode
                 ? "bg-gray-900 border-gray-800"
                 : "bg-white border-gray-200"
-            } px-8 py-6 border-b z-10`}
+            } px-8 py-6 border-b z-20`}
           >
             <div className="flex justify-between items-center">
               <h2
@@ -1347,13 +1347,12 @@ function About() {
             className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
           >
             <TranslatableText>
-              Quick access to emergency contacts and helplines across India for immediate assistance during disasters
+              Quick access to emergency contacts and helplines across India for
+              immediate assistance during disasters
             </TranslatableText>
           </motion.p>
         </div>
-
-          <SearchBar onSearch={setSearchTerm} />
-      
+        <SearchBar onSearch={setSearchTerm} />
         {/* State Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16 max-w-full">
           {filteredStates.map((state, index) => {

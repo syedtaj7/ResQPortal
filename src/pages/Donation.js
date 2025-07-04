@@ -274,7 +274,7 @@ const VolunteerRegistrationForm = ({
 
   if (isSubmitted) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999] p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -324,7 +324,7 @@ const VolunteerRegistrationForm = ({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999] p-4">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -546,7 +546,7 @@ const VolunteerRegistrationForm = ({
 // Volunteer Detail Modal Component
 const VolunteerDetailModal = ({ volunteer, onClose, onVolunteer }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999] p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -832,7 +832,7 @@ const VolunteerCard = ({ volunteer, onClick }) => {
 // Volunteer Hours Tracking Component
 const VolunteerDashboard = ({ volunteerStats, onClose }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999] p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -863,7 +863,7 @@ const VolunteerDashboard = ({ volunteerStats, onClose }) => {
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-center">
               <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
@@ -1026,7 +1026,7 @@ const DonationForm = ({ disaster, onClose }) => {
 
   if (isSubmitted) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999] p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -1076,7 +1076,7 @@ const DonationForm = ({ disaster, onClose }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999] p-4">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1296,7 +1296,7 @@ const DisasterDetailModal = ({
   );
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999] p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -1686,9 +1686,7 @@ function Donation() {
             transition={{ duration: 0.5 }}
             className="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-yellow-400 via-green-400 to-blue-400 bg-clip-text text-transparent"
           >
-            <TranslatableText>
-              Support Disaster Relief Efforts
-            </TranslatableText>
+            <TranslatableText>Support Disaster Relief Efforts</TranslatableText>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -1697,91 +1695,92 @@ function Donation() {
             className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
           >
             <TranslatableText>
-              Your contribution can make a significant difference in the lives of those affected by natural disasters across India.
+              Your contribution can make a significant difference in the lives
+              of those affected by natural disasters across India.
             </TranslatableText>
           </motion.p>
         </div>
 
-          {/* Tabs for Donations and Volunteers */}
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex rounded-md shadow-sm" role="group">
-              <button
-                type="button"
-                onClick={() => setActiveTab("donations")}
-                className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
-                  activeTab === "donations"
-                    ? "bg-yellow-500 text-white"
-                    : "bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary"
-                }`}
-              >
-                <TranslatableText>Donate Funds</TranslatableText>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("volunteers")}
-                className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
-                  activeTab === "volunteers"
-                    ? "bg-blue-500 text-white"
-                    : "bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary"
-                }`}
-              >
-                <TranslatableText>Volunteer Time</TranslatableText>
-              </button>
-            </div>
-            {activeTab === "volunteers" && (
-              <button
-                onClick={handleOpenDashboard}
-                className="ml-4 inline-flex items-center px-3 py-2 text-sm font-medium rounded-md bg-green-500 text-white hover:bg-green-600"
-              >
-                <svg
-                  className="mr-2 -ml-1 h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
-                <TranslatableText>My Volunteer Dashboard</TranslatableText>
-              </button>
-            )}
+        {/* Tabs for Donations and Volunteers */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex rounded-md shadow-sm" role="group">
+            <button
+              type="button"
+              onClick={() => setActiveTab("donations")}
+              className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
+                activeTab === "donations"
+                  ? "bg-yellow-500 text-white"
+                  : "bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary"
+              }`}
+            >
+              <TranslatableText>Donate Funds</TranslatableText>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("volunteers")}
+              className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
+                activeTab === "volunteers"
+                  ? "bg-blue-500 text-white"
+                  : "bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary"
+              }`}
+            >
+              <TranslatableText>Volunteer Time</TranslatableText>
+            </button>
           </div>
-
-          {activeTab === "donations" ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          {activeTab === "volunteers" && (
+            <button
+              onClick={handleOpenDashboard}
+              className="ml-4 inline-flex items-center px-3 py-2 text-sm font-medium rounded-md bg-green-500 text-white hover:bg-green-600"
             >
-              {disasterData.map((disaster) => (
-                <DisasterCard
-                  key={disaster.id}
-                  disaster={disaster}
-                  onClick={handleDisasterClick}
+              <svg
+                className="mr-2 -ml-1 h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                 />
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-              {volunteerData.map((volunteer) => (
-                <VolunteerCard
-                  key={volunteer.id}
-                  volunteer={volunteer}
-                  onClick={handleVolunteerClick}
-                />
-              ))}
-            </motion.div>
+              </svg>
+              <TranslatableText>My Volunteer Dashboard</TranslatableText>
+            </button>
           )}
+        </div>
+
+        {activeTab === "donations" ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {disasterData.map((disaster) => (
+              <DisasterCard
+                key={disaster.id}
+                disaster={disaster}
+                onClick={handleDisasterClick}
+              />
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {volunteerData.map((volunteer) => (
+              <VolunteerCard
+                key={volunteer.id}
+                volunteer={volunteer}
+                onClick={handleVolunteerClick}
+              />
+            ))}
+          </motion.div>
+        )}
       </main>
 
       <Footer />
@@ -1840,4 +1839,4 @@ function Donation() {
   );
 }
 
-export default Donation
+export default Donation;

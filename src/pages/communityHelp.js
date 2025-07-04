@@ -167,88 +167,112 @@ const getFormCardStyle = () => `
 // Removed unused volunteer data and components
 
 // Enhanced Modern Alert Card Component
-const ModernAlertCard = ({ alert, onUpvote, onShare, onSave, onImageClick, isUpvoting, isSaved, currentUser }) => {
+const ModernAlertCard = ({
+  alert,
+  onUpvote,
+  onShare,
+  onSave,
+  onImageClick,
+  isUpvoting,
+  isSaved,
+  currentUser,
+}) => {
   const { darkMode } = useTheme();
   const hasUpvoted = alert.upvotedBy?.includes(currentUser?.uid);
 
   const getSeverityConfig = (severity) => {
     switch (severity) {
-      case 'high':
+      case "high":
         return {
-          gradient: 'from-red-500 to-red-600',
-          bg: 'bg-red-50 dark:bg-red-900/20',
-          text: 'text-red-800 dark:text-red-200',
-          border: 'border-red-200 dark:border-red-800',
-          icon: '🚨',
-          pulse: 'animate-pulse'
+          gradient: "from-red-500 to-red-600",
+          bg: "bg-red-50 dark:bg-red-900/20",
+          text: "text-red-800 dark:text-red-200",
+          border: "border-red-200 dark:border-red-800",
+          icon: "🚨",
+          pulse: "animate-pulse",
         };
-      case 'moderate':
+      case "moderate":
         return {
-          gradient: 'from-yellow-500 to-orange-500',
-          bg: 'bg-yellow-50 dark:bg-yellow-900/20',
-          text: 'text-yellow-800 dark:text-yellow-200',
-          border: 'border-yellow-200 dark:border-yellow-800',
-          icon: '⚠️',
-          pulse: ''
+          gradient: "from-yellow-500 to-orange-500",
+          bg: "bg-yellow-50 dark:bg-yellow-900/20",
+          text: "text-yellow-800 dark:text-yellow-200",
+          border: "border-yellow-200 dark:border-yellow-800",
+          icon: "⚠️",
+          pulse: "",
         };
-      case 'low':
+      case "low":
         return {
-          gradient: 'from-green-500 to-green-600',
-          bg: 'bg-green-50 dark:bg-green-900/20',
-          text: 'text-green-800 dark:text-green-200',
-          border: 'border-green-200 dark:border-green-800',
-          icon: 'ℹ️',
-          pulse: ''
+          gradient: "from-green-500 to-green-600",
+          bg: "bg-green-50 dark:bg-green-900/20",
+          text: "text-green-800 dark:text-green-200",
+          border: "border-green-200 dark:border-green-800",
+          icon: "ℹ️",
+          pulse: "",
         };
       default:
         return {
-          gradient: 'from-blue-500 to-blue-600',
-          bg: 'bg-blue-50 dark:bg-blue-900/20',
-          text: 'text-blue-800 dark:text-blue-200',
-          border: 'border-blue-200 dark:border-blue-800',
-          icon: '📢',
-          pulse: ''
+          gradient: "from-blue-500 to-blue-600",
+          bg: "bg-blue-50 dark:bg-blue-900/20",
+          text: "text-blue-800 dark:text-blue-200",
+          border: "border-blue-200 dark:border-blue-800",
+          icon: "📢",
+          pulse: "",
         };
     }
   };
 
   const getCategoryConfig = (category) => {
     const configs = {
-      'Natural Disasters': { icon: '🌪️', color: 'from-red-500 to-orange-500' },
-      'Medical Emergency': { icon: '🏥', color: 'from-red-600 to-pink-600' },
-      'Fire Emergency': { icon: '🔥', color: 'from-red-500 to-yellow-500' },
-      'Security Issues': { icon: '🚨', color: 'from-blue-600 to-purple-600' },
-      'Infrastructure': { icon: '🏗️', color: 'from-gray-600 to-blue-600' },
-      'Environmental': { icon: '🌱', color: 'from-green-500 to-teal-500' }
+      "Natural Disasters": { icon: "🌪️", color: "from-red-500 to-orange-500" },
+      "Medical Emergency": { icon: "🏥", color: "from-red-600 to-pink-600" },
+      "Fire Emergency": { icon: "🔥", color: "from-red-500 to-yellow-500" },
+      "Security Issues": { icon: "🚨", color: "from-blue-600 to-purple-600" },
+      Infrastructure: { icon: "🏗️", color: "from-gray-600 to-blue-600" },
+      Environmental: { icon: "🌱", color: "from-green-500 to-teal-500" },
     };
-    return configs[category] || { icon: '📢', color: 'from-blue-500 to-purple-600' };
+    return (
+      configs[category] || { icon: "📢", color: "from-blue-500 to-purple-600" }
+    );
   };
 
-  const severityConfig = getSeverityConfig(alert.severity || 'low');
+  const severityConfig = getSeverityConfig(alert.severity || "low");
   const categoryConfig = getCategoryConfig(alert.category);
-  const timeAgo = alert.timestamp?.toDate ? getTimeAgo(alert.timestamp.toDate()) : 'Recently';
+  const timeAgo = alert.timestamp?.toDate
+    ? getTimeAgo(alert.timestamp.toDate())
+    : "Recently";
 
   return (
-    <div className={`group relative overflow-hidden rounded-2xl transition-all duration-500 hover:scale-[1.02] hover:rotate-1 ${
-      darkMode ? 'bg-gray-800/90 backdrop-blur-sm border border-gray-700/50' : 'bg-white/90 backdrop-blur-sm border border-gray-200/50'
-    } shadow-lg hover:shadow-2xl hover:shadow-blue-500/10`}>
-
+    <div
+      className={`group relative overflow-hidden rounded-2xl transition-all duration-500 hover:scale-[1.02] hover:rotate-1 ${
+        darkMode
+          ? "bg-gray-800/90 backdrop-blur-sm border border-gray-700/50"
+          : "bg-white/90 backdrop-blur-sm border border-gray-200/50"
+      } shadow-lg hover:shadow-2xl hover:shadow-blue-500/10`}
+    >
       {/* Animated Severity Indicator */}
-      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${severityConfig.gradient} ${severityConfig.pulse}`}></div>
+      <div
+        className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${severityConfig.gradient} ${severityConfig.pulse}`}
+      ></div>
 
       {/* Floating Elements */}
       <div className="absolute top-4 right-4 flex gap-2 z-10">
         {/* Severity Badge */}
-        <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${severityConfig.bg} ${severityConfig.text} ${severityConfig.border} border backdrop-blur-sm`}>
+        <div
+          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${severityConfig.bg} ${severityConfig.text} ${severityConfig.border} border backdrop-blur-sm`}
+        >
           <span>{severityConfig.icon}</span>
-          <TranslatableText>{alert.severity || 'low'}</TranslatableText>
+          <TranslatableText>{alert.severity || "low"}</TranslatableText>
         </div>
 
         {/* Volunteer Badge */}
         {alert.postedByVolunteer && (
           <div className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-semibold rounded-full shadow-lg">
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
             </svg>
             <TranslatableText>Verified</TranslatableText>
           </div>
@@ -258,36 +282,69 @@ const ModernAlertCard = ({ alert, onUpvote, onShare, onSave, onImageClick, isUpv
       <div className="p-6">
         {/* Enhanced Header */}
         <div className="flex items-start gap-4 mb-6">
-          <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${categoryConfig.color} flex items-center justify-center text-2xl shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
+          <div
+            className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${categoryConfig.color} flex items-center justify-center text-2xl shadow-lg transform group-hover:scale-110 transition-transform duration-300`}
+          >
             {categoryConfig.icon}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-2">
-              <h3 className={`font-bold text-xl truncate ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              <h3
+                className={`font-bold text-xl truncate ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
                 <TranslatableText>{alert.category}</TranslatableText>
               </h3>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+              <svg
+                className="w-4 h-4 text-red-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                  clipRule="evenodd"
+                />
               </svg>
-              <span className={`font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              <span
+                className={`font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 <TranslatableText>{alert.location}</TranslatableText>
                 {alert.state && `, ${alert.state}`}
               </span>
             </div>
             <div className="flex items-center gap-2 mt-1 text-xs">
-              <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+              <svg
+                className="w-3 h-3 text-gray-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                  clipRule="evenodd"
+                />
               </svg>
-              <span className={`${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{timeAgo}</span>
+              <span
+                className={`${darkMode ? "text-gray-500" : "text-gray-400"}`}
+              >
+                {timeAgo}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Enhanced Image Display */}
         {alert.imageUrl && (
-          <div className="mb-6 relative overflow-hidden rounded-xl cursor-pointer group/image" onClick={() => onImageClick(alert.imageUrl)}>
+          <div
+            className="mb-6 relative overflow-hidden rounded-xl cursor-pointer group/image"
+            onClick={() => onImageClick(alert.imageUrl)}
+          >
             <img
               src={alert.imageUrl}
               alt="Alert"
@@ -296,17 +353,39 @@ const ModernAlertCard = ({ alert, onUpvote, onShare, onSave, onImageClick, isUpv
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
               <div className="absolute bottom-4 left-4 right-4">
                 <div className="flex items-center justify-between text-white">
-                  <span className="text-sm font-medium">Click to view full image</span>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <span className="text-sm font-medium">
+                    Click to view full image
+                  </span>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                 </div>
               </div>
             </div>
             <div className="absolute top-4 right-4">
               <div className="w-10 h-10 bg-black/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                  />
                 </svg>
               </div>
             </div>
@@ -314,8 +393,16 @@ const ModernAlertCard = ({ alert, onUpvote, onShare, onSave, onImageClick, isUpv
         )}
 
         {/* Enhanced Description */}
-        <div className={`mb-6 p-4 rounded-xl ${darkMode ? 'bg-gray-700/30' : 'bg-gray-50'}`}>
-          <p className={`text-sm leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+        <div
+          className={`mb-6 p-4 rounded-xl ${
+            darkMode ? "bg-gray-700/30" : "bg-gray-50"
+          }`}
+        >
+          <p
+            className={`text-sm leading-relaxed ${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            }`}
+          >
             <TranslatableText>{alert.description}</TranslatableText>
           </p>
         </div>
@@ -329,16 +416,18 @@ const ModernAlertCard = ({ alert, onUpvote, onShare, onSave, onImageClick, isUpv
               disabled={isUpvoting}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
                 hasUpvoted
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                  ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
                   : darkMode
-                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              } ${isUpvoting ? 'animate-pulse' : ''}`}
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              } ${isUpvoting ? "animate-pulse" : ""}`}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
-              <span className="text-sm font-semibold">{alert.upvotes || 0}</span>
+              <span className="text-sm font-semibold">
+                {alert.upvotes || 0}
+              </span>
             </button>
 
             {/* Enhanced Save Button */}
@@ -346,14 +435,14 @@ const ModernAlertCard = ({ alert, onUpvote, onShare, onSave, onImageClick, isUpv
               onClick={onSave}
               className={`p-2.5 rounded-xl transition-all duration-300 transform hover:scale-105 ${
                 isSaved
-                  ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg'
+                  ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg"
                   : darkMode
-                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-yellow-400'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-yellow-600'
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-yellow-400"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-yellow-600"
               }`}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
               </svg>
             </button>
 
@@ -362,12 +451,22 @@ const ModernAlertCard = ({ alert, onUpvote, onShare, onSave, onImageClick, isUpv
               onClick={onShare}
               className={`p-2.5 rounded-xl transition-all duration-300 transform hover:scale-105 ${
                 darkMode
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-blue-400'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-blue-600'
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-blue-400"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-blue-600"
               }`}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                />
               </svg>
             </button>
           </div>
@@ -376,11 +475,15 @@ const ModernAlertCard = ({ alert, onUpvote, onShare, onSave, onImageClick, isUpv
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
               <span className="text-xs text-white font-bold">
-                {alert.userName?.charAt(0)?.toUpperCase() || 'U'}
+                {alert.userName?.charAt(0)?.toUpperCase() || "U"}
               </span>
             </div>
-            <span className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              {alert.userName || 'Anonymous'}
+            <span
+              className={`text-xs font-medium ${
+                darkMode ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              {alert.userName || "Anonymous"}
             </span>
           </div>
         </div>
@@ -394,10 +497,11 @@ const getTimeAgo = (date) => {
   const now = new Date();
   const diffInSeconds = Math.floor((now - date) / 1000);
 
-  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 60) return "Just now";
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  if (diffInSeconds < 604800)
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
   return date.toLocaleDateString();
 };
 
@@ -442,9 +546,9 @@ function CommunityHelp() {
       const q = query(alertsRef, orderBy("timestamp", "desc"));
       const querySnapshot = await getDocs(q);
 
-      const alertsData = querySnapshot.docs.map(doc => ({
+      const alertsData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
 
       setAlerts(alertsData);
@@ -466,86 +570,98 @@ function CommunityHelp() {
   const ModernTabs = ({ activeTab, setActiveTab }) => {
     const tabs = [
       {
-        id: 'feed',
-        label: 'Community Feed',
-        icon: '🌐',
+        id: "feed",
+        label: "Community Feed",
+        icon: "🌐",
         count: alerts.length,
-        description: 'View all community reports',
-        gradient: 'from-blue-500 to-cyan-500'
+        description: "View all community reports",
+        gradient: "from-blue-500 to-cyan-500",
       },
       {
-        id: 'my-posts',
-        label: 'My Reports',
-        icon: '📝',
-        count: alerts.filter(a => a.userId === user?.uid).length,
-        description: 'Your submitted reports',
-        gradient: 'from-purple-500 to-pink-500'
+        id: "my-posts",
+        label: "My Reports",
+        icon: "📝",
+        count: alerts.filter((a) => a.userId === user?.uid).length,
+        description: "Your submitted reports",
+        gradient: "from-purple-500 to-pink-500",
       },
       {
-        id: 'saved',
-        label: 'Saved',
-        icon: '💾',
+        id: "saved",
+        label: "Saved",
+        icon: "💾",
         count: 0,
-        description: 'Bookmarked alerts',
-        gradient: 'from-yellow-500 to-orange-500'
+        description: "Bookmarked alerts",
+        gradient: "from-yellow-500 to-orange-500",
       },
       {
-        id: 'volunteer',
-        label: 'Volunteer',
-        icon: '🤝',
+        id: "volunteer",
+        label: "Volunteer",
+        icon: "🤝",
         count: null,
-        description: 'Join our volunteer program',
-        gradient: 'from-green-500 to-teal-500'
-      }
+        description: "Join our volunteer program",
+        gradient: "from-green-500 to-teal-500",
+      },
     ];
 
     return (
       <div className="mb-8">
         {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-3 mb-4">
+        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 mb-4">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`group relative flex items-center gap-3 px-6 py-4 rounded-2xl font-semibold transition-all duration-500 transform hover:scale-105 ${
+              className={`group relative flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-2xl font-semibold transition-all duration-500 transform hover:scale-105 min-h-[60px] md:min-h-0 ${
                 activeTab === tab.id
                   ? `bg-gradient-to-r ${tab.gradient} text-white shadow-2xl shadow-blue-500/25`
                   : darkMode
-                    ? 'bg-gray-800/50 backdrop-blur-sm text-gray-300 hover:bg-gray-700/70 border border-gray-700/50'
-                    : 'bg-white/50 backdrop-blur-sm text-gray-700 hover:bg-white/80 border border-gray-200/50 shadow-lg'
+                  ? "bg-gray-800/50 backdrop-blur-sm text-gray-300 hover:bg-gray-700/70 border border-gray-700/50"
+                  : "bg-white/50 backdrop-blur-sm text-gray-700 hover:bg-white/80 border border-gray-200/50 shadow-lg"
               }`}
             >
               {/* Background Glow Effect */}
               {activeTab === tab.id && (
-                <div className={`absolute inset-0 bg-gradient-to-r ${tab.gradient} rounded-2xl blur-xl opacity-30 -z-10 animate-pulse`}></div>
+                <div
+                  className={`absolute inset-0 bg-gradient-to-r ${tab.gradient} rounded-2xl blur-xl opacity-30 -z-10 animate-pulse`}
+                ></div>
               )}
 
               {/* Icon with Animation */}
-              <div className={`text-2xl transition-transform duration-300 ${
-                activeTab === tab.id ? 'scale-110' : 'group-hover:scale-110'
-              }`}>
+              <div
+                className={`text-lg md:text-2xl transition-transform duration-300 ${
+                  activeTab === tab.id ? "scale-110" : "group-hover:scale-110"
+                }`}
+              >
                 {tab.icon}
               </div>
 
-              {/* Label and Count */}
-              <div className="flex flex-col items-start">
-                <span className="text-sm font-bold">
+              {/* Label and Count Container */}
+              <div className="flex flex-col items-center md:items-start flex-1 min-w-0">
+                <span className="text-sm font-bold text-center md:text-left">
                   <TranslatableText>{tab.label}</TranslatableText>
                 </span>
-                <span className={`text-xs opacity-75 ${
-                  activeTab === tab.id ? 'text-white/80' : darkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}>
+                <span
+                  className={`text-xs opacity-75 text-center md:text-left ${
+                    activeTab === tab.id
+                      ? "text-white/80"
+                      : darkMode
+                      ? "text-gray-400"
+                      : "text-gray-500"
+                  }`}
+                >
                   <TranslatableText>{tab.description}</TranslatableText>
                 </span>
               </div>
 
               {/* Count Badge */}
               {tab.count !== null && (
-                <div className={`ml-auto px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? 'bg-white/20 text-white'
-                    : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
-                }`}>
+                <div
+                  className={`px-2 py-0.5 md:px-3 md:py-1 rounded-full text-xs font-bold transition-all duration-300 ${
+                    activeTab === tab.id
+                      ? "bg-white/20 text-white"
+                      : "bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+                  }`}
+                >
                   {tab.count}
                 </div>
               )}
@@ -559,29 +675,56 @@ function CommunityHelp() {
         </div>
 
         {/* Tab Content Indicator */}
-        <div className={`p-4 rounded-xl ${
-          darkMode ? 'bg-gray-800/30 border border-gray-700/50' : 'bg-gray-50/50 border border-gray-200/50'
-        } backdrop-blur-sm`}>
+        <div
+          className={`p-4 rounded-xl ${
+            darkMode
+              ? "bg-gray-800/30 border border-gray-700/50"
+              : "bg-gray-50/50 border border-gray-200/50"
+          } backdrop-blur-sm`}
+        >
           <div className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${
-              tabs.find(t => t.id === activeTab)?.gradient || 'from-blue-500 to-purple-600'
-            } flex items-center justify-center text-white font-bold text-sm`}>
-              {tabs.find(t => t.id === activeTab)?.icon}
+            <div
+              className={`w-8 h-8 rounded-lg bg-gradient-to-r ${
+                tabs.find((t) => t.id === activeTab)?.gradient ||
+                "from-blue-500 to-purple-600"
+              } flex items-center justify-center text-white font-bold text-sm`}
+            >
+              {tabs.find((t) => t.id === activeTab)?.icon}
             </div>
             <div>
-              <h3 className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                <TranslatableText>{tabs.find(t => t.id === activeTab)?.label}</TranslatableText>
+              <h3
+                className={`font-bold ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                <TranslatableText>
+                  {tabs.find((t) => t.id === activeTab)?.label}
+                </TranslatableText>
               </h3>
-              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                <TranslatableText>{tabs.find(t => t.id === activeTab)?.description}</TranslatableText>
+              <p
+                className={`text-sm ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                <TranslatableText>
+                  {tabs.find((t) => t.id === activeTab)?.description}
+                </TranslatableText>
               </p>
             </div>
-            {tabs.find(t => t.id === activeTab)?.count !== null && (
+            {tabs.find((t) => t.id === activeTab)?.count !== null && (
               <div className="ml-auto">
-                <span className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                  {tabs.find(t => t.id === activeTab)?.count}
+                <span
+                  className={`text-2xl font-bold ${
+                    darkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  {tabs.find((t) => t.id === activeTab)?.count}
                 </span>
-                <span className={`text-sm ml-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <span
+                  className={`text-sm ml-1 ${
+                    darkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   items
                 </span>
               </div>
@@ -595,42 +738,59 @@ function CommunityHelp() {
   // Enhanced Modern Filter Bar
   const ModernFilterBar = () => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [categoryFilter, setCategoryFilter] = useState('all');
-    const [dateFilter, setDateFilter] = useState('all');
+    const [categoryFilter, setCategoryFilter] = useState("all");
+    const [dateFilter, setDateFilter] = useState("all");
 
     const categories = [
-      'Natural Disasters',
-      'Medical Emergency',
-      'Fire Emergency',
-      'Security Issues',
-      'Infrastructure',
-      'Environmental'
+      "Natural Disasters",
+      "Medical Emergency",
+      "Fire Emergency",
+      "Security Issues",
+      "Infrastructure",
+      "Environmental",
     ];
 
     const clearAllFilters = () => {
-      setSearchQuery('');
-      setSortBy('latest');
-      setFilterSeverity('all');
-      setCategoryFilter('all');
-      setDateFilter('all');
+      setSearchQuery("");
+      setSortBy("latest");
+      setFilterSeverity("all");
+      setCategoryFilter("all");
+      setDateFilter("all");
     };
 
-    const hasActiveFilters = searchQuery || sortBy !== 'latest' || filterSeverity !== 'all' || categoryFilter !== 'all' || dateFilter !== 'all';
+    const hasActiveFilters =
+      searchQuery ||
+      sortBy !== "latest" ||
+      filterSeverity !== "all" ||
+      categoryFilter !== "all" ||
+      dateFilter !== "all";
 
     return (
-      <div className={`rounded-2xl mb-8 overflow-hidden transition-all duration-500 ${
-        darkMode ? 'bg-gray-800/50 backdrop-blur-sm border border-gray-700/50' : 'bg-white/50 backdrop-blur-sm border border-gray-200/50'
-      } shadow-xl`}>
-
+      <div
+        className={`rounded-2xl mb-8 overflow-hidden transition-all duration-500 ${
+          darkMode
+            ? "bg-gray-800/50 backdrop-blur-sm border border-gray-700/50"
+            : "bg-white/50 backdrop-blur-sm border border-gray-200/50"
+        } shadow-xl`}
+      >
         {/* Main Filter Row */}
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-
             {/* Enhanced Search */}
             <div className="md:col-span-2 relative">
               <div className="relative">
-                <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
                 <input
                   type="text"
@@ -639,19 +799,29 @@ function CommunityHelp() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={`w-full pl-12 pr-12 py-4 rounded-xl border-2 transition-all duration-300 ${
                     searchQuery
-                      ? 'border-blue-500 ring-4 ring-blue-500/20'
+                      ? "border-blue-500 ring-4 ring-blue-500/20"
                       : darkMode
-                        ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20'
-                        : 'bg-white/80 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20'
+                      ? "bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20"
+                      : "bg-white/80 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20"
                   }`}
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => setSearchQuery('')}
+                    onClick={() => setSearchQuery("")}
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 )}
@@ -664,11 +834,11 @@ function CommunityHelp() {
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className={`w-full px-4 py-4 rounded-xl border-2 appearance-none cursor-pointer transition-all duration-300 ${
-                  sortBy !== 'latest'
-                    ? 'border-purple-500 ring-4 ring-purple-500/20'
+                  sortBy !== "latest"
+                    ? "border-purple-500 ring-4 ring-purple-500/20"
                     : darkMode
-                      ? 'bg-gray-700/50 border-gray-600 text-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20'
-                      : 'bg-white/80 border-gray-300 text-gray-900 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20'
+                    ? "bg-gray-700/50 border-gray-600 text-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20"
+                    : "bg-white/80 border-gray-300 text-gray-900 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20"
                 }`}
               >
                 <option value="latest">🕒 Latest First</option>
@@ -676,8 +846,18 @@ function CommunityHelp() {
                 <option value="upvotes">⭐ Most Upvoted</option>
                 <option value="severity">🚨 By Severity</option>
               </select>
-              <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </div>
 
@@ -687,11 +867,11 @@ function CommunityHelp() {
                 value={filterSeverity}
                 onChange={(e) => setFilterSeverity(e.target.value)}
                 className={`w-full px-4 py-4 rounded-xl border-2 appearance-none cursor-pointer transition-all duration-300 ${
-                  filterSeverity !== 'all'
-                    ? 'border-red-500 ring-4 ring-red-500/20'
+                  filterSeverity !== "all"
+                    ? "border-red-500 ring-4 ring-red-500/20"
                     : darkMode
-                      ? 'bg-gray-700/50 border-gray-600 text-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
-                      : 'bg-white/80 border-gray-300 text-gray-900 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
+                    ? "bg-gray-700/50 border-gray-600 text-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20"
+                    : "bg-white/80 border-gray-300 text-gray-900 focus:border-red-500 focus:ring-4 focus:ring-red-500/20"
                 }`}
               >
                 <option value="all">🎯 All Severities</option>
@@ -699,8 +879,18 @@ function CommunityHelp() {
                 <option value="moderate">⚠️ Moderate</option>
                 <option value="low">ℹ️ Low Priority</option>
               </select>
-              <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </div>
           </div>
@@ -711,12 +901,24 @@ function CommunityHelp() {
               onClick={() => setIsExpanded(!isExpanded)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                 darkMode
-                  ? 'text-gray-300 hover:text-white hover:bg-gray-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? "text-gray-300 hover:text-white hover:bg-gray-700"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               }`}
             >
-              <svg className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg
+                className={`w-4 h-4 transition-transform duration-300 ${
+                  isExpanded ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
               <span>Advanced Filters</span>
             </button>
@@ -726,8 +928,18 @@ function CommunityHelp() {
                 onClick={clearAllFilters}
                 className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all duration-300 transform hover:scale-105"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
                 <span>Clear All</span>
               </button>
@@ -737,12 +949,21 @@ function CommunityHelp() {
 
         {/* Advanced Filters (Expandable) */}
         {isExpanded && (
-          <div className={`border-t px-6 py-4 ${darkMode ? 'border-gray-700 bg-gray-800/30' : 'border-gray-200 bg-gray-50/30'}`}>
+          <div
+            className={`border-t px-6 py-4 ${
+              darkMode
+                ? "border-gray-700 bg-gray-800/30"
+                : "border-gray-200 bg-gray-50/30"
+            }`}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
               {/* Category Filter */}
               <div>
-                <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <label
+                  className={`block text-sm font-medium mb-2 ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
                   Category Filter
                 </label>
                 <select
@@ -750,20 +971,26 @@ function CommunityHelp() {
                   onChange={(e) => setCategoryFilter(e.target.value)}
                   className={`w-full px-4 py-3 rounded-xl border appearance-none cursor-pointer ${
                     darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
+                      ? "bg-gray-700 border-gray-600 text-white"
+                      : "bg-white border-gray-300 text-gray-900"
                   } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                 >
                   <option value="all">All Categories</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
                   ))}
                 </select>
               </div>
 
               {/* Date Filter */}
               <div>
-                <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <label
+                  className={`block text-sm font-medium mb-2 ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
                   Date Range
                 </label>
                 <select
@@ -771,8 +998,8 @@ function CommunityHelp() {
                   onChange={(e) => setDateFilter(e.target.value)}
                   className={`w-full px-4 py-3 rounded-xl border appearance-none cursor-pointer ${
                     darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
+                      ? "bg-gray-700 border-gray-600 text-white"
+                      : "bg-white border-gray-300 text-gray-900"
                   } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                 >
                   <option value="all">All Time</option>
@@ -787,27 +1014,52 @@ function CommunityHelp() {
 
         {/* Active Filters Display */}
         {hasActiveFilters && (
-          <div className={`border-t px-6 py-3 ${darkMode ? 'border-gray-700 bg-gray-800/20' : 'border-gray-200 bg-gray-50/20'}`}>
+          <div
+            className={`border-t px-6 py-3 ${
+              darkMode
+                ? "border-gray-700 bg-gray-800/20"
+                : "border-gray-200 bg-gray-50/20"
+            }`}
+          >
             <div className="flex flex-wrap gap-2">
-              <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              <span
+                className={`text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Active filters:
               </span>
               {searchQuery && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                   Search: "{searchQuery}"
-                  <button onClick={() => setSearchQuery('')} className="ml-1 hover:text-blue-600">×</button>
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="ml-1 hover:text-blue-600"
+                  >
+                    ×
+                  </button>
                 </span>
               )}
-              {sortBy !== 'latest' && (
+              {sortBy !== "latest" && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
                   Sort: {sortBy}
-                  <button onClick={() => setSortBy('latest')} className="ml-1 hover:text-purple-600">×</button>
+                  <button
+                    onClick={() => setSortBy("latest")}
+                    className="ml-1 hover:text-purple-600"
+                  >
+                    ×
+                  </button>
                 </span>
               )}
-              {filterSeverity !== 'all' && (
+              {filterSeverity !== "all" && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
                   Severity: {filterSeverity}
-                  <button onClick={() => setFilterSeverity('all')} className="ml-1 hover:text-red-600">×</button>
+                  <button
+                    onClick={() => setFilterSeverity("all")}
+                    className="ml-1 hover:text-red-600"
+                  >
+                    ×
+                  </button>
                 </span>
               )}
             </div>
@@ -1064,41 +1316,52 @@ function CommunityHelp() {
     let filtered = alerts;
 
     // Filter by tab
-    if (activeTab === 'my-posts') {
-      filtered = alerts.filter(alert => alert.userId === user?.uid);
-    } else if (activeTab === 'saved') {
+    if (activeTab === "my-posts") {
+      filtered = alerts.filter((alert) => alert.userId === user?.uid);
+    } else if (activeTab === "saved") {
       // TODO: Implement saved alerts logic
       filtered = [];
-    } else if (activeTab === 'volunteer') {
-      filtered = alerts.filter(alert => alert.postedByVolunteer);
+    } else if (activeTab === "volunteer") {
+      filtered = alerts.filter((alert) => alert.postedByVolunteer);
     }
 
     // Apply search filter
     if (searchQuery) {
-      filtered = filtered.filter(alert =>
-        alert.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        alert.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        alert.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (alert) =>
+          alert.description
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          alert.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          alert.category?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     // Apply severity filter
-    if (filterSeverity !== 'all') {
-      filtered = filtered.filter(alert => alert.severity === filterSeverity);
+    if (filterSeverity !== "all") {
+      filtered = filtered.filter((alert) => alert.severity === filterSeverity);
     }
 
     // Apply sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'oldest':
-          return (a.timestamp?.toDate() || new Date()) - (b.timestamp?.toDate() || new Date());
-        case 'upvotes':
+        case "oldest":
+          return (
+            (a.timestamp?.toDate() || new Date()) -
+            (b.timestamp?.toDate() || new Date())
+          );
+        case "upvotes":
           return (b.upvotes || 0) - (a.upvotes || 0);
-        case 'severity':
+        case "severity":
           const severityOrder = { high: 3, moderate: 2, low: 1 };
-          return (severityOrder[b.severity] || 1) - (severityOrder[a.severity] || 1);
+          return (
+            (severityOrder[b.severity] || 1) - (severityOrder[a.severity] || 1)
+          );
         default: // latest
-          return (b.timestamp?.toDate() || new Date()) - (a.timestamp?.toDate() || new Date());
+          return (
+            (b.timestamp?.toDate() || new Date()) -
+            (a.timestamp?.toDate() || new Date())
+          );
       }
     });
 
@@ -1127,24 +1390,32 @@ function CommunityHelp() {
 
   // Modern main render
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${
-      darkMode
-        ? 'bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800'
-        : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
-    }`}>
+    <div
+      className={`min-h-screen transition-colors duration-300 ${
+        darkMode
+          ? "bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800"
+          : "bg-gradient-to-br from-blue-50 via-white to-purple-50"
+      }`}
+    >
       <Header transparent={true} />
 
       {/* Modern Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse ${
-          darkMode ? 'bg-blue-500/10' : 'bg-blue-500/5'
-        }`}></div>
-        <div className={`absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl animate-pulse delay-700 ${
-          darkMode ? 'bg-purple-500/10' : 'bg-purple-500/5'
-        }`}></div>
-        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-3xl animate-pulse delay-1000 ${
-          darkMode ? 'bg-indigo-500/5' : 'bg-indigo-500/3'
-        }`}></div>
+        <div
+          className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse ${
+            darkMode ? "bg-blue-500/10" : "bg-blue-500/5"
+          }`}
+        ></div>
+        <div
+          className={`absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-3xl animate-pulse delay-700 ${
+            darkMode ? "bg-purple-500/10" : "bg-purple-500/5"
+          }`}
+        ></div>
+        <div
+          className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-3xl animate-pulse delay-1000 ${
+            darkMode ? "bg-indigo-500/5" : "bg-indigo-500/3"
+          }`}
+        ></div>
       </div>
 
       <main className="relative z-10 pt-24 pb-16 px-4 md:px-6 lg:px-8">
@@ -1356,24 +1627,33 @@ function CommunityHelp() {
           <div className="max-w-7xl mx-auto">
             {/* Modern Header */}
             <div className="text-center mb-12">
-              <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${
-                darkMode ? 'text-white' : 'text-gray-900'
-              }`}>
+              <h1
+                className={`text-4xl md:text-5xl font-bold mb-4 ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
                 <TranslatableText>Community Help Center</TranslatableText>
               </h1>
-              <p className={`text-lg md:text-xl ${
-                darkMode ? 'text-gray-300' : 'text-gray-600'
-              }`}>
-                <TranslatableText>Report incidents, help your community, and stay informed</TranslatableText>
+              <p
+                className={`text-lg md:text-xl ${
+                  darkMode ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
+                <TranslatableText>
+                  Report incidents, help your community, and stay informed
+                </TranslatableText>
               </p>
             </div>
 
             {/* Enhanced Report Form Section - Top Priority */}
             <div className="mb-12">
-              <div className={`rounded-3xl p-8 ${
-                darkMode ? "bg-gray-800/90 backdrop-blur-sm border border-gray-700/50" : "bg-white/90 backdrop-blur-sm border border-gray-200/50"
-              } shadow-2xl`}>
-
+              <div
+                className={`rounded-3xl p-8 ${
+                  darkMode
+                    ? "bg-gray-800/90 backdrop-blur-sm border border-gray-700/50"
+                    : "bg-white/90 backdrop-blur-sm border border-gray-200/50"
+                } shadow-2xl`}
+              >
                 {/* Enhanced Form Header */}
                 <div className="text-center mb-8">
                   <div className="relative">
@@ -1382,13 +1662,22 @@ function CommunityHelp() {
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-br from-red-500 via-orange-500 to-yellow-500 rounded-3xl blur-2xl opacity-30 animate-pulse"></div>
                   </div>
-                  <h2 className={`text-3xl font-bold mb-3 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent`}>
-                    <TranslatableText>Report Emergency Incident</TranslatableText>
+                  <h2
+                    className={`text-3xl font-bold mb-3 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent`}
+                  >
+                    <TranslatableText>
+                      Report Emergency Incident
+                    </TranslatableText>
                   </h2>
-                  <p className={`text-lg ${
-                    darkMode ? "text-gray-300" : "text-gray-600"
-                  }`}>
-                    <TranslatableText>Help your community stay safe by reporting incidents quickly and accurately</TranslatableText>
+                  <p
+                    className={`text-lg ${
+                      darkMode ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
+                    <TranslatableText>
+                      Help your community stay safe by reporting incidents
+                      quickly and accurately
+                    </TranslatableText>
                   </p>
                 </div>
 
@@ -1397,36 +1686,72 @@ function CommunityHelp() {
                 {/* Emergency Contact Info */}
                 <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className={`p-4 rounded-xl text-center ${
-                      darkMode ? 'bg-red-900/20 border border-red-800' : 'bg-red-50 border border-red-200'
-                    }`}>
+                    <div
+                      className={`p-4 rounded-xl text-center ${
+                        darkMode
+                          ? "bg-red-900/20 border border-red-800"
+                          : "bg-red-50 border border-red-200"
+                      }`}
+                    >
                       <div className="text-2xl mb-2">🚑</div>
-                      <div className={`font-bold ${darkMode ? 'text-red-300' : 'text-red-800'}`}>
+                      <div
+                        className={`font-bold ${
+                          darkMode ? "text-red-300" : "text-red-800"
+                        }`}
+                      >
                         <TranslatableText>Medical Emergency</TranslatableText>
                       </div>
-                      <div className={`text-sm ${darkMode ? 'text-red-200' : 'text-red-700'}`}>
+                      <div
+                        className={`text-sm ${
+                          darkMode ? "text-red-200" : "text-red-700"
+                        }`}
+                      >
                         Call 108
                       </div>
                     </div>
-                    <div className={`p-4 rounded-xl text-center ${
-                      darkMode ? 'bg-orange-900/20 border border-orange-800' : 'bg-orange-50 border border-orange-200'
-                    }`}>
+                    <div
+                      className={`p-4 rounded-xl text-center ${
+                        darkMode
+                          ? "bg-orange-900/20 border border-orange-800"
+                          : "bg-orange-50 border border-orange-200"
+                      }`}
+                    >
                       <div className="text-2xl mb-2">🔥</div>
-                      <div className={`font-bold ${darkMode ? 'text-orange-300' : 'text-orange-800'}`}>
+                      <div
+                        className={`font-bold ${
+                          darkMode ? "text-orange-300" : "text-orange-800"
+                        }`}
+                      >
                         <TranslatableText>Fire Emergency</TranslatableText>
                       </div>
-                      <div className={`text-sm ${darkMode ? 'text-orange-200' : 'text-orange-700'}`}>
+                      <div
+                        className={`text-sm ${
+                          darkMode ? "text-orange-200" : "text-orange-700"
+                        }`}
+                      >
                         Call 101
                       </div>
                     </div>
-                    <div className={`p-4 rounded-xl text-center ${
-                      darkMode ? 'bg-blue-900/20 border border-blue-800' : 'bg-blue-50 border border-blue-200'
-                    }`}>
+                    <div
+                      className={`p-4 rounded-xl text-center ${
+                        darkMode
+                          ? "bg-blue-900/20 border border-blue-800"
+                          : "bg-blue-50 border border-blue-200"
+                      }`}
+                    >
                       <div className="text-2xl mb-2">👮</div>
-                      <div className={`font-bold ${darkMode ? 'text-blue-300' : 'text-blue-800'}`}>
+                      <div
+                        className={`font-bold ${
+                          darkMode ? "text-blue-300" : "text-blue-800"
+                        }`}
+                      >
                         <TranslatableText>Police Emergency</TranslatableText>
                       </div>
-                      <div className={`text-sm ${darkMode ? 'text-blue-200' : 'text-blue-700'}`}>
+                      <div
+                        className={`text-sm ${
+                          darkMode ? "text-blue-200" : "text-blue-700"
+                        }`}
+                      >
                         Call 100
                       </div>
                     </div>
@@ -1437,10 +1762,8 @@ function CommunityHelp() {
 
             {/* Enhanced Full Width Layout for Community Feed */}
             <div className="w-full">
-
               {/* Main Feed - Full width */}
               <div className="w-full space-y-8">
-
                 {/* Modern Tabs */}
                 <ModernTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -1450,62 +1773,119 @@ function CommunityHelp() {
                 {/* Content Area with Enhanced Layout */}
                 <div className="space-y-8">
                   {activeTab === "volunteer" ? (
-                    <div className={`p-8 rounded-2xl ${
-                      darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
-                    } shadow-xl`}>
+                    <div
+                      className={`p-8 rounded-2xl ${
+                        darkMode
+                          ? "bg-gray-800 border border-gray-700"
+                          : "bg-white border border-gray-200"
+                      } shadow-xl`}
+                    >
                       <div className="text-center mb-6">
                         <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                           <span className="text-3xl">🤝</span>
                         </div>
-                        <h2 className={`text-2xl font-bold mb-2 ${
-                          darkMode ? "text-white" : "text-gray-900"
-                        }`}>
+                        <h2
+                          className={`text-2xl font-bold mb-2 ${
+                            darkMode ? "text-white" : "text-gray-900"
+                          }`}
+                        >
                           <TranslatableText>Volunteer Program</TranslatableText>
                         </h2>
-                        <p className={`${darkMode ? "text-gray-300" : "text-gray-600"}`}>
-                          <TranslatableText>Join our community of verified volunteers</TranslatableText>
+                        <p
+                          className={`${
+                            darkMode ? "text-gray-300" : "text-gray-600"
+                          }`}
+                        >
+                          <TranslatableText>
+                            Join our community of verified volunteers
+                          </TranslatableText>
                         </p>
                       </div>
 
                       {!userProfile?.isVolunteer ? (
                         <div className="space-y-4">
-                          <div className={`p-4 rounded-xl ${
-                            darkMode ? 'bg-blue-900/20 border border-blue-800' : 'bg-blue-50 border border-blue-200'
-                          }`}>
-                            <h3 className={`font-semibold mb-2 ${
-                              darkMode ? 'text-blue-300' : 'text-blue-800'
-                            }`}>
-                              <TranslatableText>Benefits of becoming a volunteer:</TranslatableText>
+                          <div
+                            className={`p-4 rounded-xl ${
+                              darkMode
+                                ? "bg-blue-900/20 border border-blue-800"
+                                : "bg-blue-50 border border-blue-200"
+                            }`}
+                          >
+                            <h3
+                              className={`font-semibold mb-2 ${
+                                darkMode ? "text-blue-300" : "text-blue-800"
+                              }`}
+                            >
+                              <TranslatableText>
+                                Benefits of becoming a volunteer:
+                              </TranslatableText>
                             </h3>
-                            <ul className={`space-y-1 text-sm ${
-                              darkMode ? 'text-blue-200' : 'text-blue-700'
-                            }`}>
-                              <li>• <TranslatableText>Verified badge on your reports</TranslatableText></li>
-                              <li>• <TranslatableText>Priority visibility for your alerts</TranslatableText></li>
-                              <li>• <TranslatableText>Access to volunteer-only features</TranslatableText></li>
-                              <li>• <TranslatableText>Help coordinate community response</TranslatableText></li>
+                            <ul
+                              className={`space-y-1 text-sm ${
+                                darkMode ? "text-blue-200" : "text-blue-700"
+                              }`}
+                            >
+                              <li>
+                                •{" "}
+                                <TranslatableText>
+                                  Verified badge on your reports
+                                </TranslatableText>
+                              </li>
+                              <li>
+                                •{" "}
+                                <TranslatableText>
+                                  Priority visibility for your alerts
+                                </TranslatableText>
+                              </li>
+                              <li>
+                                •{" "}
+                                <TranslatableText>
+                                  Access to volunteer-only features
+                                </TranslatableText>
+                              </li>
+                              <li>
+                                •{" "}
+                                <TranslatableText>
+                                  Help coordinate community response
+                                </TranslatableText>
+                              </li>
                             </ul>
                           </div>
                           <button className="w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
-                            <TranslatableText>Apply to Become a Volunteer</TranslatableText>
+                            <TranslatableText>
+                              Apply to Become a Volunteer
+                            </TranslatableText>
                           </button>
                         </div>
                       ) : (
-                        <div className={`p-6 rounded-xl text-center ${
-                          darkMode ? "bg-green-900/20 border border-green-800" : "bg-green-50 border border-green-200"
-                        }`}>
+                        <div
+                          className={`p-6 rounded-xl text-center ${
+                            darkMode
+                              ? "bg-green-900/20 border border-green-800"
+                              : "bg-green-50 border border-green-200"
+                          }`}
+                        >
                           <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
                             <span className="text-white text-xl">✓</span>
                           </div>
-                          <h3 className={`font-bold mb-2 ${
-                            darkMode ? "text-green-300" : "text-green-800"
-                          }`}>
-                            <TranslatableText>Verified Volunteer</TranslatableText>
+                          <h3
+                            className={`font-bold mb-2 ${
+                              darkMode ? "text-green-300" : "text-green-800"
+                            }`}
+                          >
+                            <TranslatableText>
+                              Verified Volunteer
+                            </TranslatableText>
                           </h3>
-                          <p className={`text-sm ${
-                            darkMode ? "text-green-200" : "text-green-700"
-                          }`}>
-                            <TranslatableText>You are registered as a verified volunteer! Your reports will have priority visibility.</TranslatableText>
+                          <p
+                            className={`text-sm ${
+                              darkMode ? "text-green-200" : "text-green-700"
+                            }`}
+                          >
+                            <TranslatableText>
+                              You are registered as a verified volunteer! Your
+                              reports will have priority visibility.
+                            </TranslatableText>
                           </p>
                         </div>
                       )}
@@ -1527,15 +1907,21 @@ function CommunityHelp() {
                       ))}
                     </div>
                   ) : (
-                    <div className={`text-center py-16 ${
-                      darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
-                    } rounded-2xl shadow-lg`}>
+                    <div
+                      className={`text-center py-16 ${
+                        darkMode
+                          ? "bg-gray-800 border border-gray-700"
+                          : "bg-white border border-gray-200"
+                      } rounded-2xl shadow-lg`}
+                    >
                       <div className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <span className="text-3xl">📭</span>
                       </div>
-                      <h3 className={`text-xl font-semibold mb-2 ${
-                        darkMode ? "text-white" : "text-gray-900"
-                      }`}>
+                      <h3
+                        className={`text-xl font-semibold mb-2 ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
                         {activeTab === "my-posts" ? (
                           <TranslatableText>No reports yet</TranslatableText>
                         ) : activeTab === "saved" ? (
@@ -1544,13 +1930,24 @@ function CommunityHelp() {
                           <TranslatableText>No alerts found</TranslatableText>
                         )}
                       </h3>
-                      <p className={`${darkMode ? "text-gray-400" : "text-gray-600"}`}>
+                      <p
+                        className={`${
+                          darkMode ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
                         {activeTab === "my-posts" ? (
-                          <TranslatableText>Start by reporting an incident to help your community</TranslatableText>
+                          <TranslatableText>
+                            Start by reporting an incident to help your
+                            community
+                          </TranslatableText>
                         ) : activeTab === "saved" ? (
-                          <TranslatableText>Save important alerts to access them later</TranslatableText>
+                          <TranslatableText>
+                            Save important alerts to access them later
+                          </TranslatableText>
                         ) : (
-                          <TranslatableText>Be the first to report an incident in your area</TranslatableText>
+                          <TranslatableText>
+                            Be the first to report an incident in your area
+                          </TranslatableText>
                         )}
                       </p>
                     </div>
@@ -1560,9 +1957,6 @@ function CommunityHelp() {
             </div>
 
             {/* Sidebar removed - feed now takes full width */}
-
-
-
           </div>
         )}
       </main>
