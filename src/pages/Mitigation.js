@@ -78,14 +78,14 @@ const GuideModal = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm pt-20"
       onClick={onClose}
     >
       <motion.div
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
-        className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl bg-gray-900 shadow-2xl"
+        className="relative w-full max-w-4xl max-h-[80vh] overflow-hidden rounded-2xl bg-gray-900 shadow-2xl my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -134,7 +134,7 @@ const GuideModal = ({
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+        <div className="p-6 overflow-y-auto max-h-[calc(80vh-200px)]">
           <div className="prose prose-invert prose-lg max-w-none">
             <ReactMarkdown
               components={{
@@ -226,7 +226,7 @@ const GuideModal = ({
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="absolute top-4 right-4 text-white/80 hover:text-white"
+          className="absolute top-6 right-6 text-white/80 hover:text-white bg-black/20 hover:bg-black/40 rounded-full p-2 transition-all duration-200"
           onClick={onClose}
         >
           <svg
@@ -839,11 +839,38 @@ function Mitigation() {
           <h1 className="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
             <TranslatableText>Disaster Mitigation Hub</TranslatableText>
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-8">
             <TranslatableText>
-              Comprehensive guides and strategies to prepare for, respond to, and recover from natural disasters
+              Comprehensive guides and strategies to prepare for, respond to,
+              and recover from natural disasters
             </TranslatableText>
           </p>
+
+          {/* Mitigation Demo Video */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gray-900 border border-white/10">
+              <video
+                className="w-full h-auto"
+                controls
+                poster="/resqbg.jpg"
+                preload="metadata"
+              >
+                <source
+                  src="/src/assets/videos/disasters-page.mp4"
+                  type="video/mp4"
+                />
+                <TranslatableText>
+                  Your browser does not support the video tag.
+                </TranslatableText>
+              </video>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+            </div>
+            <p className="text-sm text-gray-400 mt-3">
+              <TranslatableText>
+                Watch how to navigate disaster mitigation resources
+              </TranslatableText>
+            </p>
+          </div>
         </div>
         {/* Enhanced Search Section */}
         <div className="mb-12">

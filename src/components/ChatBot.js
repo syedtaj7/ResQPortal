@@ -199,7 +199,7 @@ const ChatBot = () => {
   return (
     <>
       <motion.button
-        className="fixed bottom-6 left-6 ml-0 md:ml-48 bg-yellow-400 text-white p-3 md:p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-40"
+        className="fixed bottom-6 left-6 md:bottom-[7rem] md:right-6 md:left-auto ml-0 bg-yellow-400 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
@@ -225,10 +225,10 @@ const ChatBot = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-16 md:bottom-24 left-2 md:left-6 w-[calc(100vw-1rem)] max-w-sm md:w-96 bg-gray-900 rounded-lg shadow-xl border border-gray-800 z-50"
+            className="fixed bottom-16 md:bottom-[8.5rem] left-2 md:right-6 md:left-auto w-[calc(100vw-1rem)] max-w-sm md:w-80 bg-gray-900 rounded-lg shadow-xl border border-gray-800 z-50"
           >
-            <div className="flex items-center justify-between p-3 md:p-4 border-b border-gray-800">
-              <h3 className="text-base md:text-lg font-semibold text-white">
+            <div className="flex items-center justify-between p-2 md:p-3 border-b border-gray-800">
+              <h3 className="text-sm md:text-base font-semibold text-white">
                 <TranslatableText>Disaster Support</TranslatableText>
               </h3>
               <button
@@ -251,7 +251,7 @@ const ChatBot = () => {
               </button>
             </div>
 
-            <div className="h-64 md:h-96 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
+            <div className="h-48 md:h-64 overflow-y-auto p-2 md:p-3 space-y-2 md:space-y-3">
               {messages.map((message, index) => (
                 <motion.div
                   key={index}
@@ -262,7 +262,7 @@ const ChatBot = () => {
                   }`}
                 >
                   <div
-                    className={`max-w-[85%] md:max-w-[80%] p-2 md:p-3 rounded-lg text-sm md:text-base ${
+                    className={`max-w-[85%] md:max-w-[80%] p-2 rounded-lg text-xs md:text-sm ${
                       message.type === "user"
                         ? "bg-blue-600 text-white"
                         : "bg-gray-800 text-gray-300"
@@ -313,7 +313,7 @@ const ChatBot = () => {
 
             <form
               onSubmit={handleSubmit}
-              className="p-3 md:p-4 border-t border-gray-800"
+              className="p-2 md:p-3 border-t border-gray-800"
             >
               <div className="flex items-center space-x-2">
                 <input
