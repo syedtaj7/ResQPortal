@@ -15,9 +15,11 @@ const WelcomeHeader = () => {
           <div className="flex items-center justify-between gap-4">
             {/* Logo */}
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-white cursor-pointer drop-shadow-lg"
-                  onClick={() => navigate("/")}>
-                <TranslatableText>ResQTech</TranslatableText>
+              <h1
+                className="text-2xl font-bold text-white cursor-pointer drop-shadow-lg"
+                onClick={() => navigate("/")}
+              >
+                <TranslatableText>ResQPortal</TranslatableText>
               </h1>
             </div>
 

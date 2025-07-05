@@ -116,7 +116,7 @@ function Welcome() {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 mb-4">
-                ResQTech
+                ResQPortal
               </h1>
               <div className="w-16 md:w-24 h-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mx-auto lg:mx-0"></div>
             </motion.div>

@@ -67,7 +67,7 @@ const Header = React.memo(({ transparent = false }) => {
                 className="text-xl font-bold md:text-white text-gray-800 md:drop-shadow-lg cursor-pointer"
                 onClick={() => navigate("/")}
               >
-                <TranslatableText>ResQTech</TranslatableText>
+                <TranslatableText>ResQPortal</TranslatableText>
               </h1>
             </div>
 
