@@ -578,7 +578,7 @@ function Welcome() {
           >
             {" "}
             <motion.div
-              className="bg-gray-900 rounded-2xl border border-gray-700 shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+              className="md:bg-gray-900 md:rounded-2xl md:border md:border-gray-700 md:shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}

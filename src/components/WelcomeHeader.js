@@ -11,7 +11,7 @@ const WelcomeHeader = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-transparent p-4">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-black/20 backdrop-blur-xl border border-white/20 rounded-full px-6 py-3 shadow-2xl">
+        <div className="bg-black/20 backdrop-blur-xl border border-white/20 md:rounded-full px-6 py-3 shadow-2xl">
           <div className="flex items-center justify-between gap-4">
             {/* Logo */}
             <div className="flex items-center">
