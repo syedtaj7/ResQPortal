@@ -36,6 +36,19 @@ function Welcome() {
       hasVideo: true,
     },
     {
+      id: "relocation",
+      title: "Relocation",
+      icon: "🏃",
+      color: "from-red-500 to-pink-500",
+      description:
+        "Find safe evacuation routes, emergency shelters, and transportation options during critical situations. Real-time updates on safe zones and traffic conditions.",
+      tags: ["Evacuation Routes", "Safe Shelters"],
+      tagColors: ["bg-red-500/20 text-red-400", "bg-pink-500/20 text-pink-400"],
+      videoPlaceholder: "Emergency Relocation Guide",
+      videoSrc: relocationPageVideo,
+      hasVideo: true,
+    },
+    {
       id: "alerts",
       title: "Alerts",
       icon: "🚨",
@@ -68,16 +81,19 @@ function Welcome() {
       hasVideo: true,
     },
     {
-      id: "relocation",
-      title: "Relocation",
-      icon: "🏃",
-      color: "from-red-500 to-pink-500",
+      id: "helplines",
+      title: "Helplines",
+      icon: "📞",
+      color: "from-cyan-500 to-blue-500",
       description:
-        "Find safe evacuation routes, emergency shelters, and transportation options during critical situations. Real-time updates on safe zones and traffic conditions.",
-      tags: ["Evacuation Routes", "Safe Shelters"],
-      tagColors: ["bg-red-500/20 text-red-400", "bg-pink-500/20 text-pink-400"],
-      videoPlaceholder: "Emergency Relocation Guide",
-      videoSrc: relocationPageVideo,
+        "Access emergency helplines, contact information for disaster response teams, and get immediate assistance during critical situations.",
+      tags: ["Emergency Contacts", "24/7 Support"],
+      tagColors: [
+        "bg-cyan-500/20 text-cyan-400",
+        "bg-blue-500/20 text-blue-400",
+      ],
+      videoPlaceholder: "Emergency Helplines Guide",
+      videoSrc: helplinesPageVideo,
       hasVideo: true,
     },
     {
@@ -94,22 +110,6 @@ function Welcome() {
       ],
       videoPlaceholder: "Donation Platform Guide",
       videoSrc: donationsPageVideo,
-      hasVideo: true,
-    },
-    {
-      id: "helplines",
-      title: "Helplines",
-      icon: "📞",
-      color: "from-cyan-500 to-blue-500",
-      description:
-        "Access emergency helplines, contact information for disaster response teams, and get immediate assistance during critical situations.",
-      tags: ["Emergency Contacts", "24/7 Support"],
-      tagColors: [
-        "bg-cyan-500/20 text-cyan-400",
-        "bg-blue-500/20 text-blue-400",
-      ],
-      videoPlaceholder: "Emergency Helplines Guide",
-      videoSrc: helplinesPageVideo,
       hasVideo: true,
     },
   ];
@@ -435,58 +435,247 @@ function Welcome() {
       <GoogleVoiceAssistant />
 
       {/* How To Section */}
-      <section className="relative z-10 bg-gradient-to-br from-gray-900 via-gray-800 to-black py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          {/* Section Header */}
+      <section className="relative z-10 py-16 md:py-24 overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0">
+          {/* Primary gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/30 to-indigo-900/20"></div>
+
+          {/* Animated geometric shapes */}
           <motion.div
-            className="text-center mb-12 md:mb-16"
+            className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-yellow-400/10 to-orange-500/10 rounded-full blur-xl"
+            animate={{
+              x: [0, 100, 0],
+              y: [0, -50, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-40 right-20 w-40 h-40 bg-gradient-to-r from-blue-400/10 to-purple-500/10 rounded-full blur-xl"
+            animate={{
+              x: [0, -80, 0],
+              y: [0, 60, 0],
+              scale: [1, 0.8, 1],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-20 left-1/4 w-24 h-24 bg-gradient-to-r from-green-400/10 to-teal-500/10 rounded-full blur-xl"
+            animate={{
+              x: [0, 60, 0],
+              y: [0, -40, 0],
+              rotate: [0, 180, 360],
+            }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          />
+
+          {/* Floating particles */}
+          {[...Array(15)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-white/20 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+              animate={{
+                y: [0, -100, 0],
+                opacity: [0, 1, 0],
+              }}
+              transition={{
+                duration: Math.random() * 3 + 2,
+                repeat: Infinity,
+                delay: Math.random() * 2,
+              }}
+            />
+          ))}
+
+          {/* Grid overlay */}
+          <div className="absolute inset-0 opacity-5">
+            <div
+              className="w-full h-full"
+              style={{
+                backgroundImage: `
+                  radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.2) 2px, transparent 2px),
+                  radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.2) 2px, transparent 2px)
+                `,
+                backgroundSize: "60px 60px",
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+          {/* Section Header with enhanced styling */}
+          <motion.div
+            className="text-center mb-12 md:mb-16 relative"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-              How to Use{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
-                ResQPortal
-              </span>
-            </h2>
-            <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
-              Navigate through our comprehensive disaster management platform
-              with these step-by-step guides
-            </p>
+            {/* Decorative arrows */}
+            <motion.div
+              className="absolute -top-8 left-1/2 transform -translate-x-1/2"
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center space-x-2">
+                <motion.div
+                  className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-yellow-400"
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                <motion.div
+                  className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[15px] border-b-orange-400"
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
+                />
+                <motion.div
+                  className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-yellow-400"
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.4 }}
+                />
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="inline-block"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2 className="text-3xl md:text-4xl lg:text-6xl font-black text-white mb-4 relative">
+                <span className="relative z-10">How to Use </span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 relative z-10">
+                  ResQPortal
+                </span>
+
+                {/* Glowing effect behind text */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-orange-500/20 to-red-500/20 blur-xl"
+                  animate={{
+                    opacity: [0.3, 0.6, 0.3],
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                />
+              </h2>
+            </motion.div>
+
+            <motion.p
+              className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto relative"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              🚀 Navigate through our comprehensive disaster management platform
+              with these step-by-step guides 🎯
+            </motion.p>
           </motion.div>
 
-          {/* How To Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {/* How To Cards Grid with enhanced styling */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 relative">
+            {/* Background decorative elements */}
+            <motion.div
+              className="absolute -top-10 -left-10 w-20 h-20 border-2 border-dashed border-yellow-400/30 rounded-full"
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute -bottom-10 -right-10 w-16 h-16 border-2 border-dashed border-blue-400/30 rounded-full"
+              animate={{ rotate: [360, 0] }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+            />
+
             {tabsData.map((tab, index) => (
               <motion.div
                 key={tab.id}
-                className={`bg-gray-800/50 backdrop-blur-xl rounded-2xl p-6 border border-gray-700 hover:border-${
+                className={`relative bg-gray-800/40 backdrop-blur-xl rounded-lg p-3 border border-gray-700/50 hover:border-${
                   tab.color.split(" ")[1].split("-")[0]
-                }-500/50 transition-all duration-300 group cursor-pointer`}
+                }-500/50 transition-all duration-500 group cursor-pointer overflow-hidden`}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 + index * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -5 }}
+                whileHover={{
+                  y: -8,
+                  scale: 1.01,
+                  boxShadow: "0 15px 30px rgba(0,0,0,0.3)",
+                }}
                 onClick={() => handleTabClick(tab)}
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div
-                    className={`w-12 h-12 bg-gradient-to-r ${tab.color} rounded-lg flex items-center justify-center`}
+                {/* Card background glow effect */}
+                <motion.div
+                  className={`absolute inset-0 bg-gradient-to-r ${tab.color} opacity-0 group-hover:opacity-10 rounded-2xl`}
+                  transition={{ duration: 0.3 }}
+                />
+
+                {/* Floating icon indicator */}
+                <motion.div
+                  className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100"
+                  initial={{ scale: 0, rotate: -180 }}
+                  whileInView={{ scale: 1, rotate: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <span className="text-black text-xs">▶</span>
+                </motion.div>
+
+                {/* Card number indicator */}
+                <motion.div
+                  className="absolute top-2 left-2 w-6 h-6 bg-gradient-to-r from-gray-600 to-gray-700 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                  whileHover={{ scale: 1.1, rotate: 360 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {index + 1}
+                </motion.div>
+
+                <div className="flex items-center gap-2 mb-3 mt-6">
+                  <motion.div
+                    className={`w-10 h-10 bg-gradient-to-r ${tab.color} rounded-lg flex items-center justify-center relative`}
+                    whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    <span className="text-2xl">{tab.icon}</span>
+                    <span className="text-xl">{tab.icon}</span>
+                    {/* Icon glow effect */}
+                    <motion.div
+                      className={`absolute inset-0 bg-gradient-to-r ${tab.color} rounded-lg blur-lg opacity-0 group-hover:opacity-30`}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </motion.div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-yellow-400 group-hover:to-orange-500 transition-all duration-300">
+                      {tab.title}
+                    </h3>
                   </div>
-                  <h3 className="text-xl font-bold text-white">{tab.title}</h3>
                 </div>
-                <p className="text-gray-300 mb-4 leading-relaxed">
+
+                <p className="text-gray-300 mb-3 leading-relaxed group-hover:text-gray-200 transition-colors duration-300 text-sm">
                   {tab.description}
                 </p>
-                <div className="bg-gray-700/50 rounded-lg p-4 mb-4 border-2 border-dashed border-gray-600 hover:border-gray-500 transition-colors">
-                  <div className="text-center text-gray-400">
+
+                {/* Enhanced video preview */}
+                <div className="bg-gray-700/30 rounded-lg p-3 mb-3 border-2 border-dashed border-gray-600 hover:border-gray-500 transition-all duration-300 relative overflow-hidden group/video">
+                  {/* Click indicator */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    whileHover={{
+                      background: [
+                        "linear-gradient(45deg, rgba(250, 204, 21, 0.1), rgba(251, 146, 60, 0.1))",
+                        "linear-gradient(90deg, rgba(250, 204, 21, 0.2), rgba(251, 146, 60, 0.2))",
+                        "linear-gradient(135deg, rgba(250, 204, 21, 0.1), rgba(251, 146, 60, 0.1))",
+                      ],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+
+                  <div className="text-center text-gray-400 relative z-10">
                     {tab.hasVideo ? (
-                      <div className="w-full aspect-video bg-gray-800 rounded-lg overflow-hidden mb-2">
+                      <div className="w-full aspect-video bg-gray-800 rounded-lg overflow-hidden mb-2 relative group/play">
                         <video
                           className="w-full h-full object-cover"
                           muted
@@ -496,72 +685,248 @@ function Welcome() {
                         >
                           <source src={tab.videoSrc} type="video/mp4" />
                         </video>
+                        {/* Play button overlay */}
+                        <motion.div
+                          className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/play:opacity-100 transition-opacity duration-300"
+                          whileHover={{ scale: 1.1 }}
+                        >
+                          <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
+                            <motion.div
+                              className="w-0 h-0 border-l-[10px] border-l-black border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent ml-1"
+                              animate={{ x: [0, 2, 0] }}
+                              transition={{ duration: 1, repeat: Infinity }}
+                            />
+                          </div>
+                        </motion.div>
                       </div>
                     ) : (
-                      <div className="w-16 h-16 mx-auto mb-2 bg-gray-600 rounded-lg flex items-center justify-center group-hover:bg-gray-500 transition-colors">
+                      <div className="w-12 h-12 mx-auto mb-2 bg-gray-600 rounded-lg flex items-center justify-center group-hover:bg-gray-500 transition-colors">
                         🎥
                       </div>
                     )}
-                    <p className="text-sm">Click to view full tutorial</p>
-                    <p className="text-xs">{tab.videoPlaceholder}</p>
+
+                    <motion.p
+                      className="text-sm group-hover:text-yellow-400 transition-colors duration-300"
+                      animate={{
+                        opacity: [1, 0.7, 1],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      ✨ Click to view full tutorial ✨
+                    </motion.p>
+                    <p className="text-xs mt-1">{tab.videoPlaceholder}</p>
+
+                    {/* Arrow indicators */}
+                    <div className="flex justify-center items-center space-x-2 mt-2">
+                      <motion.div
+                        className="w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[6px] border-l-yellow-400"
+                        animate={{ x: [0, 3, 0] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      />
+                      <motion.div
+                        className="w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[6px] border-l-orange-400"
+                        animate={{ x: [0, 3, 0] }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          delay: 0.2,
+                        }}
+                      />
+                      <motion.div
+                        className="w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[6px] border-l-yellow-400"
+                        animate={{ x: [0, 3, 0] }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          delay: 0.4,
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
+
                 <div className="flex flex-wrap gap-2">
                   {tab.tags.map((tag, tagIndex) => (
-                    <span
+                    <motion.span
                       key={tagIndex}
-                      className={`px-2 py-1 ${tab.tagColors[tagIndex]} text-xs rounded-full`}
+                      className={`px-2 py-1 ${tab.tagColors[tagIndex]} text-xs rounded-full relative overflow-hidden`}
+                      whileHover={{ scale: 1.05 }}
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{
+                        duration: 0.3,
+                        delay: 0.4 + tagIndex * 0.1,
+                      }}
+                      viewport={{ once: true }}
                     >
-                      {tag}
-                    </span>
+                      <motion.div
+                        className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100"
+                        transition={{ duration: 0.2 }}
+                      />
+                      <span className="relative z-10">{tag}</span>
+                    </motion.span>
                   ))}
                 </div>
+
+                {/* Step indicator */}
+                <motion.div
+                  className="absolute bottom-4 right-4 text-gray-500 text-xs"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  Step {index + 1} of {tabsData.length}
+                </motion.div>
               </motion.div>
             ))}
           </div>
 
-          {/* Additional Features */}
+          {/* Enhanced Additional Features */}
           <motion.div
-            className="mt-12 md:mt-16 text-center"
+            className="mt-12 md:mt-16 text-center relative"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-2xl md:text-3xl font-bold text-white mb-6">
-              Additional Features
-            </h3>
+            {/* Decorative line with arrows */}
+            <motion.div
+              className="flex items-center justify-center mb-8"
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <motion.div
+                className="h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent w-32"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <motion.div
+                className="mx-4 text-yellow-400 text-xl"
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              >
+                ⭐
+              </motion.div>
+              <motion.div
+                className="h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent w-32"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+              />
+            </motion.div>
+
+            <motion.h3
+              className="text-2xl md:text-3xl font-bold text-white mb-6 relative"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+            >
+              <span className="relative z-10">🚀 Additional Features 🎯</span>
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-orange-500/20 blur-xl opacity-0 hover:opacity-100"
+                transition={{ duration: 0.3 }}
+              />
+            </motion.h3>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <div className="bg-gray-800/30 rounded-xl p-4 border border-gray-700">
-                <div className="text-3xl mb-2">🎤</div>
-                <h4 className="text-lg font-semibold text-white mb-2">
-                  Voice Assistant
-                </h4>
-                <p className="text-gray-400 text-sm">
-                  Emergency voice commands and audio alerts for hands-free
-                  operation
-                </p>
-              </div>
-              <div className="bg-gray-800/30 rounded-xl p-4 border border-gray-700">
-                <div className="text-3xl mb-2">🌐</div>
-                <h4 className="text-lg font-semibold text-white mb-2">
-                  Multi-language Support
-                </h4>
-                <p className="text-gray-400 text-sm">
-                  Access the platform in multiple languages for global
-                  accessibility
-                </p>
-              </div>
-              <div className="bg-gray-800/30 rounded-xl p-4 border border-gray-700">
-                <div className="text-3xl mb-2">📱</div>
-                <h4 className="text-lg font-semibold text-white mb-2">
-                  Mobile Optimized
-                </h4>
-                <p className="text-gray-400 text-sm">
-                  Fully responsive design for use on any device, anywhere
-                </p>
-              </div>
+              {[
+                {
+                  icon: "🎤",
+                  title: "Voice Assistant",
+                  description:
+                    "Emergency voice commands and audio alerts for hands-free operation",
+                  color: "from-purple-500 to-pink-500",
+                },
+                {
+                  icon: "🌐",
+                  title: "Multi-language Support",
+                  description:
+                    "Access the platform in multiple languages for global accessibility",
+                  color: "from-blue-500 to-cyan-500",
+                },
+                {
+                  icon: "📱",
+                  title: "Mobile Optimized",
+                  description:
+                    "Fully responsive design for use on any device, anywhere",
+                  color: "from-green-500 to-teal-500",
+                },
+              ].map((feature, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-gray-800/30 rounded-xl p-4 border border-gray-700 relative overflow-hidden group hover:border-gray-500 transition-all duration-300"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.9 + index * 0.2 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -5, scale: 1.02 }}
+                >
+                  {/* Background glow effect */}
+                  <motion.div
+                    className={`absolute inset-0 bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-10 rounded-xl`}
+                    transition={{ duration: 0.3 }}
+                  />
+
+                  <motion.div
+                    className="text-3xl mb-2 relative z-10"
+                    animate={{
+                      scale: [1, 1.1, 1],
+                      rotate: [0, 5, -5, 0],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      delay: index * 0.5,
+                    }}
+                  >
+                    {feature.icon}
+                  </motion.div>
+
+                  <h4 className="text-lg font-semibold text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-yellow-400 group-hover:to-orange-500 transition-all duration-300 relative z-10">
+                    {feature.title}
+                  </h4>
+
+                  <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors duration-300 relative z-10">
+                    {feature.description}
+                  </p>
+
+                  {/* Corner decoration */}
+                  <motion.div
+                    className="absolute top-2 right-2 w-2 h-2 bg-yellow-400 rounded-full opacity-0 group-hover:opacity-100"
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    transition={{ duration: 0.3, delay: 1 + index * 0.1 }}
+                    viewport={{ once: true }}
+                  />
+                </motion.div>
+              ))}
             </div>
+
+            {/* Bottom decoration */}
+            <motion.div
+              className="mt-8 flex justify-center items-center space-x-2"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 1.2 }}
+              viewport={{ once: true }}
+            >
+              {[...Array(5)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="w-2 h-2 bg-yellow-400 rounded-full"
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.5, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    delay: i * 0.2,
+                  }}
+                />
+              ))}
+            </motion.div>
           </motion.div>
         </div>
       </section>
