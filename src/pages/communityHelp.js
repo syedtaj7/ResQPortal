@@ -1803,7 +1803,7 @@ function CommunityHelp() {
                     </TranslatableText>
                   </h2>
                   <p
-                    className={`text-lg ${
+                    className={`text-lg mb-6 ${
                       darkMode ? "text-gray-300" : "text-gray-600"
                     }`}
                   >
@@ -1812,12 +1812,23 @@ function CommunityHelp() {
                       quickly and accurately
                     </TranslatableText>
                   </p>
+
+                  {/* Register Disaster Report Button */}
+                  <div className="mb-8 flex justify-center">
+                    <button
+                      onClick={() => setShowReportModal(true)}
+                      className="w-full md:w-auto py-4 px-8 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl font-semibold hover:from-red-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3 text-lg"
+                    >
+                      <span className="text-xl">🚨</span>
+                      <TranslatableText>
+                        Register Disaster Report
+                      </TranslatableText>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Enhanced Report Form removed - focusing on feed display */}
-
                 {/* Emergency Contact Info */}
-                <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+                <div className="pt-8 border-t border-gray-200 dark:border-gray-700">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div
                       className={`p-4 rounded-xl text-center ${
@@ -2025,21 +2036,6 @@ function CommunityHelp() {
                     </div>
                   ) : filteredAlerts.length > 0 ? (
                     <div className="space-y-6">
-                      {/* Report Button for My Reports tab */}
-                      {activeTab === "my-posts" && (
-                        <div className="mb-6 flex justify-center">
-                          <button
-                            onClick={() => setShowReportModal(true)}
-                            className="w-full md:w-auto py-3 px-6 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl font-semibold hover:from-red-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3"
-                          >
-                            <span className="text-xl">🚨</span>
-                            <TranslatableText>
-                              Register Disaster Report
-                            </TranslatableText>
-                          </button>
-                        </div>
-                      )}
-
                       <div className="grid gap-6">
                         {filteredAlerts.map((alert) => (
                           <ModernAlertCard
@@ -2102,21 +2098,6 @@ function CommunityHelp() {
                           </TranslatableText>
                         )}
                       </p>
-
-                      {/* Report Button for empty My Reports tab */}
-                      {activeTab === "my-posts" && (
-                        <div className="mt-6">
-                          <button
-                            onClick={() => setShowReportModal(true)}
-                            className="py-3 px-6 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl font-semibold hover:from-red-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-3 mx-auto"
-                          >
-                            <span className="text-xl">🚨</span>
-                            <TranslatableText>
-                              Register Your First Report
-                            </TranslatableText>
-                          </button>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
