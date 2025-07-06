@@ -30,66 +30,6 @@ const severityColors = {
   },
 };
 
-// Update the disasterTypeColors constant with dark mode support
-const disasterTypeColors = {
-  "Weather Warning": {
-    bg: "bg-sky-100 dark:bg-sky-900/30",
-    border: "border-sky-400 dark:border-sky-700",
-    text: "text-sky-900 dark:text-sky-300",
-    title: "text-sky-950 dark:text-sky-200",
-    details: "text-sky-800 dark:text-sky-400",
-  },
-  Earthquake: {
-    bg: "bg-rose-100 dark:bg-rose-900/30",
-    border: "border-rose-400 dark:border-rose-700",
-    text: "text-rose-900 dark:text-rose-300",
-    title: "text-rose-950 dark:text-rose-200",
-    details: "text-rose-800 dark:text-rose-400",
-  },
-  "Landslide Warning": {
-    bg: "bg-orange-100 dark:bg-orange-900/30",
-    border: "border-orange-400 dark:border-orange-700",
-    text: "text-orange-900 dark:text-orange-300",
-    title: "text-orange-950 dark:text-orange-200",
-    details: "text-orange-800 dark:text-orange-400",
-  },
-  "Air Quality Warning": {
-    bg: "bg-violet-100 dark:bg-violet-900/30",
-    border: "border-violet-400 dark:border-violet-700",
-    text: "text-violet-900 dark:text-violet-300",
-    title: "text-violet-950 dark:text-violet-200",
-    details: "text-violet-800 dark:text-violet-400",
-  },
-  "Flash Flood": {
-    bg: "bg-indigo-100 dark:bg-indigo-900/30",
-    border: "border-indigo-400 dark:border-indigo-700",
-    text: "text-indigo-900 dark:text-indigo-300",
-    title: "text-indigo-950 dark:text-indigo-200",
-    details: "text-indigo-800 dark:text-indigo-400",
-  },
-  Cyclone: {
-    bg: "bg-emerald-100 dark:bg-emerald-900/30",
-    border: "border-emerald-400 dark:border-emerald-700",
-    text: "text-emerald-900 dark:text-emerald-300",
-    title: "text-emerald-950 dark:text-emerald-200",
-    details: "text-emerald-800 dark:text-emerald-400",
-  },
-  Wildfire: {
-    bg: "bg-red-100 dark:bg-red-900/30",
-    border: "border-red-400 dark:border-red-700",
-    text: "text-red-900 dark:text-red-300",
-    title: "text-red-950 dark:text-red-200",
-    details: "text-red-800 dark:text-red-400",
-  },
-  default: {
-    bg: "bg-slate-100 dark:bg-slate-800/50",
-    border: "border-slate-400 dark:border-slate-700",
-    text: "text-slate-900 dark:text-slate-300",
-    title: "text-slate-950 dark:text-slate-200",
-    details: "text-slate-800 dark:text-slate-400",
-  },
-};
-
 // Update the createCircleCoords function to be more efficient
 const createCircleCoords = (center, radiusKm = 10) => {
   const points = 24; // Reduced from 32 to 24 points for better performance
@@ -2914,7 +2854,7 @@ function Home() {
 
           {/* Enhanced Bottom Right Detailed Popup - Responsive */}
           {showDetailedPopup && selectedDisasterGroup && (
-            <div className="absolute bottom-4 right-4 left-4 md:left-auto z-[1000] md:w-[480px] max-h-[85vh] overflow-y-auto animate-fade-in-up">
+            <div className="absolute bottom-2 right-2 left-2 md:bottom-4 md:right-4 md:left-auto z-[9999] md:w-[480px] max-h-[85vh] overflow-y-auto animate-fade-in-up">
               <div className="bg-white backdrop-blur-xl border border-gray-300 rounded-2xl shadow-2xl ring-1 ring-gray-200 overflow-hidden">
                 {(() => {
                   const mainWarningInfo = getComprehensiveWeatherWarning(
@@ -2986,28 +2926,40 @@ function Home() {
                     <>
                       {/* Enhanced Header with Warning Colors */}
                       <div
-                        className={`bg-gradient-to-r ${colorScheme.headerBg} to-white p-5 border-b ${colorScheme.border}`}
+                        className={`bg-gradient-to-r ${colorScheme.headerBg} to-white p-3 md:p-5 border-b ${colorScheme.border}`}
                       >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-4">
+                        <div className="flex items-start justify-between mb-3 gap-2">
+                          <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
                             <div
-                              className={`w-14 h-14 ${colorScheme.icon} rounded-2xl flex items-center justify-center border ${colorScheme.border} shadow-lg`}
+                              className={`w-10 h-10 md:w-14 md:h-14 ${colorScheme.icon} rounded-2xl flex items-center justify-center border ${colorScheme.border} shadow-lg flex-shrink-0`}
                             >
-                              <span className="text-3xl">
+                              <span className="text-lg md:text-3xl">
                                 {mainWarningInfo.icon}
                               </span>
                             </div>
-                            <div>
-                              <h3 className="font-bold text-xl text-gray-900 mb-1">
-                                {mainWarningInfo.title}
-                              </h3>
-                              <div className="flex items-center gap-3">
+                            <div className="min-w-0 flex-1">
+                              {/* Location and Disaster Type */}
+                              <div className="mb-2">
+                                <h3 className="font-bold text-lg md:text-xl text-gray-900 mb-1 line-clamp-1">
+                                  <TranslatableText>
+                                    {selectedDisasterGroup[0]?.title ||
+                                      "Unknown Location"}
+                                  </TranslatableText>
+                                </h3>
+                                <p className="text-base md:text-lg font-semibold text-gray-700 line-clamp-1">
+                                  <TranslatableText>
+                                    {selectedDisasterGroup[0]?.type ||
+                                      "Disaster Alert"}
+                                  </TranslatableText>
+                                </p>
+                              </div>
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                                 <span
-                                  className={`px-3 py-1 rounded-full text-sm font-bold ${colorScheme.bg} ${colorScheme.text} border ${colorScheme.border}`}
+                                  className={`px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-bold ${colorScheme.bg} ${colorScheme.text} border ${colorScheme.border} w-fit`}
                                 >
                                   {mainWarningInfo.severity.toUpperCase()} ALERT
                                 </span>
-                                <span className="text-sm text-gray-600">
+                                <span className="text-xs md:text-sm text-gray-600">
                                   {selectedDisasterGroup.length} Active Alert
                                   {selectedDisasterGroup.length !== 1
                                     ? "s"
@@ -3018,10 +2970,10 @@ function Home() {
                           </div>
                           <button
                             onClick={() => setShowDetailedPopup(false)}
-                            className="w-10 h-10 bg-white hover:bg-gray-100 text-gray-600 hover:text-gray-800 transition-colors rounded-full flex items-center justify-center shadow-md border border-gray-300"
+                            className="w-9 h-9 md:w-10 md:h-10 bg-white hover:bg-gray-100 text-gray-600 hover:text-gray-800 transition-colors rounded-full flex items-center justify-center shadow-md border border-gray-300 flex-shrink-0 ml-2"
                           >
                             <svg
-                              className="w-5 h-5"
+                              className="w-4 h-4 md:w-5 md:h-5"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -3052,18 +3004,18 @@ function Home() {
                           </div>
                         )}
 
-                        <div className="flex items-center justify-between text-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
                           <div className="flex items-center gap-2">
                             <span
                               className={`w-2 h-2 ${colorScheme.dot} rounded-full animate-pulse`}
                             ></span>
-                            <span className="font-medium text-gray-700">
+                            <span className="font-medium text-gray-700 text-xs sm:text-sm">
                               LIVE MONITORING
                             </span>
                           </div>
                           <div className="flex items-center text-gray-500">
                             <svg
-                              className="w-4 h-4 mr-1"
+                              className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -3075,7 +3027,9 @@ function Home() {
                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                               />
                             </svg>
-                            Updated: {new Date().toLocaleTimeString()}
+                            <span className="text-xs sm:text-sm">
+                              Updated: {new Date().toLocaleTimeString()}
+                            </span>
                           </div>
                         </div>
                       </div>
