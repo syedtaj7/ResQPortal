@@ -16,7 +16,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import {
   getFirestore,
   collection,
-  // addDoc, // Removed - not used after form removal
+  addDoc,
   getDocs,
   query,
   orderBy,
@@ -30,9 +30,7 @@ import {
   limit,
   getDoc,
 } from "firebase/firestore";
-// Removed Firebase Storage imports - not used after sidebar removal
-// import {
-//   getStorage,
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 //   ref,
 //   uploadBytes,
 //   getDownloadURL
@@ -80,7 +78,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-// const storage = getStorage(app); // Removed - not used after sidebar removal
+const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
 // Weather API integration can be added here when needed
@@ -539,6 +537,19 @@ function CommunityHelp() {
   // const [formSeverity, setFormSeverity] = useState(""); // Removed - not used after form removal
   const [userProfile, setUserProfile] = useState(null);
 
+  // Report form modal states
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportForm, setReportForm] = useState({
+    city: "",
+    state: "",
+    disasterType: "",
+    description: "",
+    image: null,
+  });
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportError, setReportError] = useState("");
+  const [imagePreview, setImagePreview] = useState(null);
+
   // Fetch alerts from Firebase
   const fetchAlerts = useCallback(async () => {
     try {
@@ -606,7 +617,7 @@ function CommunityHelp() {
     return (
       <div className="mb-8">
         {/* Tab Navigation */}
-        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -1311,6 +1322,128 @@ function CommunityHelp() {
     setSelectedImage(imageUrl);
   };
 
+  // Disaster Report Form Handlers
+  const handleReportFormChange = (field, value) => {
+    setReportForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setReportError("Image size should be less than 5MB");
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith("image/")) {
+        setReportError("Please select a valid image file");
+        return;
+      }
+
+      setReportForm((prev) => ({
+        ...prev,
+        image: file,
+      }));
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      setReportError("");
+    }
+  };
+
+  const handleSubmitReport = async (e) => {
+    e.preventDefault();
+    setIsSubmittingReport(true);
+    setReportError("");
+
+    try {
+      // Validate form
+      if (
+        !reportForm.city ||
+        !reportForm.state ||
+        !reportForm.disasterType ||
+        !reportForm.description
+      ) {
+        setReportError("Please fill in all required fields");
+        return;
+      }
+
+      let imageUrl = null;
+
+      // Upload image if provided
+      if (reportForm.image) {
+        const imageRef = ref(
+          storage,
+          `disaster-reports/${Date.now()}_${reportForm.image.name}`
+        );
+        await uploadBytes(imageRef, reportForm.image);
+        imageUrl = await getDownloadURL(imageRef);
+      }
+
+      // Create alert document
+      const alertData = {
+        category: reportForm.disasterType,
+        description: reportForm.description,
+        location: `${reportForm.city}, ${reportForm.state}`,
+        city: reportForm.city,
+        state: reportForm.state,
+        severity: "moderate", // Default severity
+        timestamp: serverTimestamp(),
+        userId: user.uid,
+        userEmail: user.email,
+        userName: user.displayName || user.email,
+        upvotes: 0,
+        upvotedBy: [],
+        imageUrl: imageUrl,
+        postedByVolunteer: userProfile?.isVolunteer || false,
+        status: "active",
+      };
+
+      // Add to Firestore
+      await addDoc(collection(db, "alerts"), alertData);
+
+      // Reset form and close modal
+      setReportForm({
+        city: "",
+        state: "",
+        disasterType: "",
+        description: "",
+        image: null,
+      });
+      setImagePreview(null);
+      setShowReportModal(false);
+
+      window.alert("Disaster report submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      setReportError("Failed to submit report. Please try again.");
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
+
+  const closeReportModal = () => {
+    setShowReportModal(false);
+    setReportForm({
+      city: "",
+      state: "",
+      disasterType: "",
+      description: "",
+      image: null,
+    });
+    setImagePreview(null);
+    setReportError("");
+  };
+
   // Modern filtered alerts logic
   const filteredAlerts = useMemo(() => {
     let filtered = alerts;
@@ -1624,7 +1757,7 @@ function CommunityHelp() {
           </div>
         ) : (
           // Modern main content area
-          <div className="max-w-7xl mx-auto">
+          <div className="w-full">
             {/* Modern Header */}
             <div className="text-center mb-12">
               <h1
@@ -1891,20 +2024,39 @@ function CommunityHelp() {
                       )}
                     </div>
                   ) : filteredAlerts.length > 0 ? (
-                    <div className="grid gap-6">
-                      {filteredAlerts.map((alert) => (
-                        <ModernAlertCard
-                          key={alert.id}
-                          alert={alert}
-                          onUpvote={() => handleUpvote(alert.id)}
-                          onShare={() => handleShare(alert)}
-                          onSave={() => handleSaveAlert(alert)}
-                          onImageClick={() => handleImageClick(alert.imageUrl)}
-                          isUpvoting={upvotingId === alert.id}
-                          isSaved={false} // TODO: Implement saved logic
-                          currentUser={user}
-                        />
-                      ))}
+                    <div className="space-y-6">
+                      {/* Report Button for My Reports tab */}
+                      {activeTab === "my-posts" && (
+                        <div className="mb-6 flex justify-center">
+                          <button
+                            onClick={() => setShowReportModal(true)}
+                            className="w-full md:w-auto py-3 px-6 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl font-semibold hover:from-red-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-3"
+                          >
+                            <span className="text-xl">🚨</span>
+                            <TranslatableText>
+                              Register Disaster Report
+                            </TranslatableText>
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="grid gap-6">
+                        {filteredAlerts.map((alert) => (
+                          <ModernAlertCard
+                            key={alert.id}
+                            alert={alert}
+                            onUpvote={() => handleUpvote(alert.id)}
+                            onShare={() => handleShare(alert)}
+                            onSave={() => handleSaveAlert(alert)}
+                            onImageClick={() =>
+                              handleImageClick(alert.imageUrl)
+                            }
+                            isUpvoting={upvotingId === alert.id}
+                            isSaved={false} // TODO: Implement saved logic
+                            currentUser={user}
+                          />
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <div
@@ -1950,6 +2102,21 @@ function CommunityHelp() {
                           </TranslatableText>
                         )}
                       </p>
+
+                      {/* Report Button for empty My Reports tab */}
+                      {activeTab === "my-posts" && (
+                        <div className="mt-6">
+                          <button
+                            onClick={() => setShowReportModal(true)}
+                            className="py-3 px-6 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl font-semibold hover:from-red-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-3 mx-auto"
+                          >
+                            <span className="text-xl">🚨</span>
+                            <TranslatableText>
+                              Register Your First Report
+                            </TranslatableText>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1962,6 +2129,321 @@ function CommunityHelp() {
       </main>
 
       <Footer />
+
+      {/* Disaster Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm overflow-hidden">
+          <div className="flex items-center justify-center min-h-screen py-20 px-4">
+            <div
+              className={`w-full max-w-2xl max-h-[calc(100vh-10rem)] rounded-2xl shadow-2xl flex flex-col my-4 ${
+                darkMode
+                  ? "bg-gray-800 border border-gray-700"
+                  : "bg-white border border-gray-200"
+              }`}
+            >
+              {/* Modal Header */}
+              <div
+                className={`px-6 py-4 border-b rounded-t-2xl flex-shrink-0 ${
+                  darkMode
+                    ? "border-gray-700 bg-gray-800"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <h3
+                    className={`text-xl font-bold ${
+                      darkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    <TranslatableText>
+                      Register Disaster Report
+                    </TranslatableText>
+                  </h3>
+                  <button
+                    onClick={closeReportModal}
+                    className={`p-2 rounded-lg transition-colors ${
+                      darkMode
+                        ? "hover:bg-gray-700 text-gray-400 hover:text-white"
+                        : "hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Content - Scrollable */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 w-full min-w-0">
+                {/* Error Message */}
+                {reportError && (
+                  <div className="p-4 rounded-lg bg-red-100 border border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+                    {reportError}
+                  </div>
+                )}
+
+                {/* City and State Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full min-w-0">
+                  <div className="min-w-0">
+                    <label
+                      className={`block text-sm font-medium mb-2 ${
+                        darkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      <TranslatableText>City</TranslatableText> *
+                    </label>
+                    <input
+                      type="text"
+                      value={reportForm.city}
+                      onChange={(e) =>
+                        handleReportFormChange("city", e.target.value)
+                      }
+                      className={`w-full max-w-full px-4 py-3 rounded-xl border transition-all duration-300 ${
+                        darkMode
+                          ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                          : "bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500"
+                      } focus:ring-4 focus:ring-blue-500/20`}
+                      placeholder="Enter city name"
+                      required
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <label
+                      className={`block text-sm font-medium mb-2 ${
+                        darkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      <TranslatableText>State</TranslatableText> *
+                    </label>
+                    <input
+                      type="text"
+                      value={reportForm.state}
+                      onChange={(e) =>
+                        handleReportFormChange("state", e.target.value)
+                      }
+                      className={`w-full max-w-full px-4 py-3 rounded-xl border transition-all duration-300 ${
+                        darkMode
+                          ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                          : "bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500"
+                      } focus:ring-4 focus:ring-blue-500/20`}
+                      placeholder="Enter state name"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Disaster Type */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-2 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    <TranslatableText>Type of Disaster</TranslatableText> *
+                  </label>
+                  <select
+                    value={reportForm.disasterType}
+                    onChange={(e) =>
+                      handleReportFormChange("disasterType", e.target.value)
+                    }
+                    className={`w-full px-4 py-3 rounded-xl border appearance-none cursor-pointer transition-all duration-300 ${
+                      darkMode
+                        ? "bg-gray-700 border-gray-600 text-white focus:border-blue-500"
+                        : "bg-white border-gray-300 text-gray-900 focus:border-blue-500"
+                    } focus:ring-4 focus:ring-blue-500/20`}
+                    required
+                  >
+                    <option value="">Select disaster type</option>
+                    <option value="Natural Disasters">Natural Disasters</option>
+                    <option value="Fire Emergency">Fire Emergency</option>
+                    <option value="Medical Emergency">Medical Emergency</option>
+                    <option value="Security Issues">Security Issues</option>
+                    <option value="Infrastructure">Infrastructure</option>
+                    <option value="Environmental">Environmental</option>
+                    <option value="Flooding">Flooding</option>
+                    <option value="Earthquake">Earthquake</option>
+                    <option value="Cyclone/Hurricane">Cyclone/Hurricane</option>
+                    <option value="Landslide">Landslide</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-2 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    <TranslatableText>Description</TranslatableText> *
+                  </label>
+                  <textarea
+                    value={reportForm.description}
+                    onChange={(e) =>
+                      handleReportFormChange("description", e.target.value)
+                    }
+                    rows={4}
+                    className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 resize-none ${
+                      darkMode
+                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                        : "bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500"
+                    } focus:ring-4 focus:ring-blue-500/20`}
+                    placeholder="Describe the disaster situation in detail..."
+                    required
+                  />
+                </div>
+
+                {/* Image Upload */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-2 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    <TranslatableText>Image of Disaster</TranslatableText>{" "}
+                    (Optional)
+                  </label>
+                  <div
+                    className={`border-2 border-dashed rounded-xl p-6 text-center transition-all duration-300 ${
+                      darkMode
+                        ? "border-gray-600 hover:border-gray-500 bg-gray-700/30"
+                        : "border-gray-300 hover:border-gray-400 bg-gray-50"
+                    }`}
+                  >
+                    {imagePreview ? (
+                      <div className="space-y-4">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="max-w-full h-48 object-cover rounded-lg mx-auto"
+                        />
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImagePreview(null);
+                              setReportForm((prev) => ({
+                                ...prev,
+                                image: null,
+                              }));
+                            }}
+                            className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          >
+                            <TranslatableText>Remove</TranslatableText>
+                          </button>
+                          <label className="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors cursor-pointer">
+                            <TranslatableText>Change Image</TranslatableText>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    ) : (
+                      <label className="cursor-pointer block">
+                        <div
+                          className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                            darkMode ? "bg-gray-600" : "bg-gray-200"
+                          }`}
+                        >
+                          <svg
+                            className="w-6 h-6 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            />
+                          </svg>
+                        </div>
+                        <p
+                          className={`text-sm ${
+                            darkMode ? "text-gray-300" : "text-gray-600"
+                          }`}
+                        >
+                          <TranslatableText>
+                            Click to upload an image
+                          </TranslatableText>
+                        </p>
+                        <p
+                          className={`text-xs mt-1 ${
+                            darkMode ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        >
+                          PNG, JPG up to 5MB
+                        </p>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Sticky Footer with Submit Buttons */}
+              <div
+                className={`px-6 py-4 border-t rounded-b-2xl flex-shrink-0 ${
+                  darkMode
+                    ? "border-gray-700 bg-gray-800"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <form onSubmit={handleSubmitReport}>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={closeReportModal}
+                      className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
+                        darkMode
+                          ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      <TranslatableText>Cancel</TranslatableText>
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmittingReport}
+                      className="flex-1 py-3 px-6 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl font-semibold hover:from-red-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                      {isSubmittingReport ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          <TranslatableText>Submitting...</TranslatableText>
+                        </div>
+                      ) : (
+                        <TranslatableText>Submit Report</TranslatableText>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Image Modal with responsive sizing */}
       {selectedImage && (
