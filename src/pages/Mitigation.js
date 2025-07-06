@@ -845,32 +845,6 @@ function Mitigation() {
               and recover from natural disasters
             </TranslatableText>
           </p>
-
-          {/* Mitigation Demo Video */}
-          <div className="max-w-4xl mx-auto mb-8">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gray-900 border border-white/10">
-              <video
-                className="w-full h-auto"
-                controls
-                poster="/resqbg.jpg"
-                preload="metadata"
-              >
-                <source
-                  src="/src/assets/videos/disasters-page.mp4"
-                  type="video/mp4"
-                />
-                <TranslatableText>
-                  Your browser does not support the video tag.
-                </TranslatableText>
-              </video>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
-            </div>
-            <p className="text-sm text-gray-400 mt-3">
-              <TranslatableText>
-                Watch how to navigate disaster mitigation resources
-              </TranslatableText>
-            </p>
-          </div>
         </div>
         {/* Enhanced Search Section */}
         <div className="mb-12">
