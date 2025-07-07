@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TranslatableText from './TranslatableText';
 import emergencyServices from '../services/emergencyServices';
 import EmergencyContactsSetup from './EmergencyContactsSetup';
-import emailService from '../services/emailService';
 
 const GoogleVoiceAssistant = () => {
   const [isListening, setIsListening] = useState(false);
@@ -13,7 +12,7 @@ const GoogleVoiceAssistant = () => {
   const [lastError, setLastError] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [showContactsSetup, setShowContactsSetup] = useState(false);
-
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -22,115 +21,6 @@ const GoogleVoiceAssistant = () => {
   // Google Speech-to-Text API configuration
   const GOOGLE_API_KEY = "AIzaSyBkvmZpB_PznWBu2LZjlUY69bEML373MVI";
   const GOOGLE_SPEECH_API_URL = `https://speech.googleapis.com/v1/speech:recognize?key=${GOOGLE_API_KEY}`;
-
-  // Translation dictionary - maps foreign words to English
-  const translationDict = {
-    // Spanish
-    'ayuda': 'help', 'auxilio': 'help', 'emergencia': 'emergency', 'urgente': 'urgent',
-    'rescate': 'rescue', 'peligro': 'danger', 'salvar': 'save',
-    // French
-    'aide': 'help', 'secours': 'help', 'urgence': 'emergency', 'danger': 'danger',
-    'sauver': 'save', 'crise': 'emergency',
-    // German
-    'hilfe': 'help', 'notfall': 'emergency', 'dringend': 'urgent', 'rettung': 'rescue',
-    'gefahr': 'danger', 'retten': 'save',
-    // Italian
-    'aiuto': 'help', 'emergenza': 'emergency', 'urgente': 'urgent', 'soccorso': 'help',
-    'pericolo': 'danger', 'salvare': 'save',
-    // Portuguese
-    'ajuda': 'help', 'emergência': 'emergency', 'urgente': 'urgent', 'socorro': 'help',
-    'perigo': 'danger', 'salvar': 'save',
-    // Hindi - Native script
-    'मदद': 'help', 'सहायता': 'help', 'आपातकाल': 'emergency', 'बचाव': 'rescue',
-    'बचाओ': 'help', 'खतरा': 'danger', 'संकट': 'emergency',
-    // Hindi - Transliterated
-    'हेल्प': 'help', 'एमर्जेंसी': 'emergency', 'अर्जेंट': 'urgent',
-    'रेस्क्यू': 'rescue', 'डेंजर': 'danger',
-    // Arabic
-    'مساعدة': 'help', 'طوارئ': 'emergency', 'عاجل': 'urgent', 'إنقاذ': 'rescue',
-    'خطر': 'danger', 'أنقذوني': 'help',
-    // Chinese
-    '帮助': 'help', '紧急': 'emergency', '救援': 'rescue', '危险': 'danger',
-    '救命': 'help', '求救': 'help',
-    // Japanese
-    '助けて': 'help', '緊急': 'emergency', '救助': 'rescue', '危険': 'danger',
-    '救命': 'help', 'ヘルプ': 'help',
-    // Korean
-    '도움': 'help', '응급': 'emergency', '구조': 'rescue', '위험': 'danger',
-    '살려': 'help', '헬프': 'help',
-    // Russian
-    'помощь': 'help', 'срочно': 'urgent', 'спасение': 'rescue', 'опасность': 'danger',
-    'спасите': 'help', 'кризис': 'emergency',
-    // Dutch
-    'hulp': 'help', 'noodgeval': 'emergency', 'dringend': 'urgent', 'redding': 'rescue',
-    'gevaar': 'danger', 'redden': 'save',
-    // Swedish
-    'hjälp': 'help', 'nödsituation': 'emergency', 'brådskande': 'urgent',
-    'räddning': 'rescue', 'fara': 'danger', 'rädda': 'save',
-    // Norwegian
-    'hjelp': 'help', 'nødsituasjon': 'emergency', 'haster': 'urgent',
-    'redning': 'rescue', 'fare': 'danger', 'redde': 'save'
-  };
-
-  // English emergency keywords (what we check for after translation)
-  const englishEmergencyKeywords = [
-    'help', 'emergency', 'urgent', 'rescue', 'danger', 'save', 'sos',
-    'help me', 'save me', 'emergency help', 'urgent help'
-  ];
-
-  // Translate text to English
-  const translateToEnglish = (text) => {
-    console.log('🌍 Original text:', text);
-
-    let translatedText = text.toLowerCase().trim();
-    const words = translatedText.split(/\s+/);
-
-    // Translate each word
-    const translatedWords = words.map(word => {
-      const cleanWord = word.replace(/[^\w\u0900-\u097F\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\u0600-\u06ff]/g, '');
-      return translationDict[cleanWord] || cleanWord;
-    });
-
-    const finalTranslation = translatedWords.join(' ');
-    console.log('🌍 Translated to English:', finalTranslation);
-
-    return finalTranslation;
-  };
-
-  // Check for help keywords (now only checks English after translation)
-  const checkForHelpKeywords = (text) => {
-    console.log('🔍 Checking text for help keywords:', text);
-
-    // First translate to English
-    const englishText = translateToEnglish(text);
-
-    const foundKeywords = [];
-
-    // Check each English emergency keyword
-    englishEmergencyKeywords.forEach(keyword => {
-      if (englishText.includes(keyword.toLowerCase())) {
-        foundKeywords.push(keyword);
-        console.log(`✅ Found English keyword "${keyword}" in translated text`);
-      }
-    });
-
-    console.log('🔍 All found English keywords:', foundKeywords);
-    console.log('🔍 Total keyword matches:', foundKeywords.length);
-
-    if (foundKeywords.length > 0) {
-      console.log('🚨 EMERGENCY KEYWORD DETECTED!', foundKeywords);
-      console.log('🚨 Original text:', text);
-      console.log('🚨 Translated text:', englishText);
-      console.log('🚨🚨🚨 TRIGGERING EMERGENCY MODE IMMEDIATELY! 🚨🚨🚨');
-
-      // Trigger emergency mode immediately on first detection
-      triggerEmergencyMode();
-    } else {
-      console.log('❌ No emergency keywords found');
-      console.log('❌ Original text:', text);
-      console.log('❌ Translated text:', englishText);
-    }
-  };
 
   // Start recording audio
   const startRecording = async () => {
@@ -288,7 +178,6 @@ const GoogleVoiceAssistant = () => {
 
             // Test the keyword detection immediately
             console.log('🧪 Testing keyword detection with transcript:', transcript);
-            checkForHelpKeywords(transcript);
           } else {
             console.log('🎤 No speech detected by Google API');
           }
@@ -370,127 +259,41 @@ const GoogleVoiceAssistant = () => {
 
   // Note: Using only Google Speech API - no fallback needed
 
-  // Toggle listening
-  const toggleListening = async () => {
-    if (emergencyMode) return;
-
-    if (isListening) {
-      // Stop listening
-      setIsListening(false);
-      setIsRecording(false);
-      
-      // Stop recording
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
-      }
-      
-      // Stop stream
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      
-      console.log('🎤 Stopped listening');
-    } else {
-      // Start listening
-      setIsListening(true);
-      setLastError(null);
-      startRecording();
-      console.log('🎤 Started listening with Google Speech API');
+  // Add this helper function near the top, after imports
+  const sendLocationToWebhook = (phone = "+91xxxxxxxxxx") => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        fetch("https://hook.eu2.make.com/1t8lj98gzm26cu8yvyapbn1qhw811t17", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            phone,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          })
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          console.log('Webhook sent successfully');
+          return response.text();
+        })
+        .then(data => {
+          console.log('Webhook response:', data);
+        })
+        .catch(error => {
+          console.error('Error sending webhook:', error);
+          alert('Failed to send emergency location. See console for details.');
+        });
+      }, function(error) {
+        console.error('Geolocation error:', error);
+        alert('Failed to get location. Please allow location access.');
+      });
     }
   };
-
-  // Trigger emergency mode
-  const triggerEmergencyMode = async () => {
-    setEmergencyMode(true);
-    setIsListening(false);
-    setIsRecording(false);
-    setAlertingAuthorities(true);
-    
-    // Stop any ongoing recording
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-    }
-    
-    // Play emergency sound
-    playEmergencySound();
-    
-    try {
-      const emergencyData = {
-        type: 'google_voice_emergency',
-        timestamp: new Date().toISOString(),
-        transcript: transcript,
-        detectionMethod: 'instant_translation',
-        userAgent: navigator.userAgent,
-        apiUsed: 'google-speech-api',
-        apiKey: 'configured'
-      };
-
-      const results = await emergencyServices.triggerEmergencyAlert(emergencyData);
-
-      console.log('Emergency services response:', results);
-      setAlertingAuthorities(false);
-
-      const locationText = results.location?.address || 'Location unavailable';
-      const servicesNotified = results.emergencyServices?.length || 0;
-      const contactsNotified = results.notifications?.length || 0;
-
-      // Count successful email notifications
-      const successfulEmails = results.notifications?.filter(n => n.status === 'success').length || 0;
-
-      let emailStatusText = '';
-      if (successfulEmails > 0) {
-        emailStatusText = `\n📧 Email alerts sent: ${successfulEmails} (via EmailJS)`;
-      } else if (contactsNotified === 0) {
-        emailStatusText = `\n📧 No emergency contacts configured`;
-      } else {
-        emailStatusText = `\n📧 Email sending failed - check EmailJS configuration`;
-      }
-
-      alert(`🚨 EMERGENCY SERVICES HAVE BEEN NOTIFIED!\n\n` +
-            `📍 Location: ${locationText}\n` +
-            `🚔 Services Notified: ${servicesNotified}\n` +
-            `👥 Contacts Notified: ${contactsNotified}${emailStatusText}\n\n` +
-            `Help is on the way. Stay calm and stay safe.`);
-
-    } catch (error) {
-      console.error('Error alerting emergency services:', error);
-      setAlertingAuthorities(false);
-      
-      alert('⚠️ Emergency alert sent with limited functionality.\n\n' +
-            'Please manually contact emergency services:\n' +
-            'Police: 100 | Fire: 101 | Ambulance: 108 | Emergency: 112');
-    }
-  };
-
-  // Play emergency sound
-  const playEmergencySound = () => {
-    try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-      oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.5);
-      
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime + 1);
-      
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 1);
-    } catch (error) {
-      console.warn('Could not play emergency sound:', error);
-    }
-  };
-
-
-
-
 
   // Reset emergency mode
   const resetEmergencyMode = () => {
@@ -498,8 +301,6 @@ const GoogleVoiceAssistant = () => {
     setAlertingAuthorities(false);
     setTranscript('');
   };
-
-
 
   // Cleanup on unmount
   useEffect(() => {
@@ -509,6 +310,12 @@ const GoogleVoiceAssistant = () => {
       }
     };
   }, []);
+
+  const handleEmergencyClick = () => {
+    sendLocationToWebhook();
+    setShowConfirmation(true);
+    setTimeout(() => setShowConfirmation(false), 4000);
+  };
 
   return (
     <>
@@ -565,17 +372,18 @@ const GoogleVoiceAssistant = () => {
         <div className="relative flex flex-col items-center">
           {/* Main Voice Assistant Button */}
           <motion.button
-            onClick={toggleListening}
+            onClick={handleEmergencyClick}
             disabled={emergencyMode}
-            className={`relative w-24 h-24 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center ${
-              emergencyMode
-                ? 'bg-red-600 cursor-not-allowed'
-                : isListening
-                ? 'bg-gradient-to-r from-green-500 to-blue-500'
-                : lastError
-                ? 'bg-gradient-to-r from-orange-500 to-red-500'
-                : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
-            } border-4 border-white/20`}
+            className={`relative px-8 md:px-12 py-4 md:py-5 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 text-lg md:text-2xl font-extrabold tracking-wide
+              ${
+                emergencyMode
+                  ? 'bg-red-600 cursor-not-allowed text-white'
+                  : isListening
+                  ? 'bg-gradient-to-r from-red-500 to-red-700 text-white'
+                  : lastError
+                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                  : 'bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white'
+              } border-4 border-white/20`}
             whileHover={!emergencyMode ? { scale: 1.05 } : {}}
             whileTap={!emergencyMode ? { scale: 0.95 } : {}}
             animate={isListening ? {
@@ -586,14 +394,18 @@ const GoogleVoiceAssistant = () => {
             } : {}}
             transition={isListening ? { duration: 1.5, repeat: Infinity } : {}}
           >
-            <motion.div
-              animate={isRecording ? { scale: [1, 1.3, 1] } : isListening ? { scale: [1, 1.1, 1] } : {}}
-              transition={isRecording ? { duration: 0.3, repeat: Infinity } : isListening ? { duration: 1, repeat: Infinity } : {}}
-              className="text-white text-4xl"
-            >
-              {emergencyMode ? '🚨' : isRecording ? '🔴' : isListening ? '🎤' : '🎙️'}
-            </motion.div>
-
+            <span className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-600 shadow-md">
+                <motion.div
+                  animate={isRecording ? { scale: [1, 1.3, 1] } : isListening ? { scale: [1, 1.1, 1] } : {}}
+                  transition={isRecording ? { duration: 0.3, repeat: Infinity } : isListening ? { duration: 1, repeat: Infinity } : {}}
+                  className="text-white text-2xl md:text-3xl"
+                >
+                  {emergencyMode ? '🚨' : isRecording ? '🔴' : isListening ? '🎤' : '🎙️'}
+                </motion.div>
+              </span>
+              <span className="select-none font-extrabold text-black text-lg md:text-2xl">EMERGENCY</span>
+            </span>
             {/* Instant detection indicator */}
             {isListening && !emergencyMode && (
               <motion.div
@@ -604,12 +416,11 @@ const GoogleVoiceAssistant = () => {
                 🌍
               </motion.div>
             )}
-
             {/* Pulsing ring when listening */}
             {isListening && (
               <motion.div
-                className="absolute inset-0 rounded-full border-2 border-white/30"
-                animate={{ scale: [1, 1.3, 1] }}
+                className="absolute inset-0 rounded-full border-2 border-white/30 pointer-events-none"
+                animate={{ scale: [1, 1.15, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
             )}
@@ -677,6 +488,17 @@ const GoogleVoiceAssistant = () => {
         isOpen={showContactsSetup}
         onClose={() => setShowContactsSetup(false)}
       />
+
+      {showConfirmation && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          className="mt-4 px-6 py-3 rounded-xl bg-green-600 text-white font-bold shadow-lg text-center"
+        >
+          Emergency location sent!
+        </motion.div>
+      )}
     </>
   );
 };
