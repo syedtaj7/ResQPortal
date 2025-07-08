@@ -263,16 +263,18 @@ const GoogleVoiceAssistant = () => {
   const sendLocationToWebhook = (phone = "+91xxxxxxxxxx") => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
+        const dataToSend = {
+          phone,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        };
+        console.log('Sending data to webhook:', dataToSend);
         fetch("https://hook.eu2.make.com/1t8lj98gzm26cu8yvyapbn1qhw811t17", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({
-            phone,
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          })
+          body: JSON.stringify(dataToSend)
         })
         .then(response => {
           if (!response.ok) {
