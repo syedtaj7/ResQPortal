@@ -565,7 +565,7 @@ function About() {
         contacts: {
           main: "8558893911",
           email: "sdma@haryana.gov.in",
-          address: "Revenue & Disaster Management Department, Chandigarh",
+          address: "Revenue & Disaster Management Department, Gurugram, Haryana",
         },
         ngos: [
           {
@@ -593,6 +593,16 @@ function About() {
             address: "Dayal Bagh, Ambala Cantt",
             phone: "7988788519",
           },
+          {
+            name: "Gurugram Cares",
+            address: "Sector 44, Gurugram",
+            phone: "9876543210",
+          },
+          {
+            name: "ResQ Haryana",
+            address: "DLF Phase 3, Gurugram",
+            phone: "9876501234",
+          }
         ],
       },
       {

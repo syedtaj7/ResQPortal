@@ -7,6 +7,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import TranslatableText from "../components/TranslatableText";
 import { useTheme } from "../contexts/ThemeContext";
+import ForecastModal from "../components/ForecastModal";
 
 // Update the severityColors constant for map markers
 const severityColors = {
@@ -180,6 +181,7 @@ const locations = {
   bokaro: [23.6693, 86.1511],
   jharsuguda: [21.8596, 84.0066],
   angul: [20.84, 85.1016],
+  gurugram: [28.4595, 77.0266],
 };
 
 const defaultCenter = [20.5937, 78.9629];
@@ -1648,6 +1650,7 @@ function Home() {
   const [severityFilter, setSeverityFilter] = useState("high"); // Default to show only critical warnings
   const [showStatsPanel, setShowStatsPanel] = useState(false); // Default hidden on mobile
   const [showSearchBar, setShowSearchBar] = useState(false); // Default hidden on mobile
+  const [forecastModal, setForecastModal] = useState({ open: false, lat: null, lon: null, name: "" });
 
   // Remove the notification comment and related code
 
@@ -3336,27 +3339,56 @@ function Home() {
                               }
                             )}
                           </time>
-                          <a
-                            href={disaster.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-700 text-xs font-medium flex items-center gap-1"
-                          >
-                            <TranslatableText>Full Report</TranslatableText>
-                            <svg
-                              className="w-3 h-3"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setForecastModal({ open: true, lat: disaster.coordinates?.[0], lon: disaster.coordinates?.[1], name: disaster.title })}
+                              className="px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 text-white bg-blue-600 hover:bg-blue-700"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                              />
-                            </svg>
-                          </a>
+                              <TranslatableText>3 Day Forecast</TranslatableText>
+                              <svg
+                                className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M14 4h6m0 0v6m0-6L10 14"
+                                />
+                              </svg>
+                            </button>
+                            <a
+                              href={disaster.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 text-white ${
+                                  disaster.severity === "high"
+                                    ? "bg-red-600 hover:bg-red-700"
+                                    : disaster.severity === "moderate"
+                                    ? "bg-amber-600 hover:bg-amber-700"
+                                    : "bg-blue-600 hover:bg-blue-700"
+                                }`}
+                            >
+                              <TranslatableText>
+                                View Details
+                              </TranslatableText>
+                              <svg
+                                className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                />
+                              </svg>
+                            </a>
+                          </div>
                         </div>
                       </div>
                     );
@@ -3873,35 +3905,56 @@ function Home() {
                                         })}
                                       </time>
                                     </div>
-                                    <a
-                                      href={disaster.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 text-white ${
-                                        disaster.severity === "high"
-                                          ? "bg-red-600 hover:bg-red-700"
-                                          : disaster.severity === "moderate"
-                                          ? "bg-amber-600 hover:bg-amber-700"
-                                          : "bg-blue-600 hover:bg-blue-700"
-                                      }`}
-                                    >
-                                      <TranslatableText>
-                                        View Details
-                                      </TranslatableText>
-                                      <svg
-                                        className="w-4 h-4 transition-transform group-hover:translate-x-1"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
+                                    <div className="flex gap-2">
+                                      <button
+                                        onClick={() => setForecastModal({ open: true, lat: disaster.coordinates?.[0], lon: disaster.coordinates?.[1], name: disaster.title })}
+                                        className="px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 text-white bg-blue-600 hover:bg-blue-700"
                                       >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                        />
-                                      </svg>
-                                    </a>
+                                        <TranslatableText>3 Day Forecast</TranslatableText>
+                                        <svg
+                                          className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M14 4h6m0 0v6m0-6L10 14"
+                                          />
+                                        </svg>
+                                      </button>
+                                      <a
+                                        href={disaster.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 text-white ${
+                                          disaster.severity === "high"
+                                            ? "bg-red-600 hover:bg-red-700"
+                                            : disaster.severity === "moderate"
+                                            ? "bg-amber-600 hover:bg-amber-700"
+                                            : "bg-blue-600 hover:bg-blue-700"
+                                        }`}
+                                      >
+                                        <TranslatableText>
+                                          View Details
+                                        </TranslatableText>
+                                        <svg
+                                          className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                          />
+                                        </svg>
+                                      </a>
+                                    </div>
                                   </div>
                                 </div>
                               );
@@ -3938,6 +3991,16 @@ function Home() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Forecast Modal */}
+      {forecastModal.open && (
+        <ForecastModal
+          lat={forecastModal.lat}
+          lon={forecastModal.lon}
+          name={forecastModal.name}
+          onClose={() => setForecastModal({ open: false, lat: null, lon: null, name: "" })}
+        />
+      )}
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import TranslatorInitializer from "./components/TranslatorInitializer";
+import Forecast from './pages/Forecast';
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
                     <Donation />
                   </ProtectedRoute>
                 } />
+                <Route path="/forecast" element={<Forecast />} />
               </Routes>
             </Router>
           </AuthProvider>

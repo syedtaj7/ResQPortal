@@ -14,6 +14,7 @@ import {
   Marker,
 } from "react-leaflet";
 import L from "leaflet";
+import { useNavigate } from 'react-router-dom';
 
 import "leaflet/dist/leaflet.css";
 import { safeLocations as safeLocationsData } from "../data/safeLocations";
@@ -96,6 +97,7 @@ function Relocation() {
   const mapRef = useRef(null);
 
   const { darkMode } = useTheme();
+  const navigate = useNavigate();
 
   // Custom marker icons for different facility types
   const createCustomIcon = (type, color) => {
@@ -2104,6 +2106,14 @@ function Relocation() {
                 >
                   <Popup maxWidth={400} className="custom-popup">
                     {/* Popup content removed */}
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                        onClick={() => navigate(`/forecast?lat=${zone.coordinates[0]}&lon=${zone.coordinates[1]}&name=${encodeURIComponent(zone.name)}`)}
+                      >
+                        3 Day Forecast
+                      </button>
+                    </div>
                   </Popup>
                 </Circle>
               ))}

@@ -14,6 +14,7 @@ import mitigationPageVideo from "../assets/videos/Mitigation-page.mp4";
 function Welcome() {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showLoading, setShowLoading] = useState(true);
   const [currentFeature, setCurrentFeature] = useState(0);
   const [selectedTab, setSelectedTab] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -131,6 +132,32 @@ function Welcome() {
     }, 4000);
     return () => clearInterval(interval);
   }, []);
+
+  // Loading video effect
+  useEffect(() => {
+    let timeout;
+    if (showLoading) {
+      // Fallback: hide loading after 8 seconds if video doesn't end
+      timeout = setTimeout(() => setShowLoading(false), 8000);
+    }
+    return () => clearTimeout(timeout);
+  }, [showLoading]);
+
+  if (showLoading) {
+    return (
+      <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black">
+        <video
+          src="/resqportal_loading.mp4"
+          autoPlay
+          muted
+          playsInline
+          onEnded={() => setShowLoading(false)}
+          className="w-screen h-screen object-cover bg-black"
+          style={{ width: '100vw', height: '100vh' }}
+        />
+      </div>
+    );
+  }
 
   const features = [
     {

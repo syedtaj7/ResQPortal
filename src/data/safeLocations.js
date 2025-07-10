@@ -1,6 +1,7 @@
 // Add imports for disaster data handling
 import { getActiveDisasters } from '../services/disasterService';
 import { Popup } from 'react-leaflet';
+import { useNavigate } from 'react-router-dom';
 
 export const safeLocations = {
   // North India
@@ -87,6 +88,23 @@ export const safeLocations = {
       nearestStation: 'Jaipur Junction',
       majorHighways: ['NH-8', 'NH-11', 'NH-12'],
       busTerminal: 'Sindhi Camp Bus Stand'
+    }
+  },
+  'gurugram': {
+    coordinates: [28.4595, 77.0266],
+    score: 90,
+    capacity: 'High',
+    facilities: ['Medical Centers', 'Emergency Shelters', 'Food Supply', 'Helipad'],
+    description: 'Major city with modern infrastructure and proximity to Delhi',
+    state: 'Haryana',
+    elevation: '217m',
+    hasAirport: true,
+    hasRailway: true,
+    transportInfo: {
+      nearestAirport: 'Indira Gandhi International Airport (DEL)',
+      nearestStation: 'Gurugram Railway Station',
+      majorHighways: ['NH-48'],
+      busTerminal: 'Gurugram Bus Stand'
     }
   },
 
@@ -416,6 +434,7 @@ export const regionCategories = {
     'chandigarh',
     'jaipur',
     'new delhi',
+    'gurugram', // Added Gurugram
     'gulmarg',
     'pahalgam',
     'sonamarg',
@@ -583,6 +602,13 @@ export const stateSafeLocations = {
       'mussoorie': [30.4598, 78.0644],
       'nainital': [29.3919, 79.4542],
       'haridwar': [29.9457, 78.1642]
+    }
+  },
+  'Haryana': {
+    primary: 'gurugram',
+    fallback: [],
+    coordinates: {
+      'gurugram': [28.4595, 77.0266]
     }
   },
 
@@ -1108,63 +1134,73 @@ const getBestTransportModes = (distance, destination) => {
 };
 
 // Create a SafeLocationPopup component
-export const SafeLocationPopup = ({ zone, userLocation }) => (
-  <Popup>
-    <div className="bg-white p-4 rounded-lg">
-      <h3 className="font-bold text-gray-900">{zone.name.toUpperCase()}</h3>
-      <p className="text-green-600">Safety Score: {zone.score}%</p>
-      <p className="text-gray-600">Capacity: {zone.capacity}</p>
-    
-    {userLocation && (
-      <div className="mt-4 border-t pt-4">
-        <h4 className="font-semibold text-gray-800 mb-2">Transportation Options</h4>
-        <div className="space-y-2">
-          {getBestTransportModes(
-            calculateDistance(
-              userLocation[0],
-              userLocation[1],
-              zone.coordinates[0],
-              zone.coordinates[1]
-            ),
-            zone
-          ).map((mode, index) => (
-            <div 
-              key={mode.name}
-              className={`flex items-center p-2 rounded ${
-                mode.recommended ? 'bg-blue-50' : 'bg-gray-50'
-              }`}
-            >
-              <span className="text-xl mr-2">{mode.icon}</span>
-              <div>
-                <p className="font-medium text-gray-900">
-                  {mode.name}
-                  {mode.recommended && (
-                    <span className="ml-2 text-xs text-blue-600 font-semibold">
-                      RECOMMENDED
-                    </span>
-                  )}
-                </p>
-                <p className="text-sm text-gray-600">
-                  Duration: {mode.duration}
-                </p>
-                <p className="text-xs text-gray-500">{mode.details}</p>
-              </div>
+export const SafeLocationPopup = ({ zone, userLocation }) => {
+  const navigate = useNavigate();
+  return (
+    <Popup>
+      <div className="bg-white p-4 rounded-lg">
+        <h3 className="font-bold text-gray-900">{zone.name.toUpperCase()}</h3>
+        <p className="text-green-600">Safety Score: {zone.score}%</p>
+        <p className="text-gray-600">Capacity: {zone.capacity}</p>
+        {userLocation && (
+          <div className="mt-4 border-t pt-4">
+            <h4 className="font-semibold text-gray-800 mb-2">Transportation Options</h4>
+            <div className="space-y-2">
+              {getBestTransportModes(
+                calculateDistance(
+                  userLocation[0],
+                  userLocation[1],
+                  zone.coordinates[0],
+                  zone.coordinates[1]
+                ),
+                zone
+              ).map((mode, index) => (
+                <div 
+                  key={mode.name}
+                  className={`flex items-center p-2 rounded ${
+                    mode.recommended ? 'bg-blue-50' : 'bg-gray-50'
+                  }`}
+                >
+                  <span className="text-xl mr-2">{mode.icon}</span>
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {mode.name}
+                      {mode.recommended && (
+                        <span className="ml-2 text-xs text-blue-600 font-semibold">
+                          RECOMMENDED
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Duration: {mode.duration}
+                    </p>
+                    <p className="text-xs text-gray-500">{mode.details}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        )}
+        <div className="mt-4">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            onClick={() => navigate(`/forecast?lat=${zone.coordinates[0]}&lon=${zone.coordinates[1]}&name=${encodeURIComponent(zone.name)}`)}
+          >
+            3 Day Forecast
+          </button>
+        </div>
+        <div className="mt-4">
+          <p className="font-semibold text-gray-700">Available Facilities:</p>
+          <ul className="list-disc list-inside text-gray-600">
+            {zone.facilities.map((facility, index) => (
+              <li key={index}>{facility}</li>
+            ))}
+          </ul>
         </div>
       </div>
-    )}
-
-    <div className="mt-4">
-      <p className="font-semibold text-gray-700">Available Facilities:</p>
-      <ul className="list-disc list-inside text-gray-600">
-        {zone.facilities.map((facility, index) => (
-          <li key={index}>{facility}</li>
-        ))}
-      </ul>
-    </div>
-  </div>
-</Popup>);
+    </Popup>
+  );
+};
 
 // Add a function to get optimal transport mode based on real-time conditions
 export const getOptimalTransport = (from, to, conditions = {}) => {
