@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import TranslatableText from "./TranslatableText";
-import LanguageSelector from "./LanguageSelector";
 
 function Footer() {
   return (
@@ -128,7 +127,7 @@ function Footer() {
           </div>
           <div className="flex space-x-3 items-center">
             <div className="language-selector">
-              <LanguageSelector />
+              {/* The LanguageSelector component is removed, so this div will be empty */}
             </div>
           </div>
         </div>

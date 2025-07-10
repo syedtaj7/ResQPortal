@@ -14,6 +14,11 @@ const GoogleVoiceAssistant = () => {
   const [showContactsSetup, setShowContactsSetup] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
+  // Add state for phone number popup
+  const [showPhonePopup, setShowPhonePopup] = useState(false);
+  const [phoneInput, setPhoneInput] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
@@ -260,7 +265,13 @@ const GoogleVoiceAssistant = () => {
   // Note: Using only Google Speech API - no fallback needed
 
   // Add this helper function near the top, after imports
-  const sendLocationToWebhook = (phone = "+91xxxxxxxxxx") => {
+  const sendLocationToWebhook = (phone) => {
+    if (!phone || !/^\+91\d{10}$/.test(phone)) {
+      setPhoneError('Please enter a valid number with +91-XXXXXXXXXX');
+      return;
+    }
+    setPhoneError('');
+    setShowPhonePopup(false);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
         const dataToSend = {
@@ -269,7 +280,7 @@ const GoogleVoiceAssistant = () => {
           longitude: position.coords.longitude
         };
         console.log('Sending data to webhook:', dataToSend);
-        fetch("https://hook.eu2.make.com/1t8lj98gzm26cu8yvyapbn1qhw811t17", {
+        fetch("https://hook.eu2.make.com/6ynr9o4nawug1jgrqqu5od878tuo9fie", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -314,9 +325,19 @@ const GoogleVoiceAssistant = () => {
   }, []);
 
   const handleEmergencyClick = () => {
-    sendLocationToWebhook();
+    setShowPhonePopup(true);
+  };
+
+  const handlePhoneSubmit = (e) => {
+    e.preventDefault();
+    if (!/^\+91\d{10}$/.test(phoneInput)) {
+      setPhoneError('Please enter a valid number with +91-XXXXXXXXXX');
+      return;
+    }
+    sendLocationToWebhook(phoneInput);
     setShowConfirmation(true);
     setTimeout(() => setShowConfirmation(false), 4000);
+    setPhoneInput('');
   };
 
   return (
@@ -500,6 +521,29 @@ const GoogleVoiceAssistant = () => {
         >
           Emergency location sent!
         </motion.div>
+      )}
+
+      {/* Phone Number Popup */}
+      {showPhonePopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <form onSubmit={handlePhoneSubmit} className="bg-white p-6 rounded-lg shadow-xl flex flex-col gap-4 min-w-[320px]">
+            <h2 className="text-lg font-bold text-gray-800 mb-2">Enter your number with +91-</h2>
+            <input
+              type="text"
+              className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="+91-XXXXXXXXXX"
+              value={phoneInput}
+              onChange={e => setPhoneInput(e.target.value.replace(/\s/g, ''))}
+              maxLength={13}
+              autoFocus
+            />
+            {phoneError && <div className="text-red-600 text-sm">{phoneError}</div>}
+            <div className="flex gap-2 mt-2">
+              <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Send</button>
+              <button type="button" className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition" onClick={() => { setShowPhonePopup(false); setPhoneError(''); }}>Cancel</button>
+            </div>
+          </form>
+        </div>
       )}
     </>
   );

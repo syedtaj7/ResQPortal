@@ -33,10 +33,63 @@
     <title>ResQTech</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+    <style>
+      /* Remove any style that hides #google_translate_element */
+      /* #google_translate_element { display: none !important; } */
+      /* Style the floating Google Translate widget for visibility */
+      #google_translate_element {
+        /* Remove fixed positioning so it can be placed inline in the header */
+        background: rgba(255,255,255,0.95);
+        border-radius: 9999px;
+        padding: 4px 10px 4px 10px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        font-size: 0.92rem;
+      }
+      #google_translate_element:before {
+        content: '';
+        margin: 0;
+        padding: 0;
+        display: none;
+      }
+      #google_translate_element .goog-te-combo {
+        background: #f8fafc;
+        color: #222;
+        border-radius: 9999px;
+        padding: 4px 10px;
+        border: 1.2px solid #d1d5db;
+        font-size: 0.95rem;
+        min-width: 90px;
+        margin: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        outline: none;
+        transition: border 0.2s;
+      }
+      #google_translate_element .goog-te-combo:focus {
+        border: 1.5px solid #007bff;
+      }
+      /* Hide Google branding (optional, not recommended for production) */
+      .goog-logo-link, .goog-te-gadget span {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <div id="google_translate_element" style="position: fixed; top: 16px; right: 16px; z-index: 99999;"></div>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {pageLanguage: 'en', includedLanguages: 'en,hi,ta,te,kn,ml,mr,bn,gu,pa,ur,or,as', layout: google.translate.TranslateElement.InlineLayout.SIMPLE},
+          'google_translate_element'
+        );
+      }
+    </script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.

@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, LogOut, User } from "lucide-react";
 import TranslatableText from "./TranslatableText";
-import LanguageSelector from "./LanguageSelector";
 import { useAuth } from "../contexts/AuthContext";
 
 // Navigation items matching Google Maps style - moved outside component for performance
@@ -56,6 +55,24 @@ const Header = React.memo(({ transparent = false }) => {
     };
   }, []);
 
+  // Move the actual Google Translate dropdown into the header
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const widget = document.querySelector('.goog-te-combo');
+      const target = document.getElementById('google_translate_element');
+      if (widget && target && !target.contains(widget)) {
+        target.appendChild(widget);
+        // Hide the floating widget container if it exists
+        const floating = document.querySelectorAll('#google_translate_element');
+        floating.forEach(el => {
+          if (el !== target) el.style.display = 'none';
+        });
+        clearInterval(interval);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <header className="fixed top-0 left-0 right-0 z-[9999] bg-transparent p-4">
       <div className="max-w-7xl mx-auto">
@@ -72,7 +89,7 @@ const Header = React.memo(({ transparent = false }) => {
             </div>
 
             {/* Center Navigation Pills */}
-            <nav className="hidden lg:flex items-center space-x-1 bg-white/10 backdrop-blur-md rounded-full p-1.5 shadow-inner nav-container">
+            <nav className="hidden lg:flex flex-1 items-center justify-center space-x-6 bg-white/10 backdrop-blur-md rounded-full p-1.5 shadow-inner nav-container">
               {NAVIGATION_ITEMS.map((item) => (
                 <NavLink
                   key={item.path}
@@ -97,9 +114,9 @@ const Header = React.memo(({ transparent = false }) => {
             </nav>
 
             {/* Right side controls */}
-            <div className="hidden lg:flex items-center space-x-3">
-              <LanguageSelector />
-
+            <div className="hidden lg:flex items-center space-x-6 ml-4">
+              {/* Google Translate Widget - to the left of the username/user menu */}
+              <div id="google_translate_element" className="mr-2" />
               {/* User Menu */}
               {user && (
                 <div className="relative" ref={userMenuRef}>
@@ -141,7 +158,6 @@ const Header = React.memo(({ transparent = false }) => {
 
             {/* Mobile menu button */}
             <div className="lg:hidden flex items-center space-x-2">
-              <LanguageSelector />
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`p-2 rounded-full transition-all duration-200 ${

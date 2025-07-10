@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import TranslatableText from "./TranslatableText";
-import LanguageSelector from "./LanguageSelector";
 
 const WelcomeHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +24,6 @@ const WelcomeHeader = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-4">
-              <LanguageSelector />
 
               {/* Login/Signup Buttons */}
               <div className="flex items-center space-x-2">
@@ -46,7 +44,6 @@ const WelcomeHeader = () => {
 
             {/* Mobile menu button */}
             <div className="lg:hidden flex items-center space-x-2">
-              <LanguageSelector />
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="p-2 rounded-full text-white hover:bg-white/15 border border-white/30 hover:border-white/50 bg-white/10 backdrop-blur-sm transition-all duration-300"

@@ -3,7 +3,6 @@ import { Navigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext";
 import TranslatableText from "../components/TranslatableText";
-import LanguageSelector from "../components/LanguageSelector";
 
 const Login = () => {
   const { user, signIn, signUp, signInWithGoogle } = useAuth();
@@ -115,7 +114,7 @@ const Login = () => {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <LanguageSelector />
+            {/* REMOVE: <LanguageSelector /> */}
           </motion.div>
         </div>
       </motion.header>
@@ -465,68 +464,68 @@ const Login = () => {
             </motion.button>
 
             {/* Animated toggle login/register */}
-            <motion.p
-              className="mt-6 text-center text-sm text-gray-400"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.9 }}
-            >
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={isLoginMode ? "login-text" : "signup-text"}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {isLoginMode ? (
-                    <TranslatableText>Don't have an account?</TranslatableText>
-                  ) : (
-                    <TranslatableText>
-                      Already have an account?
-                    </TranslatableText>
-                  )}
-                </motion.span>
-              </AnimatePresence>{" "}
-              <motion.button
-                onClick={() => {
-                  setIsLoginMode(!isLoginMode);
-                  setAuthError("");
-                  setName("");
-                  setEmail("");
-                  setPassword("");
-                }}
-                className="font-medium text-yellow-500 hover:text-yellow-400 transition-colors duration-300 hover:underline relative"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <motion.div
-                  className="absolute inset-0 bg-yellow-500 opacity-0 rounded"
-                  whileHover={{ opacity: 0.1 }}
-                  transition={{ duration: 0.2 }}
-                />
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={isLoginMode ? "signup-btn" : "signin-btn"}
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    transition={{ duration: 0.2 }}
-                    className="relative z-10"
-                  >
-                    {isLoginMode ? (
-                      <TranslatableText>Sign up</TranslatableText>
-                    ) : (
-                      <TranslatableText>Sign in</TranslatableText>
-                    )}
-                  </motion.span>
-                </AnimatePresence>
-              </motion.button>
-            </motion.p>
+           <motion.p
+  className="mt-6 text-center text-sm text-gray-400"
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5, delay: 1.9 }}
+>
+  <AnimatePresence mode="wait">
+    <motion.span
+      key={isLoginMode ? "login-text" : "signup-text"}
+      initial={{ opacity: 0, y: 5 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -5 }}
+      transition={{ duration: 0.2 }}
+    >
+      {isLoginMode ? (
+        <TranslatableText>Don't have an account?</TranslatableText>
+      ) : (
+        <TranslatableText>
+          Already have an account?
+        </TranslatableText>
+      )}
+    </motion.span>
+  </AnimatePresence>{" "}
+  <motion.button
+    onClick={() => {
+      setIsLoginMode(!isLoginMode);
+      setAuthError("");
+      setName("");
+      setEmail("");
+      setPassword("");
+    }}
+    className="font-medium text-yellow-500 hover:text-yellow-400 transition-colors duration-300 hover:underline relative"
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+  >
+    <motion.div
+      className="absolute inset-0 bg-yellow-500 opacity-0 rounded"
+      whileHover={{ opacity: 0.1 }}
+      transition={{ duration: 0.2 }}
+    />
+    <AnimatePresence mode="wait">
+      <motion.span
+        key={isLoginMode ? "signup-btn" : "signin-btn"}
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -5 }}
+        transition={{ duration: 0.2 }}
+        className="relative z-10"
+      >
+        {isLoginMode ? (
+          <TranslatableText>Sign up</TranslatableText>
+        ) : (
+          <TranslatableText>Sign in</TranslatableText>
+        )}
+      </motion.span>
+    </AnimatePresence>
+  </motion.button>
+</motion.p>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </main>
-    </motion.div>
+        </main>
+      </motion.div>
   );
 };
 
