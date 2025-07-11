@@ -3,7 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
@@ -24,8 +27,8 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <link 
-      rel="stylesheet" 
+    <link
+      rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
       crossorigin=""
@@ -34,59 +37,108 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
     <style>
-      /* Remove any style that hides #google_translate_element */
-      /* #google_translate_element { display: none !important; } */
-      /* Style the floating Google Translate widget for visibility */
-      #google_translate_element {
-        /* Remove fixed positioning so it can be placed inline in the header */
-        background: rgba(255,255,255,0.95);
+      /* Styles for Google Translate elements in navbar */
+      #google_translate_element_navbar,
+      #google_translate_element_mobile {
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 9999px;
-        padding: 4px 10px 4px 10px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+        padding: 3px 8px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
         min-width: 0;
-        font-size: 0.92rem;
+        font-size: 0.75rem;
+        max-width: 140px;
+        height: 32px;
       }
-      #google_translate_element:before {
-        content: '';
-        margin: 0;
-        padding: 0;
-        display: none;
-      }
-      #google_translate_element .goog-te-combo {
-        background: #f8fafc;
-        color: #222;
+
+      #google_translate_element_navbar .goog-te-combo,
+      #google_translate_element_mobile .goog-te-combo {
+        background: rgba(255, 255, 255, 0.9);
+        color: #1f2937;
         border-radius: 9999px;
-        padding: 4px 10px;
-        border: 1.2px solid #d1d5db;
-        font-size: 0.95rem;
-        min-width: 90px;
+        padding: 4px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-size: 0.75rem;
+        min-width: 80px;
+        max-width: 120px;
         margin: 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
         outline: none;
-        transition: border 0.2s;
+        transition: all 0.2s;
+        height: 26px;
+        line-height: 1.2;
       }
-      #google_translate_element .goog-te-combo:focus {
-        border: 1.5px solid #007bff;
+
+      #google_translate_element_navbar .goog-te-combo:focus,
+      #google_translate_element_mobile .goog-te-combo:focus {
+        border: 1px solid rgba(59, 130, 246, 0.8);
+        background: rgba(255, 255, 255, 1);
       }
-      /* Hide Google branding (optional, not recommended for production) */
-      .goog-logo-link, .goog-te-gadget span {
+
+      /* Hide Google branding */
+      #google_translate_element_navbar .goog-logo-link,
+      #google_translate_element_navbar .goog-te-gadget span,
+      #google_translate_element_mobile .goog-logo-link,
+      #google_translate_element_mobile .goog-te-gadget span {
         display: none !important;
+      }
+
+      /* Style the gadget container for proper spacing */
+      #google_translate_element_navbar .goog-te-gadget,
+      #google_translate_element_mobile .goog-te-gadget {
+        overflow: hidden !important;
+        max-width: 120px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-family: inherit !important;
+      }
+
+      /* Style the gadget simple container */
+      #google_translate_element_navbar .goog-te-gadget-simple,
+      #google_translate_element_mobile .goog-te-gadget-simple {
+        background: transparent !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 2px 4px !important;
+        font-size: 0.75rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 100% !important;
+      }
+
+      /* Style the actual translate link/button */
+      #google_translate_element_navbar .goog-te-gadget-simple a,
+      #google_translate_element_mobile .goog-te-gadget-simple a {
+        color: rgba(255, 255, 255, 0.9) !important;
+        text-decoration: none !important;
+        font-size: 0.75rem !important;
+        padding: 2px 6px !important;
+        border-radius: 9999px !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        transition: all 0.2s !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+      }
+
+      #google_translate_element_navbar .goog-te-gadget-simple a:hover,
+      #google_translate_element_mobile .goog-te-gadget-simple a:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
       }
     </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <div id="google_translate_element" style="position: fixed; top: 16px; right: 16px; z-index: 99999;"></div>
     <script type="text/javascript">
       function googleTranslateElementInit() {
-        new google.translate.TranslateElement(
-          {pageLanguage: 'en', includedLanguages: 'en,hi,ta,te,kn,ml,mr,bn,gu,pa,ur,or,as', layout: google.translate.TranslateElement.InlineLayout.SIMPLE},
-          'google_translate_element'
-        );
+        // This function will be called by the Header component
+        // No need to initialize here anymore
       }
     </script>
     <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>

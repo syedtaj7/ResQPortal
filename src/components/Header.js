@@ -55,33 +55,69 @@ const Header = React.memo(({ transparent = false }) => {
     };
   }, []);
 
-  // Move the actual Google Translate dropdown into the header
+  // Initialize Google Translate
   useEffect(() => {
-    const interval = setInterval(() => {
-      const widget = document.querySelector('.goog-te-combo');
-      const target = document.getElementById('google_translate_element');
-      if (widget && target && !target.contains(widget)) {
-        target.appendChild(widget);
-        // Hide the floating widget container if it exists
-        const floating = document.querySelectorAll('#google_translate_element');
-        floating.forEach(el => {
-          if (el !== target) el.style.display = 'none';
-        });
-        clearInterval(interval);
+    const initializeGoogleTranslate = () => {
+      if (window.google && window.google.translate) {
+        // Initialize for desktop navbar
+        const navbarElement = document.getElementById(
+          "google_translate_element_navbar"
+        );
+        if (navbarElement && !navbarElement.hasChildNodes()) {
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: "en",
+              includedLanguages: "en,hi,ta,te,kn,ml,mr,bn,gu,pa,ur,or,as",
+              layout:
+                window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+            },
+            "google_translate_element_navbar"
+          );
+        }
+
+        // Initialize for mobile
+        const mobileElement = document.getElementById(
+          "google_translate_element_mobile"
+        );
+        if (mobileElement && !mobileElement.hasChildNodes()) {
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: "en",
+              includedLanguages: "en,hi,ta,te,kn,ml,mr,bn,gu,pa,ur,or,as",
+              layout:
+                window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+            },
+            "google_translate_element_mobile"
+          );
+        }
       }
-    }, 500);
-    return () => clearInterval(interval);
+    };
+
+    // Try to initialize immediately if Google Translate is already loaded
+    initializeGoogleTranslate();
+
+    // Also listen for the Google Translate script to load
+    const checkGoogleTranslate = setInterval(() => {
+      if (window.google && window.google.translate) {
+        initializeGoogleTranslate();
+        clearInterval(checkGoogleTranslate);
+      }
+    }, 100);
+
+    return () => {
+      clearInterval(checkGoogleTranslate);
+    };
   }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[9999] bg-transparent p-4">
       <div className="max-w-7xl mx-auto">
-        <div className="md:bg-black/20 md:backdrop-blur-xl md:border md:border-white/20 md:rounded-full bg-transparent px-6 py-3 md:shadow-2xl">
-          <div className="flex items-center justify-between gap-4">
+        <div className="md:bg-black/20 md:backdrop-blur-xl md:border md:border-white/20 md:rounded-full bg-transparent px-4 py-3 md:shadow-2xl">
+          <div className="flex items-center justify-between gap-2 min-w-0">
             {/* Logo */}
-            <div className="flex items-center">
+            <div className="flex items-center flex-shrink-0">
               <h1
-                className="text-xl font-bold md:text-white text-gray-800 md:drop-shadow-lg cursor-pointer"
+                className="text-lg md:text-xl font-bold md:text-white text-gray-800 md:drop-shadow-lg cursor-pointer"
                 onClick={() => navigate("/")}
               >
                 <TranslatableText>ResQPortal</TranslatableText>
@@ -89,18 +125,18 @@ const Header = React.memo(({ transparent = false }) => {
             </div>
 
             {/* Center Navigation Pills */}
-            <nav className="hidden lg:flex flex-1 items-center justify-center space-x-6 bg-white/10 backdrop-blur-md rounded-full p-1.5 shadow-inner nav-container">
+            <nav className="hidden lg:flex flex-1 items-center justify-center space-x-4 bg-white/10 backdrop-blur-md rounded-full p-1.5 shadow-inner nav-container mx-4 min-w-0">
               {NAVIGATION_ITEMS.map((item) => (
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  className={`nav-pill relative px-3 py-2 rounded-full text-xs font-medium transition-all duration-300 flex items-center space-x-1.5 whitespace-nowrap ${
+                  className={`nav-pill relative px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center space-x-1 whitespace-nowrap flex-shrink-0 ${
                     isActiveRoute(item.path)
                       ? "bg-white/25 text-white shadow-lg nav-active backdrop-blur-sm border border-white/40"
                       : "text-white/80 hover:text-white hover:bg-white/15 hover:shadow-md hover:border hover:border-white/30"
                   }`}
                 >
-                  <span className="text-sm transition-transform duration-200 hover:scale-110">
+                  <span className="text-xs transition-transform duration-200 hover:scale-110 flex-shrink-0">
                     {item.icon}
                   </span>
                   <span className="font-medium text-xs">
@@ -114,18 +150,24 @@ const Header = React.memo(({ transparent = false }) => {
             </nav>
 
             {/* Right side controls */}
-            <div className="hidden lg:flex items-center space-x-6 ml-4">
-              {/* Google Translate Widget - to the left of the username/user menu */}
-              <div id="google_translate_element" className="mr-2" />
+            <div className="hidden lg:flex items-center space-x-3 ml-3 flex-shrink-0">
+              {/* Google Translate Element */}
+              <div className="flex items-center">
+                <div
+                  id="google_translate_element_navbar"
+                  className="flex items-center"
+                ></div>
+              </div>
+
               {/* User Menu */}
               {user && (
-                <div className="relative" ref={userMenuRef}>
+                <div className="relative flex-shrink-0" ref={userMenuRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-200 text-white/80 hover:text-white hover:bg-white/15 border border-white/30 hover:border-white/50 bg-white/10 backdrop-blur-sm text-xs"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-200 text-white/80 hover:text-white hover:bg-white/15 border border-white/30 hover:border-white/50 bg-white/10 backdrop-blur-sm text-xs max-w-[140px]"
                   >
-                    <User size={16} />
-                    <span className="text-xs font-medium">
+                    <User size={14} className="flex-shrink-0" />
+                    <span className="text-xs font-medium truncate">
                       {userProfile?.name || user.email?.split("@")[0] || "User"}
                     </span>
                   </button>
@@ -219,6 +261,18 @@ const Header = React.memo(({ transparent = false }) => {
                     </button>
                   </div>
                 )}
+
+                {/* Google Translate for Mobile */}
+                <div className="mt-4 pt-4 border-t border-gray-700">
+                  <div className="px-4 py-2">
+                    <div className="flex items-center justify-center">
+                      <div
+                        id="google_translate_element_mobile"
+                        className="flex items-center"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
               </nav>
             </div>
           )}
